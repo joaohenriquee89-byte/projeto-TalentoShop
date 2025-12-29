@@ -1,0 +1,220 @@
+
+import React, { useState, useRef } from 'react';
+import { User, Job } from '../../types';
+
+interface VendedorDashboardProps {
+  user: User;
+  setUser: (user: User) => void;
+}
+
+const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [jobs] = useState<Job[]>([
+    { id: '1', companyName: 'Reserva', title: 'Vendedor Jr.', location: 'Shopping Morumbi', compatibility: 98, logoInitial: 'R' },
+    { id: '2', companyName: 'Zara', title: 'Gerente de Seção', location: 'Shopping Eldorado', logoInitial: 'Z' },
+  ]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setUser({ ...user, avatar: base64String });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const currentAvatar = user.avatar || `https://picsum.photos/seed/${user.id}/200/200`;
+
+  if (isEditing) {
+    return (
+      <div className="max-w-3xl mx-auto animate-fade-in">
+        <button onClick={() => setIsEditing(false)} className="mb-6 flex items-center gap-2 text-primary font-medium">
+          <span className="material-icons-round">arrow_back</span> Voltar ao Dashboard
+        </button>
+        <div className="bg-surface-light dark:bg-surface-dark shadow rounded-xl p-8 border border-gray-100 dark:border-gray-700">
+          <h2 className="text-2xl font-bold mb-6 dark:text-white">Editar Perfil Profissional</h2>
+
+          <div className="flex flex-col items-center mb-8">
+            <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+              <img alt="Profile" className="h-32 w-32 rounded-full border-4 border-primary shadow-lg object-cover" src={currentAvatar} />
+              <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="material-icons-round text-white text-3xl">photo_camera</span>
+              </div>
+            </div>
+            <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
+            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Clique na foto para alterar</p>
+          </div>
+
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <input
+                className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5"
+                placeholder="Nome Completo"
+                value={user.name}
+                onChange={(e) => setUser({ ...user, name: e.target.value })}
+              />
+              <input
+                className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5"
+                placeholder="E-mail"
+                value={user.email}
+                onChange={(e) => setUser({ ...user, email: e.target.value })}
+              />
+              <textarea
+                className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5 col-span-2"
+                placeholder="Bio Profissional"
+                defaultValue="Vendedor focado em resultados com 5 anos de experiência..."
+                rows={4}
+              />
+            </div>
+            <button onClick={() => setIsEditing(false)} className="w-full bg-primary text-white font-bold py-3 rounded-lg shadow-lg hover:bg-opacity-90 transition-all">
+              Salvar Alterações
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Olá, {user.name.split(' ')[0]}! 👋</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Aqui está o resumo das suas conexões hoje.</p>
+        </div>
+        <div className="flex items-center bg-blue-50 dark:bg-gray-800 px-4 py-2 rounded-lg border border-blue-100 dark:border-gray-700">
+          <span className="material-icons-round text-primary dark:text-secondary mr-2">verified</span>
+          <span className="text-sm font-medium text-primary dark:text-white mr-2">Plano Atual:</span>
+          <span className="text-sm font-bold text-gray-500 dark:text-gray-400">FREE</span>
+          <a className="ml-4 text-sm font-semibold text-secondary hover:text-green-600 underline decoration-2 underline-offset-2" href="#/dashboard/vendedor/plans">Fazer Upgrade</a>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Profile Card */}
+        <div className="lg:col-span-1 space-y-8">
+          <div className="bg-surface-light dark:bg-surface-dark shadow rounded-xl overflow-hidden border border-gray-100 dark:border-gray-700">
+            <div className="h-24 bg-gradient-to-r from-primary to-secondary"></div>
+            <div className="px-6 pb-6 relative">
+              <div className="-mt-12 mb-4">
+                <img alt="Profile" className="h-24 w-24 rounded-full border-4 border-white dark:border-gray-800 shadow-md object-cover" src={currentAvatar} />
+              </div>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">{user.name}</h2>
+              <p className="text-primary dark:text-secondary font-medium text-sm mb-4">Shopping Morumbi • São Paulo, SP</p>
+              <div className="space-y-3">
+                <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                  <span className="material-icons-round mr-2 text-gray-400">work_outline</span>
+                  <span>Experiência: 5 anos</span>
+                </div>
+                <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                  <span className="material-icons-round mr-2 text-gray-400">grade</span>
+                  <span>Especialidade: Moda Masculina</span>
+                </div>
+              </div>
+              <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Completude do Perfil</span>
+                  <span className="text-sm font-bold text-primary dark:text-secondary">85%</span>
+                </div>
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                  <div className="bg-primary h-2.5 rounded-full" style={{ width: '85%' }}></div>
+                </div>
+                <button onClick={() => setIsEditing(true)} className="mt-4 w-full py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
+                  Editar Perfil
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-800 dark:to-gray-900 rounded-xl p-6 border border-blue-100 dark:border-gray-700 relative overflow-hidden">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="material-icons-round text-secondary">auto_awesome</span>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">Dicas da IA</h3>
+            </div>
+            <ul className="space-y-3 mb-4">
+              <li className="flex items-start text-sm text-gray-600 dark:text-gray-400">
+                <span className="material-icons-round text-yellow-500 text-base mr-2 mt-0.5">lightbulb</span>
+                Adicione um vídeo de apresentação curto.
+              </li>
+              <li className="flex items-start text-sm text-gray-600 dark:text-gray-400">
+                <span className="material-icons-round text-yellow-500 text-base mr-2 mt-0.5">lightbulb</span>
+                Liste suas últimas 2 conquistas de vendas.
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Job Listings Area */}
+        <div className="lg:col-span-2 space-y-8">
+          <div className="bg-primary rounded-xl shadow-lg p-6 text-white relative overflow-hidden group">
+            <div className="relative z-10 sm:flex justify-between items-center">
+              <div className="mb-4 sm:mb-0">
+                <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
+                  <span className="material-icons-round">rocket_launch</span>
+                  Acelere sua contratação
+                </h3>
+                <p className="text-blue-100 text-sm">
+                  Usuários Premium aparecem no topo das buscas e têm acesso ilimitado.
+                </p>
+              </div>
+              <a href="#/dashboard/vendedor/plans" className="bg-secondary hover:bg-green-500 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 transform hover:scale-105 inline-block text-center">
+                Quero ser Premium
+              </a>
+            </div>
+          </div>
+
+          <div className="bg-surface-light dark:bg-surface-dark shadow rounded-xl border border-gray-100 dark:border-gray-700 p-6">
+            <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <span className="material-icons-round text-primary dark:text-secondary">storefront</span>
+                Buscar Lojas Contratando
+              </h3>
+            </div>
+            <div className="flex gap-2 mb-6">
+              <div className="relative flex-grow">
+                <span className="material-icons-round absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">search</span>
+                <input className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm" placeholder="Ex: Zara, Shopping Iguatemi..." type="text" />
+              </div>
+              <button className="bg-primary hover:bg-opacity-90 text-white px-4 py-2 rounded-md font-medium text-sm">Buscar</button>
+            </div>
+
+            <div className="space-y-4">
+              {jobs.map(job => (
+                <div key={job.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-secondary transition-colors cursor-pointer">
+                  <div className="flex items-center gap-4 mb-3 sm:mb-0">
+                    <div className={`h-12 w-12 rounded-lg flex items-center justify-center text-xl font-bold ${job.logoInitial === 'Z' ? 'bg-black text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}`}>
+                      {job.logoInitial}
+                    </div>
+                    <div>
+                      <h4 className="text-base font-semibold text-gray-900 dark:text-white">{job.companyName}</h4>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{job.title} • {job.location}</p>
+                      {job.compatibility && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 mt-1">
+                          {job.compatibility}% Match
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <button className="text-primary dark:text-secondary font-medium text-sm hover:underline">Ver Detalhes</button>
+                </div>
+              ))}
+
+              <div className="relative group p-4 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center bg-gray-50/50 dark:bg-gray-800/50">
+                <div className="text-center">
+                  <span className="material-icons-round text-secondary text-2xl mb-1">lock</span>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Upgrade para ver mais 15 vagas compatíveis</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default VendedorDashboard;

@@ -1,0 +1,8 @@
+{
+  "name": "TalentoShop",
+  "description": "Uma plataforma inteligente de conexão entre talentos de vendas e lojistas de sucesso, impulsionada por IA.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
