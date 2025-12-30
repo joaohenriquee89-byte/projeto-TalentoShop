@@ -70,7 +70,7 @@ serve(async (req) => {
                 throw new Error(errorMessage);
             }
 
-            return new Response(JSON.stringify({ init_point: data.init_point }), {
+            return new Response(JSON.stringify({ url: data.init_point }), {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                 status: 200
             });

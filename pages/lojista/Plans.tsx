@@ -32,10 +32,11 @@ const Plans: React.FC = () => {
 
         try {
             const data = await createCheckout(planCode, price, `Assinatura ${selectedPlan} `);
-            if (data && data.init_point) {
-                window.location.href = data.init_point;
+            console.log("Dados recebidos da função (Plans):", data);
+            if (data && data.url) {
+                window.location.href = data.url;
             } else {
-                alert('Erro ao gerar pagamento. Tente novamente.');
+                console.warn("URL não recebida no Plans:", data);
             }
         } catch (error: any) {
             console.error(error);

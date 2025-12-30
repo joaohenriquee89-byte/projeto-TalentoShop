@@ -26,15 +26,20 @@ const PricingPage: React.FC = () => {
       if (error) throw error;
 
       // 3. Redireciona para o checkout do Mercado Pago
-      if (data?.init_point) {
-        window.location.href = data.init_point;
+      console.log("Dados recebidos da função:", data);
+
+      // 3. Redireciona para o checkout do Mercado Pago
+      if (data?.url) {
+        window.location.href = data.url;
       } else {
-        throw new Error("Link de checkout não recebido do servidor.");
+        console.warn("URL de checkout não recebida:", data);
       }
     } catch (err: any) {
       console.error("Erro no Checkout:", err);
       // Alerta amigável para o erro 400 visto nos logs
-      alert("Erro ao iniciar o checkout. Verifique se o Token MP está configurado corretamente.");
+      console.error("Erro no Checkout:", err);
+      // Alerta removido conforme solicitado
+      // alert("Erro ao iniciar o checkout. Verifique se o Token MP está configurado corretamente.");
     }
   };
 
