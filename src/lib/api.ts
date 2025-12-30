@@ -3,7 +3,7 @@ import { supabase } from './supabase';
 export const createCheckout = async (planName: string, price: number, title: string) => {
     try {
         const { data, error } = await supabase.functions.invoke('create-checkout', {
-            body: { plan_name: planName, price, title },
+            body: { plan_name: planName, price: Number(price), title },
         });
 
         if (error) {

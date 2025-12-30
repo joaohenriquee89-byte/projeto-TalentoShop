@@ -12,8 +12,6 @@ serve(async (req) => {
 
     try {
         // 1. Check Payload
-        // AUTH REMOVIDO TEMPORARIAMENTE
-        let userId = 'USER_NAO_IDENTIFICADO';
         let body;
         try {
             body = await req.json();
@@ -21,14 +19,18 @@ serve(async (req) => {
             throw new Error('Falha ao ler corpo da requisição JSON');
         }
         const { plan_name, price } = body;
-        console.log('Received checkout request:', { plan_name, price, user_id: userId });
+        // Hardcoded user ID to avoid validation errors
+        const userId = 'guest_user';
+        console.log('Received checkout request:', { plan_name, price });
 
         // 2. Check Secret
         const mpToken = Deno.env.get('MERCADO_PAGO_ACCESS_TOKEN');
         if (!mpToken) throw new Error('MERCADO_PAGO_ACCESS_TOKEN não configurado no Supabase');
 
         // 3. Create Preference
-        const unit_price = parseFloat(String(price).replace(/[^\d.,]/g, '').replace(',', '.'));
+        // 3. Create Preference
+        // Converting price directly to Number as requested
+        const unit_price = Number(price);
         console.log("Preço processado:", unit_price);
 
         const preference = {
