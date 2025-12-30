@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { supabase } from '../../src/lib/supabase';
+import { createCheckout } from '../../src/lib/api';
+// import { supabase } from '../../src/lib/supabase'; // Não usado diretamente mais aqui
 
 const VendedorPlans: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
@@ -7,14 +8,21 @@ const VendedorPlans: React.FC = () => {
     const handleUpgrade = async () => {
         setIsLoading(true);
         try {
-            const { data, error } = await supabase.functions.invoke('create-checkout', {
-                body: { plan_name: 'Plano PRO', price: 9.90, title: 'Assinatura PRO' }
-            });
-            if (error) throw error;
-            if (data?.init_point) window.location.href = data.init_point;
-        } catch (err) {
-            console.error(err);
-            alert('Erro ao processar pagamento.');
+            // Usando a mesma função padronizada do Lojista
+            const data = await createCheckout('PRO_VENDEDOR', 9.90, 'Assinatura PRO Vendedor');
+
+            console.log("Dados recebidos da função (Vendedor):", data);
+
+            if (data && data.url) {
+                window.location.href = data.url;
+            } else {
+                console.warn("URL não recebida:", data);
+                alert('Erro: O link de pagamento não foi gerado. Tente novamente.');
+            }
+        } catch (error: any) {
+            console.error("Erro detalhado:", error);
+            // Mostrar erro detalhado na tela para facilitar debug
+            alert(`Erro no pagamento: ${JSON.stringify(error) || error.message}`);
         } finally {
             setIsLoading(false);
         }
