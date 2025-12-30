@@ -28,6 +28,29 @@ serve(async (req) => {
         if (!mpToken) throw new Error('MERCADO_PAGO_ACCESS_TOKEN não configurado no Supabase');
 
         // 3. Create Preference
+        const unit_price = parseFloat(String(price).replace(/[^\d.,]/g, '').replace(',', '.'));
+        console.log("Preço processado:", unit_price);
+
+        const preference = {
+            items: [{
+                title: `Assinatura ${plan_name}`,
+                quantity: 1,
+                currency_id: 'BRL',
+                unit_price: unit_price
+            }],
+            payer: { email: 'test_user_123@testuser.com' },
+            auto_return: 'approved',
+            back_urls: {
+                success: "https://talentoshop.vercel.app/dashboard",
+                failure: "https://talentoshop.vercel.app/plans",
+                pending: "https://talentoshop.vercel.app/plans"
+            },
+            notification_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/webhook-mp`,
+            external_reference: `${userId}|${plan_name}`
+        };
+
+        console.log("Corpo enviado ao MP:", JSON.stringify(preference));
+
         try {
             const response = await fetch('https://api.mercadopago.com/checkout/preferences', {
                 method: 'POST',
@@ -35,22 +58,7 @@ serve(async (req) => {
                     'Authorization': `Bearer ${mpToken}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    items: [{
-                        title: `Assinatura ${plan_name}`,
-                        quantity: 1,
-                        currency_id: 'BRL',
-                        unit_price: Number(price)
-                    }],
-                    auto_return: 'approved',
-                    back_urls: {
-                        success: "https://talentoshop.vercel.app/dashboard",
-                        failure: "https://talentoshop.vercel.app/plans",
-                        pending: "https://talentoshop.vercel.app/plans"
-                    },
-                    notification_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/webhook-mp`,
-                    external_reference: `${userId}|${plan_name}`
-                })
+                body: JSON.stringify(preference)
             });
 
             const data = await response.json();
