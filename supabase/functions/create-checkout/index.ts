@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 
 const corsHeaders = {
@@ -19,17 +20,37 @@ serve(async (req) => {
             throw new Error('Falha ao ler corpo da requisição JSON');
         }
         const { plan_name } = body;
-        const userId = 'guest_user';
-        console.log('Received checkout request (RESET MODE):', { plan_name });
+
+        // 2. Auth Check (Restored)
+        const supabaseClient = createClient(
+            Deno.env.get('SUPABASE_URL') ?? '',
+            Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+            { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
+        );
+
+        const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+
+        if (authError || !user) {
+            console.error('Auth Error:', authError);
+            throw new Error('Usuário não autenticado');
+        }
+
+        const userId = user.id;
+        console.log('Received checkout request for user:', userId, { plan_name });
 
         // 2. Check Secret
         const mpToken = Deno.env.get('MERCADO_PAGO_ACCESS_TOKEN');
         if (!mpToken) throw new Error('MERCADO_PAGO_ACCESS_TOKEN não configurado no Supabase');
 
         // 3. Create Preference
-        // 3. Create Preference
-        const unit_price = Number(99.90);
-        console.log("Preço processado FIXED:", unit_price);
+        const priceFromBody = body.price;
+        const unit_price = Number(parseFloat(String(priceFromBody)).toFixed(2));
+
+        console.log("Preço processado DYNAMIC:", unit_price, "Original:", priceFromBody);
+
+        if (isNaN(unit_price) || unit_price <= 0) {
+            throw new Error(`Preço inválido: ${priceFromBody}`);
+        }
 
         const preference = {
             items: [{
