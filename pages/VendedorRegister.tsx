@@ -272,7 +272,7 @@ const VendedorRegister: React.FC = () => {
   const isOtherSetor = selectedSetor === 'Outros';
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-background-light dark:bg-slate-900 flex flex-col items-center justify-center p-4">
       <div className="mb-8 text-center">
         <Link to="/" className="flex items-center justify-center gap-3">
           <div className="bg-gradient-to-br from-primary to-secondary p-2 rounded-xl shadow-sm">
@@ -282,7 +282,7 @@ const VendedorRegister: React.FC = () => {
         <p className="mt-2 text-sm text-gray-500 dark:text-slate-400">Sua jornada profissional começa aqui.</p>
       </div>
 
-      <div className="w-full max-w-4xl bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700">
+      <div className="w-full max-w-4xl bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700">
         <div className="bg-petrol-800 dark:bg-gray-900 p-8 text-white">
           <h1 className="text-2xl font-bold mb-6">Cadastro de Vendedor</h1>
           <div className="flex items-center justify-between">

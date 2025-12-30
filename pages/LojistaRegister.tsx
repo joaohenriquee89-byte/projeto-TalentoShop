@@ -270,23 +270,23 @@ const LojistaRegister: React.FC = () => {
   const isOtherSetor = selectedSetor === 'Outros';
 
   return (
-    <div className="flex h-screen flex-col md:flex-row bg-background-light dark:bg-background-dark font-sans transition-colors duration-200">
-      <aside className="w-full md:w-2/5 bg-primary relative overflow-hidden flex flex-col justify-between p-12 text-white">
+    <div className="flex min-h-screen flex-col md:flex-row bg-background-light dark:bg-slate-900 font-sans transition-colors duration-200">
+      <aside className="w-full md:w-2/5 bg-primary relative overflow-hidden flex flex-col justify-between p-8 md:p-12 text-white shrink-0">
         <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 rounded-full bg-white opacity-5 blur-3xl"></div>
         <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-60 h-60 rounded-full bg-secondary opacity-10 blur-3xl"></div>
 
         <div className="relative z-10">
-          <Link to="/" className="flex items-center gap-3 mb-12 hover:opacity-80 transition-opacity">
-            <div className="w-10 h-10 relative">
+          <Link to="/" className="flex items-center gap-3 mb-6 md:mb-12 hover:opacity-80 transition-opacity">
+            <div className="w-8 h-8 md:w-10 md:h-10 relative">
               <div className="absolute inset-0 bg-white/20 rounded-xl backdrop-blur-sm"></div>
-              <span className="material-icons-round absolute inset-0 flex items-center justify-center text-white text-xl">hub</span>
+              <span className="material-icons-round absolute inset-0 flex items-center justify-center text-white text-lg md:text-xl">hub</span>
             </div>
-            <span className="text-2xl font-bold tracking-tight">Talento<span className="text-secondary">Shop</span></span>
+            <span className="text-xl md:text-2xl font-bold tracking-tight">Talento<span className="text-secondary">Shop</span></span>
           </Link>
-          <h1 className="text-4xl font-bold leading-tight mb-6">Encontre os melhores vendedores para o seu negócio.</h1>
-          <p className="text-blue-100 text-lg font-light leading-relaxed">Junte-se à plataforma líder em conexão e otimize suas contratações com nossa IA.</p>
+          <h1 className="text-2xl md:text-4xl font-bold leading-tight mb-4 md:mb-6">Encontre os melhores vendedores para o seu negócio.</h1>
+          <p className="text-blue-100 text-sm md:text-lg font-light leading-relaxed hidden md:block">Junte-se à plataforma líder em conexão e otimize suas contratações com nossa IA.</p>
         </div>
-        <div className="relative z-10 mt-12">
+        <div className="relative z-10 mt-8 md:mt-12 hidden md:block">
           <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/10 shadow-lg">
             <div className="flex -space-x-3">
               <div className="w-8 h-8 rounded-full bg-blue-400 border-2 border-primary"></div>

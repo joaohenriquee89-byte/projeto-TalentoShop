@@ -59,8 +59,8 @@ const LoginPage: React.FC<LoginPageProps> = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 transition-colors duration-200 bg-background-light dark:bg-background-dark">
-      <div className="w-full max-w-6xl h-auto md:h-[800px] flex flex-col md:flex-row bg-surface-light dark:bg-surface-dark rounded-2xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-700">
+    <div className="min-h-screen flex items-center justify-center p-4 transition-colors duration-200 bg-background-light dark:bg-slate-900">
+      <div className="w-full max-w-6xl h-auto md:h-[800px] flex flex-col md:flex-row bg-surface-light dark:bg-slate-800 rounded-2xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-700">
         {/* Left Side: Form */}
         <div className="w-full md:w-1/2 p-8 md:p-12 lg:p-16 flex flex-col justify-center relative">
           <Link to="/" className="flex items-center gap-2 mb-8 transform hover:scale-105 transition-transform origin-left">
@@ -161,11 +161,13 @@ const LoginPage: React.FC<LoginPageProps> = () => {
                 <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-surface-light dark:bg-surface-dark text-slate-500 dark:text-slate-400">Ou continue com</span>
+                <span className="px-2 bg-surface-light dark:bg-slate-800 text-slate-500 dark:text-slate-400">Ou continue com</span>
               </div>
             </div>
             <div className="mt-6 grid grid-cols-2 gap-3">
-              <button className="w-full inline-flex justify-center py-2.5 px-4 border border-slate-300 dark:border-slate-600 rounded-xl shadow-sm bg-white dark:bg-slate-800 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+              <button
+                onClick={() => supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } })}
+                className="w-full inline-flex justify-center py-2.5 px-4 border border-slate-300 dark:border-slate-600 rounded-xl shadow-sm bg-white dark:bg-slate-800 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
                 <img alt="Google" className="h-5 w-5 mr-2" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKsb6tOVQFw7LK0uFBc8s-WRlLnFXLHk3tsWde9QEFUSTFBaNYv3tGpOoXHvzrxKaPSW8mvoKpNc0GTmgdS6d5_PJjWwcpfAHVhTQRrxaJZ2_Hw68ylK6Tks0EMOt75-cJwbbDr7jIhDqdJuEcI-5uVxqm_HDrkT4nO4Qn0ysVz5DEItRwwIoCT00OnQ8t62HHrbJPaRXk3zYmwvxQ4BdB2wByRVMSxwQamYUdcP_WZg17v-OrtJJq06oeIWLa7UPKWCRHnQhziHQ" />
                 Google
               </button>

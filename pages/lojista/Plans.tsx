@@ -145,7 +145,7 @@ const Plans: React.FC = () => {
 
                         <div className="mt-6 flex items-center justify-center gap-2 text-xs text-gray-400">
                             <span className="material-icons-round text-sm">lock</span>
-                            Pagamento 100% seguro via Stripe
+                            Pagamento processado com segurança via Mercado Pago
                         </div>
                     </div>
                 </div>
