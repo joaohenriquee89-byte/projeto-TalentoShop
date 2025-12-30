@@ -19,6 +19,7 @@ serve(async (req) => {
             throw new Error('Falha ao ler corpo da requisição JSON');
         }
         const { plan_name } = body;
+        const userId = 'guest_user';
         console.log('Received checkout request (RESET MODE):', { plan_name });
 
         // 2. Check Secret
@@ -80,7 +81,10 @@ serve(async (req) => {
 
     } catch (error: any) {
         console.error('Edge Function Error:', error);
-        return new Response(JSON.stringify({ error: error.message }), {
+        return new Response(JSON.stringify({
+            error: error.message || 'Erro desconhecido',
+            raw_error: String(error)
+        }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 400
         });
