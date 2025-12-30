@@ -18,10 +18,8 @@ serve(async (req) => {
         } catch (e) {
             throw new Error('Falha ao ler corpo da requisição JSON');
         }
-        const { plan_name, price } = body;
-        // Hardcoded user ID to avoid validation errors
-        const userId = 'guest_user';
-        console.log('Received checkout request:', { plan_name, price });
+        const { plan_name } = body;
+        console.log('Received checkout request (RESET MODE):', { plan_name });
 
         // 2. Check Secret
         const mpToken = Deno.env.get('MERCADO_PAGO_ACCESS_TOKEN');
@@ -29,9 +27,8 @@ serve(async (req) => {
 
         // 3. Create Preference
         // 3. Create Preference
-        // Converting price directly to Number as requested
-        const unit_price = Number(price);
-        console.log("Preço processado:", unit_price);
+        const unit_price = Number(99.90);
+        console.log("Preço processado FIXED:", unit_price);
 
         const preference = {
             items: [{
@@ -40,7 +37,7 @@ serve(async (req) => {
                 currency_id: 'BRL',
                 unit_price: unit_price
             }],
-            payer: { email: 'test_user_123@testuser.com' },
+            payer: { email: 'teste@teste.com' },
             auto_return: 'approved',
             back_urls: {
                 success: "https://talentoshop.vercel.app/dashboard",
@@ -73,8 +70,8 @@ serve(async (req) => {
             }
 
             return new Response(JSON.stringify({ url: data.init_point }), {
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                status: 200
+                status: 200,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
         } catch (fetchError: any) {
             throw fetchError; // Re-throw to be caught by outer catch

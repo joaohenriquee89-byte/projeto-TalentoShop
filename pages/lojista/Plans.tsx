@@ -40,7 +40,9 @@ const Plans: React.FC = () => {
             }
         } catch (error: any) {
             console.error(error);
-            alert(error.message || 'Erro ao conectar com o serviço de pagamento.');
+            // MODIFICAÇÃO DE DEBUG: Mostrar erro real na tela
+            console.error("Erro detalhado:", error);
+            alert(`Erro no pagamento: ${JSON.stringify(error)}`);
         } finally {
             setIsLoading(false);
             setShowUpgradeModal(false);

@@ -46,7 +46,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 .eq('profile_id', currentSession.user.id)
                 .eq('status', 'active')
                 .gt('expires_at', new Date().toISOString()) // Ensure not expired
-                .single();
+                .maybeSingle();
 
             if (subscription) {
                 planName = subscription.plan_name;
