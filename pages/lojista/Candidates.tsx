@@ -12,6 +12,7 @@ const Candidates: React.FC<CandidatesProps> = ({ user }) => {
     const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
     const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
     const [profileModalOpen, setProfileModalOpen] = useState(false);
+    const [invitedCandidateIds, setInvitedCandidateIds] = useState<string[]>([]);
 
     // Filters State
     const [locationFilter, setLocationFilter] = useState('');
@@ -64,6 +65,23 @@ const Candidates: React.FC<CandidatesProps> = ({ user }) => {
         alert("Filtros atualizados com sucesso!");
     };
 
+    const handleInviteCandidate = (candidateId: string) => {
+        const isPremium = user.plan === 'PRO' || user.plan === 'STANDARD';
+
+        if (!isPremium && invitedCandidateIds.length >= 2 && !invitedCandidateIds.includes(candidateId)) {
+            setProfileModalOpen(false);
+            setUpgradeModalOpen(true);
+            return;
+        }
+
+        if (!invitedCandidateIds.includes(candidateId)) {
+            setInvitedCandidateIds(prev => [...prev, candidateId]);
+            alert("Convite enviado com sucesso! Aguarde o retorno do candidato.");
+        } else {
+            alert("Você já enviou um convite para este candidato.");
+        }
+    };
+
     return (
         <div className="space-y-8 animate-fade-in relative">
             <UpgradeModal
@@ -81,6 +99,8 @@ const Candidates: React.FC<CandidatesProps> = ({ user }) => {
                 }}
                 candidate={selectedCandidate}
                 userPlan={user.plan}
+                onInvite={handleInviteCandidate}
+                isInvited={selectedCandidate ? invitedCandidateIds.includes(selectedCandidate.id) : false}
             />
 
             <div className="flex justify-between items-center mb-8">

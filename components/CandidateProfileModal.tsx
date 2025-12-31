@@ -6,9 +6,11 @@ interface CandidateProfileModalProps {
     onClose: () => void;
     candidate: Candidate | null;
     userPlan?: string;
+    onInvite: (candidateId: string) => void;
+    isInvited: boolean;
 }
 
-const CandidateProfileModal: React.FC<CandidateProfileModalProps> = ({ isOpen, onClose, candidate, userPlan }) => {
+const CandidateProfileModal: React.FC<CandidateProfileModalProps> = ({ isOpen, onClose, candidate, userPlan, onInvite, isInvited }) => {
     if (!isOpen || !candidate) return null;
 
     const isPremium = userPlan === 'PRO' || userPlan === 'STANDARD';
@@ -140,8 +142,11 @@ const CandidateProfileModal: React.FC<CandidateProfileModalProps> = ({ isOpen, o
                                                 Baixar CV (Premium)
                                             </button>
                                         )}
-                                        <button className="w-full mt-3 bg-primary text-white py-4 rounded-2xl font-bold text-lg shadow-xl shadow-primary/20 hover:bg-opacity-90 transition-all flex items-center justify-center gap-2">
-                                            Convidar para Chat
+                                        <button
+                                            onClick={() => onInvite(candidate.id)}
+                                            className={`w-full mt-3 py-4 rounded-2xl font-bold text-lg shadow-xl transition-all flex items-center justify-center gap-2 ${isInvited ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 cursor-default' : 'bg-primary text-white shadow-primary/20 hover:bg-opacity-90'}`}
+                                        >
+                                            {isInvited ? 'Convite Enviado' : 'Convidar para Chat'}
                                         </button>
                                     </div>
                                 </div>
