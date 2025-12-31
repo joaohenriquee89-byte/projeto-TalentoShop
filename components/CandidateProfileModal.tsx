@@ -16,10 +16,22 @@ const CandidateProfileModal: React.FC<CandidateProfileModalProps> = ({ isOpen, o
     const isPremium = userPlan === 'PRO' || userPlan === 'STANDARD';
 
     return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-            <div className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col max-h-[90vh]">
+        <div
+            className="fixed inset-0 z-[60] flex items-center justify-center p-0 md:p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in"
+            onClick={(e) => {
+                if (e.target === e.currentTarget) onClose();
+            }}
+        >
+            <div className="bg-white dark:bg-slate-900 w-full max-w-2xl md:rounded-3xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col h-full md:h-[90vh]">
                 {/* Header */}
-                <div className="relative h-32 bg-gradient-to-r from-primary to-petrol-600">
+                <div className="relative h-32 md:h-40 bg-gradient-to-r from-primary to-petrol-600">
+                    <button
+                        onClick={onClose}
+                        className="absolute top-4 left-4 md:hidden flex items-center gap-2 bg-black/20 hover:bg-black/30 text-white px-4 py-2 rounded-full backdrop-blur-md transition-colors font-bold text-sm"
+                    >
+                        <span className="material-icons-round text-base">arrow_back</span>
+                        Voltar
+                    </button>
                     <button
                         onClick={onClose}
                         className="absolute top-4 right-4 bg-white/20 hover:bg-white/30 text-white p-2 rounded-full backdrop-blur-md transition-colors"

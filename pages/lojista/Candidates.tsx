@@ -124,7 +124,7 @@ const Candidates: React.FC<CandidatesProps> = ({ user }) => {
 
             <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
                 {/* Filters */}
-                <div className="xl:col-span-1 bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 h-fit sticky top-24">
+                <div className="xl:col-span-1 bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 h-fit xl:sticky xl:top-24">
                     <h3 className="font-semibold text-gray-800 dark:text-white mb-4">Filtros</h3>
                     <div className="space-y-4">
                         <div>
