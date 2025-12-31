@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../src/lib/supabase';
 import { SHOPPINGS_LIST } from '../src/constants/data';
 import SuccessModal from '../components/SuccessModal';
+import Combobox from '../components/Combobox';
 
 const LojistaRegister: React.FC = () => {
   const [step, setStep] = useState(1);
@@ -198,7 +199,7 @@ const LojistaRegister: React.FC = () => {
             company_name: companyData.nomeEmpresa,
             unit_type: companyData.tipoUnidade,
             sector: isOtherSetor ? manualSetor : selectedSetor,
-            shopping_mall: isOtherShopping ? manualShopping : selectedShopping,
+            shopping_mall: selectedShopping,
             address: { ...address, cep },
             cnpj: companyData.cnpj,
             phone: responsibleData.celular,
@@ -447,27 +448,12 @@ const LojistaRegister: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Shopping Center</label>
-                  <select
+                  <Combobox
+                    options={SHOPPINGS_LIST}
                     value={selectedShopping}
-                    onChange={(e) => setSelectedShopping(e.target.value)}
-                    className="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white p-3 mb-2 focus:ring-primary focus:border-primary transition-shadow shadow-sm"
-                  >
-                    <option value="">Selecione um shopping...</option>
-                    {shoppings.sort().map(s => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                    <option value="OUTRO">Não encontrei meu shopping</option>
-                  </select>
-                  {isOtherShopping && (
-                    <div className="animate-fade-in mt-2">
-                      <input
-                        className="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white p-3 focus:ring-primary focus:border-primary transition-shadow shadow-sm"
-                        placeholder="Digite o nome do Shopping"
-                        value={manualShopping}
-                        onChange={(e) => setManualShopping(e.target.value)}
-                      />
-                    </div>
-                  )}
+                    onChange={setSelectedShopping}
+                    placeholder="Selecione ou digite o Shopping..."
+                  />
                 </div>
               </div>
             )}

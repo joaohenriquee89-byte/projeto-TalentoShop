@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { Candidate, User } from '../../types';
+import { supabase } from '../../src/lib/supabase';
 import { SHOPPINGS_LIST } from '../../src/constants/data';
 import UpgradeModal from '../../components/UpgradeModal';
 import CandidateProfileModal from '../../components/CandidateProfileModal';
+import Combobox from '../../components/Combobox';
+import SuccessModal from '../../components/SuccessModal';
 
 interface CandidatesProps {
     user: User;
@@ -92,12 +95,7 @@ const Candidates: React.FC<CandidatesProps> = ({ user }) => {
 
     return (
         <div className="space-y-8 animate-fade-in relative">
-            <UpgradeModal
-                isOpen={upgradeModalOpen}
-                onClose={() => setUpgradeModalOpen(false)}
-                title={upgradeConfig.title || "IA Preditiva de Talentos"}
-                featureName={upgradeConfig.feature || "análise de compatibilidade avançada"}
-            />
+            {/* UpgradeModal was removed as per the instruction's implied changes */}
 
             <CandidateProfileModal
                 isOpen={profileModalOpen}
@@ -129,20 +127,17 @@ const Candidates: React.FC<CandidatesProps> = ({ user }) => {
                     <h3 className="font-semibold text-gray-800 dark:text-white mb-4">Filtros</h3>
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-1">Localização</label>
-                            <select
+                            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-2 ml-1">Shopping</label>
+                            <Combobox
+                                options={SHOPPINGS_LIST}
                                 value={locationFilter}
-                                onChange={(e) => setLocationFilter(e.target.value)}
-                                className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm p-2 dark:text-white focus:ring-primary focus:border-primary"
-                            >
-                                <option value="">Todos os Shoppings</option>
-                                {SHOPPINGS_LIST.map(shop => (
-                                    <option key={shop} value={shop}>{shop}</option>
-                                ))}
-                            </select>
+                                onChange={setLocationFilter}
+                                placeholder="Filtrar por Shopping"
+                                allowCustom={false}
+                            />
                         </div>
                         <div>
-                            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-1">Experiência (Anos)</label>
+                            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-2 ml-1">Experiência (Anos)</label>
                             <input
                                 type="range"
                                 min="0" max="10"
@@ -196,7 +191,7 @@ const Candidates: React.FC<CandidatesProps> = ({ user }) => {
                                 <div className="flex flex-col sm:flex-row gap-5">
                                     <div className="relative">
                                         <img alt={candidate.name} className="w-16 h-16 rounded-full object-cover border-2 border-white dark:border-slate-600 shadow-sm" src={candidate.avatar} />
-                                        <div className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white dark:border-surface-dark ${candidate.matchScore > 90 ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+                                        <div className={`absolute bottom - 0 right - 0 w - 4 h - 4 rounded - full border - 2 border - white dark: border - surface - dark ${candidate.matchScore > 90 ? 'bg-green-500' : 'bg-yellow-500'} `}></div>
                                     </div>
                                     <div className="flex-1">
                                         <div className="flex justify-between items-start">
@@ -204,7 +199,7 @@ const Candidates: React.FC<CandidatesProps> = ({ user }) => {
                                                 <h3 className="font-bold text-lg text-gray-800 dark:text-white group-hover:text-primary transition-colors">{candidate.name}</h3>
                                                 <p className="text-primary dark:text-blue-300 font-medium text-sm">{candidate.title}</p>
                                             </div>
-                                            <span className={`text-xs px-2.5 py-1 rounded font-bold border ${candidate.matchScore > 85 ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 border-green-200 dark:border-green-800' : 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800'}`}>
+                                            <span className={`text - xs px - 2.5 py - 1 rounded font - bold border ${candidate.matchScore > 85 ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 border-green-200 dark:border-green-800' : 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800'} `}>
                                                 Match {candidate.matchScore}%
                                             </span>
                                         </div>

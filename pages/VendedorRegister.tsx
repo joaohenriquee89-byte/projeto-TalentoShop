@@ -4,6 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../src/lib/supabase';
 import SuccessModal from '../components/SuccessModal';
 import { SHOPPINGS_LIST } from '../src/constants/data';
+import Combobox from '../components/Combobox';
 
 const VendedorRegister: React.FC = () => {
   const [step, setStep] = useState(1);
@@ -237,7 +238,7 @@ const VendedorRegister: React.FC = () => {
             address: { ...address, cep: address.cep || '' },
             experiences: experiences.map(exp => ({
               ...exp,
-              shopping: exp.shopping === 'OUTRO' ? manualShopping : exp.shopping
+              shopping: exp.shopping
             })),
             skills: formData.tags.split(',').map(s => s.trim())
           }
@@ -608,27 +609,18 @@ const VendedorRegister: React.FC = () => {
                       </div>
                     </div>
                     <div className="col-span-1 md:col-span-2">
-                      <label className="block text-xs text-gray-500 mb-1">Shopping onde trabalhou</label>
-                      <select
-                        name="shopping"
+                      <label className="block text-xs text-gray-500 mb-2">Shopping onde trabalhou</label>
+                      <Combobox
+                        options={SHOPPINGS_LIST}
                         value={exp.shopping}
-                        onChange={(e) => handleExpChange(index, e)}
-                        className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white p-2.5"
-                      >
-                        <option value="">Selecione um shopping...</option>
-                        {shoppings.sort().map(s => (
-                          <option key={s} value={s}>{s}</option>
-                        ))}
-                        <option value="OUTRO">Não encontrei meu shopping</option>
-                      </select>
-                      {exp.shopping === 'OUTRO' && (
-                        <input
-                          className="w-full mt-2 rounded-lg border-primary dark:border-accent bg-blue-50/30 dark:bg-slate-800 dark:text-white p-2.5"
-                          placeholder="Nome do Shopping"
-                          value={manualShopping}
-                          onChange={(e) => setManualShopping(e.target.value)}
-                        />
-                      )}
+                        onChange={(val) => {
+                          const newExperiences = [...experiences];
+                          newExperiences[index] = { ...newExperiences[index], shopping: val };
+                          setExperiences(newExperiences);
+                        }}
+                        placeholder="Selecione ou digite o shopping..."
+                        className="text-gray-900"
+                      />
                     </div>
                     <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                       <h3 className="col-span-1 md:col-span-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">Referências Profissionais</h3>
