@@ -13,6 +13,7 @@ const Candidates: React.FC<CandidatesProps> = ({ user }) => {
     const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
     const [profileModalOpen, setProfileModalOpen] = useState(false);
     const [invitedCandidateIds, setInvitedCandidateIds] = useState<string[]>([]);
+    const [upgradeConfig, setUpgradeConfig] = useState({ title: '', feature: '' });
 
     // Filters State
     const [locationFilter, setLocationFilter] = useState('');
@@ -66,9 +67,16 @@ const Candidates: React.FC<CandidatesProps> = ({ user }) => {
     };
 
     const handleInviteCandidate = (candidateId: string) => {
-        const isPremium = user.plan === 'PRO' || user.plan === 'STANDARD';
+        const userPlan = user.plan?.toUpperCase();
+        const isPremium = userPlan === 'PRO' || userPlan === 'STANDARD';
+
+        console.log('Invite attempt:', { candidateId, userPlan, isPremium, invitedCount: invitedCandidateIds.length });
 
         if (!isPremium && invitedCandidateIds.length >= 2 && !invitedCandidateIds.includes(candidateId)) {
+            setUpgradeConfig({
+                title: "Limite de Convites Atingido",
+                feature: "convites ilimitados para chat"
+            });
             setProfileModalOpen(false);
             setUpgradeModalOpen(true);
             return;
@@ -76,9 +84,9 @@ const Candidates: React.FC<CandidatesProps> = ({ user }) => {
 
         if (!invitedCandidateIds.includes(candidateId)) {
             setInvitedCandidateIds(prev => [...prev, candidateId]);
-            alert("Convite enviado com sucesso! Aguarde o retorno do candidato.");
+            // Removed alert for a cleaner experience, it will be reflected in button state
         } else {
-            alert("Você já enviou um convite para este candidato.");
+            console.log('Candidate already invited');
         }
     };
 
@@ -87,8 +95,8 @@ const Candidates: React.FC<CandidatesProps> = ({ user }) => {
             <UpgradeModal
                 isOpen={upgradeModalOpen}
                 onClose={() => setUpgradeModalOpen(false)}
-                title="IA Preditiva de Talentos"
-                featureName="análise de compatibilidade avançada"
+                title={upgradeConfig.title || "IA Preditiva de Talentos"}
+                featureName={upgradeConfig.feature || "análise de compatibilidade avançada"}
             />
 
             <CandidateProfileModal
@@ -168,7 +176,13 @@ const Candidates: React.FC<CandidatesProps> = ({ user }) => {
                             <p className="text-sm opacity-90 mt-1 max-w-lg">Encontre compatibilidades de até 98% com nossa análise preditiva. Economize horas de triagem.</p>
                         </div>
                         <button
-                            onClick={() => setUpgradeModalOpen(true)}
+                            onClick={() => {
+                                setUpgradeConfig({
+                                    title: "IA Preditiva de Talentos",
+                                    feature: "análise de compatibilidade avançada"
+                                });
+                                setUpgradeModalOpen(true);
+                            }}
                             className="relative z-10 bg-white text-primary px-6 py-2.5 rounded-lg font-bold hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                         >
                             Desbloquear IA

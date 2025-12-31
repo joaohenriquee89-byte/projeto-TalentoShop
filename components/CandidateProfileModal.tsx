@@ -144,9 +144,14 @@ const CandidateProfileModal: React.FC<CandidateProfileModalProps> = ({ isOpen, o
                                         )}
                                         <button
                                             onClick={() => onInvite(candidate.id)}
-                                            className={`w-full mt-3 py-4 rounded-2xl font-bold text-lg shadow-xl transition-all flex items-center justify-center gap-2 ${isInvited ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 cursor-default' : 'bg-primary text-white shadow-primary/20 hover:bg-opacity-90'}`}
+                                            className={`w-full mt-3 py-3.5 px-4 rounded-2xl font-bold text-base shadow-xl transition-all flex items-center justify-center gap-2 ${isInvited ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 cursor-default' : 'bg-primary text-white shadow-primary/20 hover:bg-opacity-90'}`}
                                         >
-                                            {isInvited ? 'Convite Enviado' : 'Convidar para Chat'}
+                                            <span className="material-icons-round text-xl">
+                                                {isInvited ? 'check_circle' : 'chat'}
+                                            </span>
+                                            <span className="whitespace-nowrap">
+                                                {isInvited ? 'Convite Enviado' : 'Convidar para Chat'}
+                                            </span>
                                         </button>
                                     </div>
                                 </div>
