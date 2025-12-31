@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import { Candidate } from '../../types';
 import { SHOPPINGS_LIST } from '../../src/constants/data';
 import UpgradeModal from '../../components/UpgradeModal';
+import CandidateProfileModal from '../../components/CandidateProfileModal';
 
 const Candidates: React.FC = () => {
     const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
+    const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
+    const [profileModalOpen, setProfileModalOpen] = useState(false);
 
     // Filters State
     const [locationFilter, setLocationFilter] = useState('');
@@ -64,6 +67,15 @@ const Candidates: React.FC = () => {
                 onClose={() => setUpgradeModalOpen(false)}
                 title="IA Preditiva de Talentos"
                 featureName="análise de compatibilidade avançada"
+            />
+
+            <CandidateProfileModal
+                isOpen={profileModalOpen}
+                onClose={() => {
+                    setProfileModalOpen(false);
+                    setSelectedCandidate(null);
+                }}
+                candidate={selectedCandidate}
             />
 
             <div className="flex justify-between items-center mb-8">
@@ -166,7 +178,13 @@ const Candidates: React.FC = () => {
                                 </div>
                                 <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-3 opacity-80 group-hover:opacity-100 transition-opacity">
                                     <button className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">Exportar CV</button>
-                                    <button className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-petrol-700 shadow-sm transition-all flex items-center gap-1">
+                                    <button
+                                        onClick={() => {
+                                            setSelectedCandidate(candidate);
+                                            setProfileModalOpen(true);
+                                        }}
+                                        className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-petrol-700 shadow-sm transition-all flex items-center gap-1"
+                                    >
                                         <span className="material-icons-round text-base">visibility</span>
                                         Ver Perfil
                                     </button>
