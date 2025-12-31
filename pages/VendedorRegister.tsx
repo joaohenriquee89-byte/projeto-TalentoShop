@@ -16,6 +16,7 @@ const VendedorRegister: React.FC = () => {
     sobrenome: '',
     nascimento: '',
     cpf: '',
+    rg: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -271,6 +272,7 @@ const VendedorRegister: React.FC = () => {
             full_name: `${formData.nome} ${formData.sobrenome}`,
             user_type: 'vendedor',
             cpf: formData.cpf.replace(/\D/g, ''),
+            rg: formData.rg.replace(/\D/g, ''),
             birth_date: formData.nascimento,
             bio: formData.bio,
             phone: formData.celular.replace(/\D/g, ''),
@@ -332,6 +334,17 @@ const VendedorRegister: React.FC = () => {
 
   const handleNext = () => {
     if (step === 1) {
+      if (!formData.nome || !formData.sobrenome || !formData.nascimento || !formData.cpf || !formData.rg || !formData.celular || !formData.email || !formData.password) {
+        setModalConfig({
+          isOpen: true,
+          type: 'error',
+          title: 'Dados Incompletos',
+          message: 'Por favor, preencha todos os campos obrigatórios (*) para prosseguir.',
+          buttonText: 'Entendido',
+          redirectUrl: ''
+        });
+        return;
+      }
       if (formData.password.length < 6) {
         setModalConfig({
           isOpen: true,
@@ -400,15 +413,19 @@ const VendedorRegister: React.FC = () => {
             <div className="animate-fade-in-up space-y-4">
               <h2 className="text-xl font-semibold mb-6 flex items-center text-primary dark:text-accent"><span className="material-symbols-outlined mr-2">person</span>Dados Pessoais</h2>
               <div className="flex flex-col md:grid md:grid-cols-2 gap-4">
-                <input name="nome" value={formData.nome} onChange={handleInputChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="Nome" />
-                <input name="sobrenome" value={formData.sobrenome} onChange={handleInputChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="Sobrenome" />
+                <input name="nome" value={formData.nome} onChange={handleInputChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="Nome *" />
+                <input name="sobrenome" value={formData.sobrenome} onChange={handleInputChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="Sobrenome *" />
                 <div className="w-full">
-                  <label className="block text-xs text-gray-500 mb-1 ml-1">Data de Nascimento</label>
+                  <label className="block text-xs text-gray-500 mb-1 ml-1">Data de Nascimento *</label>
                   <input name="nascimento" value={formData.nascimento} onChange={handleInputChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" type="date" />
                 </div>
                 <div className="w-full">
-                  <label className="block text-xs text-gray-500 mb-1 ml-1">CPF</label>
+                  <label className="block text-xs text-gray-500 mb-1 ml-1">CPF *</label>
                   <input name="cpf" value={formData.cpf} onChange={handleInputChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="000.000.000-00" />
+                </div>
+                <div className="w-full">
+                  <label className="block text-xs text-gray-500 mb-1 ml-1">Identidade (RG) *</label>
+                  <input name="rg" value={formData.rg} onChange={handleInputChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="00.000.000-0" />
                 </div>
 
                 <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -459,7 +476,7 @@ const VendedorRegister: React.FC = () => {
                     value={address.uf}
                     readOnly
                   />
-                  <input name="celular" value={formData.celular} onChange={handleInputChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="Celular" />
+                  <input name="celular" value={formData.celular} onChange={handleInputChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="Celular *" />
                 </div>
                 {address.lat && (
                   <div className="col-span-1 md:col-span-2 p-2 bg-blue-50 dark:bg-slate-800/50 rounded text-[10px] text-gray-500 flex items-center gap-2">
@@ -528,7 +545,7 @@ const VendedorRegister: React.FC = () => {
                 </div>
 
                 <div className="w-full md:col-span-2">
-                  <input name="email" value={formData.email} onChange={handleInputChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="E-mail" type="email" />
+                  <input name="email" value={formData.email} onChange={handleInputChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="E-mail *" type="email" />
                 </div>
                 <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="relative group">
@@ -716,6 +733,25 @@ const VendedorRegister: React.FC = () => {
                   className="w-full rounded-xl border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-3.5 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
                   placeholder="Ex: Moda, Atendimento, CRM, Vendas"
                 />
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <span className="text-[10px] font-bold text-gray-400 uppercase w-full mb-1">Sugestões (clique para adicionar):</span>
+                  {['Moda', 'Luxo', 'Vendas', 'Atendimento', 'Inglês', 'Espanhol', 'CRM', 'Liderança', 'Estoque'].map(tag => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => {
+                        const currentTags = formData.tags ? formData.tags.split(',').map(t => t.trim()) : [];
+                        if (!currentTags.includes(tag)) {
+                          const newTags = [...currentTags, tag].join(', ');
+                          setFormData(prev => ({ ...prev, tags: newTags }));
+                        }
+                      }}
+                      className="px-3 py-1 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-full text-xs font-medium text-gray-600 dark:text-slate-300 hover:border-primary hover:text-primary transition-colors shadow-sm"
+                    >
+                      + {tag}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="p-4 bg-yellow-50 dark:bg-yellow-900/10 border-l-4 border-yellow-400 text-yellow-800 dark:text-yellow-200 text-sm rounded-r-xl">

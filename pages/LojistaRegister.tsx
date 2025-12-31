@@ -301,8 +301,31 @@ const LojistaRegister: React.FC = () => {
   };
 
   const handleNext = () => {
-    if (step < 2) setStep(step + 1);
-    else {
+    if (step === 1) {
+      if (!companyData.nomeEmpresa || !companyData.cnpj || !cep || !address.rua || !address.numero) {
+        setModalConfig({
+          isOpen: true,
+          type: 'error',
+          title: 'Dados da Empresa Incompletos',
+          message: 'Por favor, preencha todos os campos obrigatórios (*) da unidade para prosseguir.',
+          buttonText: 'Entendido',
+          redirectUrl: ''
+        });
+        return;
+      }
+      setStep(2);
+    } else {
+      if (!responsibleData.nome || !responsibleData.cpf || !responsibleData.celular || !responsibleData.email || !responsibleData.password) {
+        setModalConfig({
+          isOpen: true,
+          type: 'error',
+          title: 'Dados do Responsável Incompletos',
+          message: 'Por favor, preencha todos os campos obrigatórios (*) para finalizar o cadastro.',
+          buttonText: 'Entendido',
+          redirectUrl: ''
+        });
+        return;
+      }
       if (responsibleData.password !== responsibleData.confirmPassword) {
         setModalConfig({
           isOpen: true,
@@ -376,7 +399,7 @@ const LojistaRegister: React.FC = () => {
               <div className="animate-fade-in-up space-y-5">
                 <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Dados da Empresa</h2>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Nome da Empresa</label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Nome da Empresa *</label>
                   <input
                     name="nomeEmpresa"
                     value={companyData.nomeEmpresa}
@@ -386,7 +409,7 @@ const LojistaRegister: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">CNPJ</label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">CNPJ *</label>
                   <input
                     name="cnpj"
                     value={companyData.cnpj}
@@ -436,7 +459,7 @@ const LojistaRegister: React.FC = () => {
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-xs font-medium text-slate-500 mb-1">CEP</label>
+                      <label className="block text-xs font-medium text-slate-500 mb-1">CEP *</label>
                       <div className="relative">
                         <input
                           className="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white p-3 focus:ring-primary focus:border-primary transition-shadow shadow-sm"
@@ -455,7 +478,7 @@ const LojistaRegister: React.FC = () => {
                       )}
                     </div>
                     <div className="col-span-1 md:col-span-2">
-                      <label className="block text-xs font-medium text-slate-500 mb-1">Rua / Logradouro</label>
+                      <label className="block text-xs font-medium text-slate-500 mb-1">Rua / Logradouro *</label>
                       <input
                         className="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white p-3 focus:ring-primary focus:border-primary transition-shadow shadow-sm"
                         placeholder="Rua..."
@@ -464,7 +487,7 @@ const LojistaRegister: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-slate-500 mb-1">Número</label>
+                      <label className="block text-xs font-medium text-slate-500 mb-1">Número *</label>
                       <input
                         className="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white p-3 focus:ring-primary focus:border-primary transition-shadow shadow-sm"
                         placeholder="123"
@@ -515,7 +538,7 @@ const LojistaRegister: React.FC = () => {
                 <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Dados do Responsável</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="col-span-1 md:col-span-2">
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Nome Completo</label>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Nome Completo *</label>
                     <input
                       name="nome"
                       value={responsibleData.nome}
@@ -525,7 +548,7 @@ const LojistaRegister: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">CPF</label>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">CPF *</label>
                     <input
                       name="cpf"
                       value={responsibleData.cpf}
@@ -545,7 +568,7 @@ const LojistaRegister: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Celular</label>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Celular *</label>
                     <input
                       name="celular"
                       value={responsibleData.celular}
@@ -555,7 +578,7 @@ const LojistaRegister: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">E-mail Corporativo</label>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">E-mail Corporativo *</label>
                     <input
                       name="email"
                       value={responsibleData.email}
@@ -565,7 +588,7 @@ const LojistaRegister: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Senha</label>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Senha *</label>
                     <div className="relative">
                       <input
                         name="password"

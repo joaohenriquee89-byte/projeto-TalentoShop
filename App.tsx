@@ -76,7 +76,7 @@ const MainRoutes: React.FC<{ theme: 'light' | 'dark', toggleTheme: () => void, s
               path="/dashboard/vendedor/*"
               element={
                 localUser?.role === UserRole.VENDEDOR ? (
-                  <Layout user={localUser} setUser={handleSetUser} theme={theme} toggleTheme={toggleTheme}>
+                  <Layout user={localUser} onLogout={handleLogout} theme={theme} toggleTheme={toggleTheme}>
                     <Routes>
                       <Route path="/" element={<VendedorOverview user={localUser} setUser={handleSetUser} />} />
                       <Route path="my-jobs" element={<VendedorJobs />} />
@@ -94,7 +94,7 @@ const MainRoutes: React.FC<{ theme: 'light' | 'dark', toggleTheme: () => void, s
               path="/dashboard/lojista/*"
               element={
                 localUser?.role === UserRole.LOJISTA ? (
-                  <Layout user={localUser} setUser={handleSetUser} theme={theme} toggleTheme={toggleTheme}>
+                  <Layout user={localUser} onLogout={handleLogout} theme={theme} toggleTheme={toggleTheme}>
                     <Routes>
                       <Route path="/" element={<LojistaOverview user={localUser} />} />
                       <Route path="candidates" element={<LojistaCandidates user={localUser} />} />

@@ -6,12 +6,12 @@ import Sidebar from './Sidebar';
 interface LayoutProps {
     children: React.ReactNode;
     user: User;
-    setUser: (user: User | null) => void;
+    onLogout: () => void;
     toggleTheme: () => void;
     theme: 'dark' | 'light';
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, user, setUser, toggleTheme, theme }) => {
+const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, toggleTheme, theme }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
     const [hasUnread, setHasUnread] = useState(true);
@@ -33,7 +33,7 @@ const Layout: React.FC<LayoutProps> = ({ children, user, setUser, toggleTheme, t
     }, []);
 
     const handleLogout = () => {
-        setUser(null);
+        onLogout();
     };
 
     const rolePath = user.role === 'vendedor' ? '/dashboard/vendedor' : '/dashboard/lojista';
