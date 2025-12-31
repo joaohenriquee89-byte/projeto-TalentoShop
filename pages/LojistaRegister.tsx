@@ -341,7 +341,7 @@ const LojistaRegister: React.FC = () => {
                     placeholder="00.000.000/0000-00"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Tipo de Unidade</label>
                     <select name="tipoUnidade" value={companyData.tipoUnidade} onChange={handleCompanyChange} className="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white p-3 focus:ring-primary focus:border-primary transition-shadow shadow-sm">
@@ -380,7 +380,7 @@ const LojistaRegister: React.FC = () => {
                     <span className="material-icons-round text-primary text-lg">location_on</span>
                     Localização da Unidade
                   </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <label className="block text-xs font-medium text-slate-500 mb-1">CEP</label>
                       <div className="relative">

@@ -308,11 +308,11 @@ const VendedorRegister: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input name="nome" value={formData.nome} onChange={handleInputChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="Nome" />
                 <input name="sobrenome" value={formData.sobrenome} onChange={handleInputChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="Sobrenome" />
-                <div>
+                <div className="col-span-1 md:col-span-1">
                   <label className="block text-xs text-gray-500 mb-1 ml-1">Data de Nascimento</label>
                   <input name="nascimento" value={formData.nascimento} onChange={handleInputChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" type="date" />
                 </div>
-                <div>
+                <div className="col-span-1 md:col-span-1">
                   <label className="block text-xs text-gray-500 mb-1 ml-1">CPF</label>
                   <input name="cpf" value={formData.cpf} onChange={handleInputChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="000.000.000-00" />
                 </div>
@@ -398,7 +398,7 @@ const VendedorRegister: React.FC = () => {
                   )}
                 </div>
 
-                <input name="email" value={formData.email} onChange={handleInputChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="E-mail" type="email" />
+                <input name="email" value={formData.email} onChange={handleInputChange} className="w-full col-span-1 md:col-span-2 rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="E-mail" type="email" />
                 <div className="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="relative group">
                     <div className="relative">
