@@ -54,7 +54,9 @@ const LojistaRegister: React.FC = () => {
 
   const handleCompanyChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setCompanyData(prev => ({ ...prev, [name]: value }));
+    let formattedValue = value;
+    if (name === 'cnpj') formattedValue = formatCNPJ(value);
+    setCompanyData(prev => ({ ...prev, [name]: formattedValue }));
   };
 
   const handleResponsibleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,6 +127,16 @@ const LojistaRegister: React.FC = () => {
       .replace(/\D/g, '')
       .replace(/(\d{5})(\d)/, '$1-$2')
       .replace(/(-\d{3})\d+?$/, '$1');
+  };
+
+  const formatCNPJ = (value: string) => {
+    return value
+      .replace(/\D/g, '')
+      .replace(/^(\d{2})(\d)/, '$1.$2')
+      .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+      .replace(/\.(\d{3})(\d)/, '.$1/$2')
+      .replace(/(\d{4})(\d)/, '$1-$2')
+      .replace(/(-\d{2})\d+?$/, '$1');
   };
 
   const handleCepBlur = async () => {
