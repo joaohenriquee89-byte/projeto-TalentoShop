@@ -17,6 +17,7 @@ const Candidates: React.FC<CandidatesProps> = ({ user }) => {
     const [profileModalOpen, setProfileModalOpen] = useState(false);
     const [invitedCandidateIds, setInvitedCandidateIds] = useState<string[]>([]);
     const [upgradeConfig, setUpgradeConfig] = useState({ title: '', feature: '' });
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
 
     // Filters State
     const [locationFilter, setLocationFilter] = useState('');
@@ -65,8 +66,8 @@ const Candidates: React.FC<CandidatesProps> = ({ user }) => {
     const filteredCandidates = candidates; // Placeholder for logic if needed
 
     const handleApplyFilters = () => {
-        // Just a mock feedback for now as requested
-        alert("Filtros atualizados com sucesso!");
+        // Mock filtering logic would go here
+        setShowSuccessModal(true);
     };
 
     const handleInviteCandidate = (candidateId: string) => {
@@ -95,7 +96,20 @@ const Candidates: React.FC<CandidatesProps> = ({ user }) => {
 
     return (
         <div className="space-y-8 animate-fade-in relative">
-            {/* UpgradeModal was removed as per the instruction's implied changes */}
+            <UpgradeModal
+                isOpen={upgradeModalOpen}
+                onClose={() => setUpgradeModalOpen(false)}
+                title={upgradeConfig.title || "IA Preditiva de Talentos"}
+                featureName={upgradeConfig.feature || "análise de compatibilidade avançada"}
+            />
+
+            <SuccessModal
+                isOpen={showSuccessModal}
+                onClose={() => setShowSuccessModal(false)}
+                title="Filtros Aplicados"
+                message="A lista de candidatos foi atualizada com sucesso de acordo com seus critérios."
+                buttonText="Entendido"
+            />
 
             <CandidateProfileModal
                 isOpen={profileModalOpen}

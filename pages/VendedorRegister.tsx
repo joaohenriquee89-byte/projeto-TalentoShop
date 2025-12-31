@@ -289,8 +289,28 @@ const VendedorRegister: React.FC = () => {
 
   const handleNext = () => {
     if (step === 1) {
-      if (formData.password.length < 6) return alert("Senha muito curta");
-      if (formData.password !== formData.confirmPassword) return alert("Senhas não coincidem");
+      if (formData.password.length < 6) {
+        setModalConfig({
+          isOpen: true,
+          type: 'error',
+          title: 'Senha muito curta',
+          message: 'A senha deve ter pelo menos 6 caracteres para garantir sua segurança.',
+          buttonText: 'Ok',
+          redirectUrl: ''
+        });
+        return;
+      }
+      if (formData.password !== formData.confirmPassword) {
+        setModalConfig({
+          isOpen: true,
+          type: 'error',
+          title: 'Senhas não coincidem',
+          message: 'As senhas informadas não são iguais. Por favor, verifique.',
+          buttonText: 'Tentar Novamente',
+          redirectUrl: ''
+        });
+        return;
+      }
     }
     if (step < 3) setStep(step + 1);
     else handleRegister();

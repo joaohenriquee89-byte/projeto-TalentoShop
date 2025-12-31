@@ -258,7 +258,14 @@ const LojistaRegister: React.FC = () => {
     if (step < 2) setStep(step + 1);
     else {
       if (responsibleData.password !== responsibleData.confirmPassword) {
-        alert("As senhas não coincidem");
+        setModalConfig({
+          isOpen: true,
+          type: 'error',
+          title: 'Senhas não coincidem',
+          message: 'As senhas informadas não são iguais. Por favor, verifique.',
+          buttonText: 'Tentar Novamente',
+          redirectUrl: ''
+        });
         return;
       }
       handleRegister();

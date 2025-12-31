@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import SuccessModal from '../../components/SuccessModal';
 
 const Jobs: React.FC = () => {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -10,10 +11,11 @@ const Jobs: React.FC = () => {
     ]);
 
     const [activeActionId, setActiveActionId] = useState<number | null>(null);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
 
     const handleCreateJob = (e: React.FormEvent) => {
         e.preventDefault();
-        alert("Vaga criada com sucesso! (Mock)");
+        setShowSuccessModal(true);
         setIsCreateModalOpen(false);
     };
 
@@ -133,6 +135,13 @@ const Jobs: React.FC = () => {
                     </table>
                 </div>
             </div>
+            <SuccessModal
+                isOpen={showSuccessModal}
+                onClose={() => setShowSuccessModal(false)}
+                title="Vaga Criada"
+                message="Sua nova vaga foi publicada com sucesso e já está visível para candidatos compatíveis."
+                buttonText="Ver Minhas Vagas"
+            />
         </div>
     );
 };
