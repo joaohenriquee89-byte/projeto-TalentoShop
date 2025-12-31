@@ -3,17 +3,17 @@ import React from 'react';
 // Se a pasta 'lib' estiver dentro de 'src', use este caminho:
 import { supabase } from '../src/lib/supabase';
 const PricingPage: React.FC = () => {
-  const handleCheckout = async (planName: string, price: number) => {
-    // 1. Verifica autenticação do usuário
+  const [role, setRole] = React.useState<'vendedor' | 'lojista'>('lojista');
+
+  const handleCheckout = async (planName: string, price: number, planCode: string) => {
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-      alert("Por favor, faça login para continuar.");
+      window.location.href = `/login?redirect=/pricing`;
       return;
     }
 
     try {
-      // 2. Chama a Edge Function com os parâmetros exatos esperados pelo servidor
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: {
           plan_name: planName,
@@ -22,44 +22,79 @@ const PricingPage: React.FC = () => {
         }
       });
 
-      // Se a função retornar erro (non-2xx), ele será capturado aqui
       if (error) throw error;
-
-      // 3. Redireciona para o checkout do Mercado Pago
-      console.log("Dados recebidos da função:", data);
-
-      // 3. Redireciona para o checkout do Mercado Pago
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
-        console.warn("URL de checkout não recebida:", data);
-      }
-    } catch (err: any) {
+      if (data?.url) window.location.href = data.url;
+    } catch (err) {
       console.error("Erro no Checkout:", err);
-      // Alerta amigável para o erro 400 visto nos logs
-      console.error("Erro no Checkout:", err);
-      // Alerta removido conforme solicitado
-      // alert("Erro ao iniciar o checkout. Verifique se o Token MP está configurado corretamente.");
     }
   };
 
+  const pricingData = {
+    lojista: [
+      { name: 'Essencial', price: 49.90, code: 'STANDARD', desc: 'Para lojas individuais', features: ['1 Vaga ativa', 'Busca IA padrão', 'Filtros avançados'] },
+      { name: 'Premium', price: 99.90, code: 'PRO', desc: 'Para redes e expansão', features: ['Vagas ilimitadas', 'Match IA completo', 'Destaque prioritário'], recommended: true }
+    ],
+    vendedor: [
+      { name: 'Grátis', price: 0, code: 'FREE', desc: 'Comece agora', features: ['Perfil básico', 'Candidaturas limitadas', 'Sem IA'] },
+      { name: 'PRO', price: 9.90, code: 'PRO_VENDEDOR', desc: 'Destaque-se na multidão', features: ['Match IA de vagas', 'Perfil verificado', 'Prioridade em buscas'], recommended: true }
+    ]
+  };
+
   return (
-    <div className="pt-32 pb-16 bg-white min-h-screen text-center">
-      <div className="max-w-7xl mx-auto px-4">
-        <h1 className="text-4xl font-extrabold mb-12">Planos de Assinatura</h1>
+    <div className="pt-32 pb-24 bg-background dark:bg-slate-950 min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <h1 className="text-5xl font-display font-extrabold text-slate-900 dark:text-white mb-6">Investimento que <span className="text-primary italic">gera retorno.</span></h1>
+          <p className="text-xl text-slate-500 dark:text-slate-400 mb-12">Escolha o plano que melhor se adapta ao seu momento profissional no varejo.</p>
 
-        <div className="max-w-sm mx-auto bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-          <h3 className="text-xl font-bold mb-4 uppercase text-blue-600">Lojista Premium</h3>
-          <p className="text-4xl font-extrabold mb-6">R$ 99,90<span className="text-sm text-gray-500">/mês</span></p>
+          <div className="inline-flex p-1 bg-slate-100 dark:bg-slate-900 rounded-2xl mb-8">
+            <button
+              onClick={() => setRole('lojista')}
+              className={`px-8 py-3 rounded-xl font-bold transition-all ${role === 'lojista' ? 'bg-primary text-white shadow-lg' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+            >
+              Sou Lojista
+            </button>
+            <button
+              onClick={() => setRole('vendedor')}
+              className={`px-8 py-3 rounded-xl font-bold transition-all ${role === 'vendedor' ? 'bg-primary text-white shadow-lg' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+            >
+              Sou Vendedor
+            </button>
+          </div>
+        </div>
 
-          <button
-            onClick={() => handleCheckout("Lojista Premium", 99.90)}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition-colors"
-          >
-            Assinar Agora
-          </button>
+        <div className={`grid grid-cols-1 md:grid-cols-${pricingData[role].length} gap-8 max-w-5xl mx-auto items-start`}>
+          {pricingData[role].map((plan, i) => (
+            <div key={i} className={`relative bg-white dark:bg-slate-900 p-8 rounded-3xl border transition-all hover:border-primary/50 group ${plan.recommended ? 'border-primary shadow-soft ring-1 ring-primary/20 bg-slate-50/30' : 'border-slate-200 dark:border-slate-800 shadow-premium'}`}>
+              {plan.recommended && (
+                <span className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg">Mais Popular</span>
+              )}
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{plan.name}</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-8">{plan.desc}</p>
 
-          <p className="mt-4 text-xs text-gray-400">Pagamento seguro via Mercado Pago</p>
+              <div className="mb-8">
+                <span className="text-5xl font-extrabold text-slate-900 dark:text-white">R$ {plan.price.toFixed(2).replace('.', ',')}</span>
+                <span className="text-slate-500 dark:text-slate-400 text-sm ml-2">/mês</span>
+              </div>
+
+              <ul className="space-y-4 mb-10">
+                {plan.features.map((f, j) => (
+                  <li key={j} className="flex items-center gap-3 text-slate-600 dark:text-slate-300 text-sm font-medium">
+                    <span className="material-icons-round text-primary text-lg">check_circle</span>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+
+              <button
+                onClick={() => handleCheckout(plan.name, plan.price, plan.code)}
+                disabled={plan.price === 0}
+                className={`w-full py-4 rounded-2xl font-bold transition-all transform group-hover:-translate-y-1 ${plan.recommended ? 'bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-700'}`}
+              >
+                {plan.price === 0 ? 'Plano Atual' : 'Escolher Plano'}
+              </button>
+            </div>
+          ))}
         </div>
       </div>
     </div>

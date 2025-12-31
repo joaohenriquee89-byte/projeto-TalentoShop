@@ -21,7 +21,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, theme, toggleTheme, onLogout }) =
 
   // Render Public Navbar
   return (
-    <nav className="fixed w-full z-50 glass-effect border-b border-slate-200 dark:border-slate-800 transition-colors duration-300">
+    <nav className="fixed w-full z-50 glass border-b transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           <Link to="/" className="flex items-center gap-2">

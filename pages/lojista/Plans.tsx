@@ -163,9 +163,9 @@ const Plans: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
                 {plans.map((plan, idx) => (
-                    <div key={idx} className={`relative bg-surface-light dark:bg-surface-dark rounded-2xl p-8 border ${plan.recommended ? 'border-primary shadow-2xl shadow-primary/10 ring-1 ring-primary/20 scale-105 z-10' : 'border-slate-200 dark:border-slate-700 shadow-sm'} flex flex-col transition-all hover:border-primary/50`}>
+                    <div key={idx} className={`relative bg-white dark:bg-slate-900 rounded-3xl p-8 border transition-all duration-300 hover:shadow-soft ${plan.recommended ? 'border-primary shadow-soft ring-1 ring-primary/20 scale-105 z-10' : 'border-slate-200 dark:border-slate-800 shadow-premium'} flex flex-col`}>
                         {plan.recommended && (
-                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-petrol-600 text-white px-6 py-1.5 rounded-full text-sm font-bold uppercase tracking-wider shadow-lg flex items-center gap-2">
+                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white px-6 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg flex items-center gap-2">
                                 <span className="material-icons-round text-base">star</span>
                                 Recomendado
                             </div>
