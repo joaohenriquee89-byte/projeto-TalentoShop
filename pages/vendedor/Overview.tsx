@@ -14,11 +14,28 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
     { id: '1', companyName: 'Reserva', title: 'Vendedor Jr.', location: 'Shopping Morumbi', compatibility: 98, logoInitial: 'R' },
     { id: '2', companyName: 'Zara', title: 'Gerente de Seção', location: 'Shopping Eldorado', logoInitial: 'Z' },
   ]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const [upgradeConfig, setUpgradeConfig] = useState({ title: '', feature: '' });
 
   const userPlan = user.plan?.toUpperCase() || 'FREE';
   const isPremium = userPlan === 'PRO' || userPlan === 'STANDARD';
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    // Simulate loading
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 800);
+  };
+
+  const filteredJobs = jobs.filter(job =>
+    job.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    job.location.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -178,61 +195,78 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
             </div>
           </div>
 
-          <div className="bg-surface-light dark:bg-surface-dark shadow rounded-xl border border-gray-100 dark:border-gray-700 p-6">
+          <div className="bg-[#1e2533] dark:bg-surface-dark shadow-xl rounded-xl border border-slate-700 p-6">
             <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <span className="material-icons-round text-primary dark:text-secondary">storefront</span>
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <span className="material-icons-round text-secondary">storefront</span>
                 Buscar Lojas Contratando
               </h3>
             </div>
-            <div className="flex gap-2 mb-6">
+            <form onSubmit={handleSearch} className="flex gap-2 mb-6">
               <div className="relative flex-grow">
                 <span className="material-icons-round absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">search</span>
-                <input className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm" placeholder="Ex: Zara, Shopping Iguatemi..." type="text" />
+                <input
+                  className="block w-full pl-10 pr-3 py-3 border border-slate-600 rounded-md bg-[#161b26] dark:bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-secondary sm:text-sm"
+                  placeholder="Ex: Zara, Shopping Iguatemi..."
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
               </div>
-              <button className="bg-primary hover:bg-opacity-90 text-white px-4 py-2 rounded-md font-medium text-sm">Buscar</button>
-            </div>
+              <button type="submit" className="bg-primary hover:bg-opacity-90 text-white px-6 py-2 rounded-md font-bold text-sm transition-all active:scale-95">Buscar</button>
+            </form>
 
             <div className="space-y-4">
-              {jobs.map(job => (
-                <div key={job.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-secondary transition-colors cursor-pointer">
-                  <div className="flex items-center gap-4 mb-3 sm:mb-0">
-                    <div className={`h-12 w-12 rounded-lg flex items-center justify-center text-xl font-bold ${job.logoInitial === 'Z' ? 'bg-black text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}`}>
-                      {job.logoInitial}
-                    </div>
-                    <div>
-                      <h4 className="text-base font-semibold text-gray-900 dark:text-white">{job.companyName}</h4>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{job.title} • {job.location}</p>
-                      {job.compatibility && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 mt-1">
-                          {job.compatibility}% Match
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => {
-                      if (!isPremium) {
-                        setUpgradeConfig({
-                          title: "Candidatura Bloqueada",
-                          feature: "candidatar-se a vagas e ver detalhes exclusivos"
-                        });
-                        setUpgradeModalOpen(true);
-                        return;
-                      }
-                      // Actual detail logic here
-                    }}
-                    className="text-primary dark:text-secondary font-medium text-sm hover:underline"
-                  >
-                    {isPremium ? 'Ver Detalhes' : 'Desbloquear Vaga'}
-                  </button>
+              {isLoading ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <div className="w-10 h-10 border-4 border-secondary border-t-transparent rounded-full animate-spin mb-4"></div>
+                  <p className="text-slate-400 text-sm animate-pulse">Buscando lojas compatíveis...</p>
                 </div>
-              ))}
+              ) : filteredJobs.length > 0 ? (
+                filteredJobs.map(job => (
+                  <div key={job.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-[#161b26] dark:bg-gray-800 border border-slate-700 rounded-lg hover:border-secondary transition-all cursor-pointer group">
+                    <div className="flex items-center gap-4 mb-3 sm:mb-0">
+                      <div className={`h-12 w-12 rounded-lg flex items-center justify-center text-xl font-bold transition-transform group-hover:scale-110 ${job.logoInitial === 'Z' ? 'bg-black text-white' : 'bg-slate-700 text-white'}`}>
+                        {job.logoInitial}
+                      </div>
+                      <div>
+                        <h4 className="text-base font-semibold text-white">{job.companyName}</h4>
+                        <p className="text-sm text-slate-400">{job.title} • {job.location}</p>
+                        {job.compatibility && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-green-900/40 text-green-400 border border-green-800/50 mt-1">
+                            {job.compatibility}% Match
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        if (!isPremium) {
+                          setUpgradeConfig({
+                            title: "Candidatura Bloqueada",
+                            feature: "candidatar-se a vagas e ver detalhes exclusivos"
+                          });
+                          setUpgradeModalOpen(true);
+                          return;
+                        }
+                      }}
+                      className="text-secondary font-bold text-sm hover:text-green-400 transition-colors"
+                    >
+                      {isPremium ? 'Ver Detalhes' : 'Desbloquear Vaga'}
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-12">
+                  <span className="material-icons-round text-slate-600 text-4xl mb-2">search_off</span>
+                  <p className="text-slate-500">Nenhuma loja encontrada para "{searchTerm}"</p>
+                </div>
+              )}
 
-              <div className="relative group p-4 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center bg-gray-50/50 dark:bg-gray-800/50">
+              <div className="relative group p-4 border border-dashed border-slate-600 rounded-lg flex items-center justify-center bg-black/20">
                 <div className="text-center">
                   <span className="material-icons-round text-secondary text-2xl mb-1">lock</span>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Upgrade para ver mais 15 vagas compatíveis</p>
+                  <p className="text-xs text-slate-400 font-medium">Upgrade para ver mais 15 vagas compatíveis</p>
                 </div>
               </div>
             </div>
