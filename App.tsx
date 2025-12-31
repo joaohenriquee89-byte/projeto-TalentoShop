@@ -4,6 +4,7 @@ import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import VendedorRegister from './pages/VendedorRegister';
 import LojistaRegister from './pages/LojistaRegister';
+import RegisterSelection from './pages/RegisterSelection';
 import VendedorOverview from './pages/vendedor/Overview';
 import VendedorJobs from './pages/vendedor/Jobs';
 import VendedorApplications from './pages/vendedor/Applications';
@@ -66,6 +67,7 @@ const MainRoutes: React.FC<{ theme: 'light' | 'dark', toggleTheme: () => void, s
             {/* Public Routes */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterSelection />} />
             <Route path="/register/vendedor" element={<VendedorRegister />} />
             <Route path="/register/lojista" element={<LojistaRegister />} />
             <Route path="/pricing" element={<PricingPage />} />
@@ -149,7 +151,7 @@ const ConditionalNavbar: React.FC<{
 }> = ({ user, theme, toggleTheme, onLogout }) => {
   const location = useLocation();
   // Hide Navbar on Login/Register/Limit pages AND Dashboard pages (Layout handles Dashboard)
-  const hiddenOn = ['/login', '/register/vendedor', '/register/lojista', '/limit'];
+  const hiddenOn = ['/login', '/register', '/register/vendedor', '/register/lojista', '/limit'];
   const isDashboard = location.pathname.includes('/dashboard');
 
   if (hiddenOn.includes(location.pathname) || isDashboard) return null;
@@ -160,7 +162,7 @@ const ConditionalNavbar: React.FC<{
 const ConditionalFooter: React.FC = () => {
   const location = useLocation();
   // Hide Footer on Auth pages and Dashboard pages
-  const hiddenOn = ['/login', '/register/vendedor', '/register/lojista', '/limit'];
+  const hiddenOn = ['/login', '/register', '/register/vendedor', '/register/lojista', '/limit'];
   const isDashboard = location.pathname.includes('/dashboard');
 
   if (hiddenOn.includes(location.pathname) || isDashboard) return null;

@@ -37,7 +37,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, theme, toggleTheme, onLogout }) =
               <span className="material-symbols-outlined text-slate-600 dark:text-slate-300 text-xl flex items-center">{theme === 'dark' ? 'light_mode' : 'dark_mode'}</span>
             </button>
             <Link className="text-sm font-bold text-primary dark:text-white hover:underline" to="/login">Login</Link>
-            <Link to="/register/vendedor" className="bg-primary hover:bg-opacity-90 text-white px-6 py-2.5 rounded-full font-medium transition shadow-lg shadow-primary/30 flex items-center">
+            <Link to="/register" className="bg-primary hover:bg-opacity-90 text-white px-6 py-2.5 rounded-full font-medium transition shadow-lg shadow-primary/30 flex items-center">
               Começar Agora
             </Link>
           </div>
@@ -71,7 +71,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, theme, toggleTheme, onLogout }) =
               <Link onClick={() => setIsMobileMenuOpen(false)} to="/login" className="text-center py-3 text-base font-bold text-primary dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition">
                 Fazer Login
               </Link>
-              <Link onClick={() => setIsMobileMenuOpen(false)} to="/register/vendedor" className="bg-primary hover:bg-petrol-700 text-white py-3 rounded-xl font-medium text-center shadow-lg shadow-primary/30 transition">
+              <Link onClick={() => setIsMobileMenuOpen(false)} to="/register" className="bg-primary hover:bg-petrol-700 text-white py-3 rounded-xl font-medium text-center shadow-lg shadow-primary/30 transition">
                 Começar Agora
               </Link>
             </div>

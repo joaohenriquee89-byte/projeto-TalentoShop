@@ -179,7 +179,7 @@ const LoginPage: React.FC<LoginPageProps> = () => {
           </div>
           <p className="mt-8 text-center text-sm text-slate-500 dark:text-slate-400">
             Ainda não tem uma conta?
-            <Link className="font-bold text-primary hover:text-petrol-700 dark:text-blue-400 dark:hover:text-blue-300 ml-1" to="/register/vendedor">Criar conta grátis</Link>
+            <Link className="font-bold text-primary hover:text-petrol-700 dark:text-blue-400 dark:hover:text-blue-300 ml-1" to="/register">Criar conta grátis</Link>
           </p>
         </div>
 
