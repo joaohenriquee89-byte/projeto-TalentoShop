@@ -1,6 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { User, Job } from '../../types';
 import UpgradeModal from '../../components/UpgradeModal';
+import { supabase } from '../../src/lib/supabase';
 
 interface VendedorDashboardProps {
   user: User;
@@ -10,25 +11,53 @@ interface VendedorDashboardProps {
 const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) => {
   const [isEditing, setIsEditing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [jobs] = useState<Job[]>([
-    { id: '1', companyName: 'Reserva', title: 'Vendedor Jr.', location: 'Shopping Morumbi', compatibility: 98, logoInitial: 'R' },
-    { id: '2', companyName: 'Zara', title: 'Gerente de Seção', location: 'Shopping Eldorado', logoInitial: 'Z' },
-  ]);
+  const [jobs, setJobs] = useState<Job[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const [upgradeConfig, setUpgradeConfig] = useState({ title: '', feature: '' });
 
   const userPlan = user.plan?.toUpperCase() || 'FREE';
   const isPremium = userPlan === 'PRO' || userPlan === 'STANDARD';
 
+  useEffect(() => {
+    const fetchStores = async () => {
+      try {
+        setIsLoading(true);
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_type', 'lojista');
+
+        if (error) throw error;
+
+        if (data) {
+          const mappedJobs: Job[] = data.map(profile => ({
+            id: profile.id,
+            companyName: profile.company_name || 'Loja Sem Nome',
+            title: 'Loja Parceira',
+            location: profile.shopping_mall || profile.address?.cidade || 'Localização não informada',
+            compatibility: Math.floor(Math.random() * (99 - 70 + 1)) + 70, // Simulated for now
+            logoInitial: (profile.company_name || 'L').charAt(0).toUpperCase()
+          }));
+          setJobs(mappedJobs);
+        }
+      } catch (err) {
+        console.error('Error fetching stores:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchStores();
+  }, []);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    // Search is already real-time via filteredJobs, 
+    // but the button can trigger a refresh or just visual feedback
     setIsLoading(true);
-    // Simulate loading
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 800);
+    setTimeout(() => setIsLoading(false), 500);
   };
 
   const filteredJobs = jobs.filter(job =>
