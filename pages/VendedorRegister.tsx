@@ -21,7 +21,23 @@ const VendedorRegister: React.FC = () => {
     celular: '',
     bio: '',
     tags: '',
+    escolaridade: '',
+    disponibilidade: '',
   });
+
+  const [experiences, setExperiences] = useState([
+    {
+      funcao: '',
+      empresa: '',
+      atividades: '',
+      inicio: '',
+      fim: '',
+      atual: false,
+      shopping: '',
+      referenciaNome: '',
+      referenciaTel: ''
+    }
+  ]);
 
   const [address, setAddress] = useState({
     cep: '',
@@ -35,17 +51,7 @@ const VendedorRegister: React.FC = () => {
     lng: ''
   });
 
-  // Experiência
-  const [experience, setExperience] = useState({
-    funcao: '',
-    empresa: '',
-    atividades: '',
-    inicio: '',
-    fim: '',
-    shopping: '',
-    referenciaNome: '',
-    referenciaTel: ''
-  });
+
 
   const [selectedSetor, setSelectedSetor] = useState('');
   const [manualSetor, setManualSetor] = useState('');
@@ -75,9 +81,32 @@ const VendedorRegister: React.FC = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleExpChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setExperience(prev => ({ ...prev, [name]: value }));
+  const handleExpChange = (index: number, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    const val = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
+    const newExperiences = [...experiences];
+    newExperiences[index] = { ...newExperiences[index], [name]: val };
+    setExperiences(newExperiences);
+  };
+
+  const addExperience = () => {
+    setExperiences([...experiences, {
+      funcao: '',
+      empresa: '',
+      atividades: '',
+      inicio: '',
+      fim: '',
+      atual: false,
+      shopping: '',
+      referenciaNome: '',
+      referenciaTel: ''
+    }]);
+  };
+
+  const removeExperience = (index: number) => {
+    if (experiences.length > 1) {
+      setExperiences(experiences.filter((_, i) => i !== index));
+    }
   };
 
   const fetchCoordinates = async (logradouro: string, cidade: string, uf: string) => {
@@ -202,12 +231,14 @@ const VendedorRegister: React.FC = () => {
             cpf: formData.cpf,
             birth_date: formData.nascimento,
             bio: formData.bio,
-            phone: formData.celular, // Added phone saving
+            phone: formData.celular,
+            escolaridade: formData.escolaridade,
+            disponibilidade: formData.disponibilidade,
             address: { ...address, cep: address.cep || '' },
-            experience: {
-              ...experience,
-              shopping: experience.shopping === 'OUTRO' ? manualShopping : experience.shopping
-            },
+            experiences: experiences.map(exp => ({
+              ...exp,
+              shopping: exp.shopping === 'OUTRO' ? manualShopping : exp.shopping
+            })),
             skills: formData.tags.split(',').map(s => s.trim())
           }
         }
@@ -269,7 +300,6 @@ const VendedorRegister: React.FC = () => {
     else navigate('/');
   };
 
-  const isOtherShopping = experience.shopping === 'OUTRO';
   const isOtherSetor = selectedSetor === 'Outros';
 
   return (
@@ -374,6 +404,41 @@ const VendedorRegister: React.FC = () => {
                   </div>
                 )}
 
+                <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-1 ml-1">Escolaridade</label>
+                    <select
+                      name="escolaridade"
+                      value={formData.escolaridade}
+                      onChange={handleInputChange}
+                      className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5"
+                    >
+                      <option value="">Selecione...</option>
+                      <option value="Ensino Médio Incompleto">Ensino Médio Incompleto</option>
+                      <option value="Ensino Médio Completo">Ensino Médio Completo</option>
+                      <option value="Superior Incompleto">Superior Incompleto</option>
+                      <option value="Superior Completo">Superior Completo</option>
+                      <option value="Pós-graduação">Pós-graduação</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-1 ml-1">Disponibilidade</label>
+                    <select
+                      name="disponibilidade"
+                      value={formData.disponibilidade}
+                      onChange={handleInputChange}
+                      className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5"
+                    >
+                      <option value="">Selecione...</option>
+                      <option value="Imediata (Manhã)">Imediata (Manhã)</option>
+                      <option value="Imediata (Tarde)">Imediata (Tarde)</option>
+                      <option value="Imediata (Noite)">Imediata (Noite)</option>
+                      <option value="Imediata (44h/sem)">Imediata (44h/sem)</option>
+                      <option value="Finais de Semana">Finais de Semana</option>
+                    </select>
+                  </div>
+                </div>
+
                 <div className="col-span-1 md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Setor de Atuação Predominante</label>
                   <select
@@ -460,53 +525,125 @@ const VendedorRegister: React.FC = () => {
             </div>
           )}
           {step === 2 && (
-            <div className="animate-fade-in-up space-y-4">
-              <h2 className="text-xl font-semibold mb-6 flex items-center text-primary dark:text-accent"><span className="material-symbols-outlined mr-2">work_outline</span>Experiência Profissional</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input name="funcao" value={experience.funcao} onChange={handleExpChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="Função Atual/Última" />
-                <input name="empresa" value={experience.empresa} onChange={handleExpChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="Nome da Loja/Empresa" />
-                <textarea name="atividades" value={experience.atividades} onChange={handleExpChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5 col-span-1 md:col-span-2" placeholder="Principais Atividades" rows={2}></textarea>
-                <div>
-                  <label className="block text-xs text-gray-500 mb-1">Data Início</label>
-                  <input name="inicio" value={experience.inicio} onChange={handleExpChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" type="date" />
-                </div>
-                <div>
-                  <label className="block text-xs text-gray-500 mb-1">Data Fim (ou atual)</label>
-                  <input name="fim" value={experience.fim} onChange={handleExpChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" type="date" />
-                </div>
-                <div className="col-span-1 md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Shopping onde trabalhou</label>
-                  <select
-                    value={experience.shopping}
-                    onChange={handleExpChange}
-                    name="shopping"
-                    className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5"
-                  >
-                    <option value="">Selecione um shopping...</option>
-                    {shoppings.sort().map(s => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                    <option value="OUTRO">Não encontrei meu shopping</option>
-                  </select>
-                  {isOtherShopping && (
-                    <input
-                      className="w-full mt-2 rounded-lg border-primary dark:border-accent bg-blue-50/30 dark:bg-slate-800 dark:text-white p-2.5"
-                      placeholder="Nome do Shopping"
-                      value={manualShopping}
-                      onChange={(e) => setManualShopping(e.target.value)}
-                    />
+            <div className="animate-fade-in-up space-y-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-semibold flex items-center text-primary dark:text-accent">
+                  <span className="material-symbols-outlined mr-2">work_outline</span>
+                  Experiência Profissional
+                </h2>
+                <button
+                  onClick={addExperience}
+                  className="text-primary dark:text-accent font-bold text-sm flex items-center gap-1 hover:underline"
+                >
+                  <span className="material-icons-round text-base">add_circle</span>
+                  Adicionar Outra
+                </button>
+              </div>
+
+              {experiences.map((exp, index) => (
+                <div key={index} className="p-6 bg-gray-50 dark:bg-slate-900/50 rounded-2xl border border-gray-100 dark:border-slate-700 relative group">
+                  {experiences.length > 1 && (
+                    <button
+                      onClick={() => removeExperience(index)}
+                      className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors"
+                    >
+                      <span className="material-icons-round">delete</span>
+                    </button>
                   )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input
+                      name="funcao"
+                      value={exp.funcao}
+                      onChange={(e) => handleExpChange(index, e)}
+                      className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white p-2.5"
+                      placeholder="Função (Ex: Vendedor Sênior)"
+                    />
+                    <input
+                      name="empresa"
+                      value={exp.empresa}
+                      onChange={(e) => handleExpChange(index, e)}
+                      className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white p-2.5"
+                      placeholder="Nome da Loja/Empresa"
+                    />
+                    <textarea
+                      name="atividades"
+                      value={exp.atividades}
+                      onChange={(e) => handleExpChange(index, e)}
+                      className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white p-2.5 col-span-1 md:col-span-2"
+                      placeholder="Principais Atividades e Conquistas"
+                      rows={2}
+                    ></textarea>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Data Início</label>
+                      <input
+                        name="inicio"
+                        value={exp.inicio}
+                        onChange={(e) => handleExpChange(index, e)}
+                        className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white p-2.5"
+                        type="date"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Data Fim (ou atual)</label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          name="fim"
+                          value={exp.fim}
+                          onChange={(e) => handleExpChange(index, e)}
+                          disabled={exp.atual}
+                          className={`flex-1 rounded-lg border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white p-2.5 ${exp.atual ? 'opacity-50' : ''}`}
+                          type="date"
+                        />
+                        <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            name="atual"
+                            checked={exp.atual}
+                            onChange={(e) => handleExpChange(index, e)}
+                            className="rounded border-gray-300 text-primary focus:ring-primary"
+                          />
+                          Atual
+                        </label>
+                      </div>
+                    </div>
+                    <div className="col-span-1 md:col-span-2">
+                      <label className="block text-xs text-gray-500 mb-1">Shopping onde trabalhou</label>
+                      <select
+                        name="shopping"
+                        value={exp.shopping}
+                        onChange={(e) => handleExpChange(index, e)}
+                        className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white p-2.5"
+                      >
+                        <option value="">Selecione um shopping...</option>
+                        {shoppings.sort().map(s => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                        <option value="OUTRO">Não encontrei meu shopping</option>
+                      </select>
+                      {exp.shopping === 'OUTRO' && (
+                        <input
+                          className="w-full mt-2 rounded-lg border-primary dark:border-accent bg-blue-50/30 dark:bg-slate-800 dark:text-white p-2.5"
+                          placeholder="Nome do Shopping"
+                          value={manualShopping}
+                          onChange={(e) => setManualShopping(e.target.value)}
+                        />
+                      )}
+                    </div>
+                    <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <h3 className="col-span-1 md:col-span-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">Referências Profissionais</h3>
+                      <input name="referenciaNome" value={exp.referenciaNome} onChange={(e) => handleExpChange(index, e)} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white p-2.5" placeholder="Nome do ex-gestor" />
+                      <input name="referenciaTel" value={exp.referenciaTel} onChange={(e) => handleExpChange(index, e)} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white p-2.5" placeholder="Telefone da Referência" />
+                    </div>
+                  </div>
                 </div>
-                <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <h3 className="col-span-1 md:col-span-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mt-2">Referências Profissionais</h3>
-                  <input name="referenciaNome" value={experience.referenciaNome} onChange={handleExpChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="Nome do ex-gestor" />
-                  <input name="referenciaTel" value={experience.referenciaTel} onChange={handleExpChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="Telefone da Referência" />
-                </div>
-                <div className="col-span-1 md:col-span-2 mt-4 p-4 border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-xl text-center">
-                  <span className="material-symbols-outlined text-gray-400 text-3xl mb-2">picture_as_pdf</span>
-                  <p className="text-sm text-gray-500 dark:text-slate-400">Anexe seu currículo em PDF (opcional)</p>
-                  <button className="mt-2 text-primary font-bold text-sm">Clique para upload</button>
-                </div>
+              ))}
+
+              <div className="col-span-1 md:col-span-2 mt-4 p-6 border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-2xl text-center bg-gray-50/50 dark:bg-slate-900/30">
+                <span className="material-symbols-outlined text-gray-400 text-3xl mb-2">picture_as_pdf</span>
+                <p className="text-sm font-medium text-gray-600 dark:text-slate-300">Anexe seu currículo em PDF (opcional)</p>
+                <p className="text-xs text-gray-400 mt-1">Isso ajuda lojas tradicionais a verem seu histórico completo.</p>
+                <button className="mt-4 text-primary font-bold text-sm bg-primary/10 px-6 py-2 rounded-full hover:bg-primary/20 transition-colors">Selecionar Arquivo</button>
               </div>
             </div>
           )}
