@@ -200,6 +200,8 @@ const LojistaRegister: React.FC = () => {
             sector: isOtherSetor ? manualSetor : selectedSetor,
             shopping_mall: isOtherShopping ? manualShopping : selectedShopping,
             address: { ...address, cep },
+            cnpj: companyData.cnpj,
+            phone: responsibleData.celular,
             responsible_contact: {
               nome: responsibleData.nome,
               cpf: responsibleData.cpf,
@@ -327,6 +329,16 @@ const LojistaRegister: React.FC = () => {
                     onChange={handleCompanyChange}
                     className="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white p-3 focus:ring-primary focus:border-primary transition-shadow shadow-sm"
                     placeholder="Ex: Fashion Store Ltda"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">CNPJ</label>
+                  <input
+                    name="cnpj"
+                    value={companyData.cnpj}
+                    onChange={handleCompanyChange}
+                    className="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white p-3 focus:ring-primary focus:border-primary transition-shadow shadow-sm"
+                    placeholder="00.000.000/0000-00"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">

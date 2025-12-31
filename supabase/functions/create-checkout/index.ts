@@ -36,7 +36,10 @@ serve(async (req) => {
         }
 
         const userId = user.id;
-        console.log('Received checkout request for user:', userId, { plan_name });
+        const userRole = user.user_metadata?.user_type || 'lojista';
+        const dashboardPath = userRole === 'vendedor' ? 'vendedor' : 'lojista';
+
+        console.log(`Received checkout request for ${userRole}:`, userId, { plan_name });
 
         // 2. Check Secret
         const mpToken = Deno.env.get('MERCADO_PAGO_ACCESS_TOKEN');
@@ -59,12 +62,12 @@ serve(async (req) => {
                 currency_id: 'BRL',
                 unit_price: unit_price
             }],
-            payer: { email: 'teste@teste.com' },
+            payer: { email: user.email },
             auto_return: 'approved',
             back_urls: {
-                success: "https://talentoshop.vercel.app/dashboard",
-                failure: "https://talentoshop.vercel.app/plans",
-                pending: "https://talentoshop.vercel.app/plans"
+                success: `https://talentoshop.vercel.app/#/dashboard/${dashboardPath}`,
+                failure: `https://talentoshop.vercel.app/#/dashboard/${dashboardPath}/plans`,
+                pending: `https://talentoshop.vercel.app/#/dashboard/${dashboardPath}/plans`
             },
             notification_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/webhook-mp`,
             external_reference: `${userId}|${plan_name}`

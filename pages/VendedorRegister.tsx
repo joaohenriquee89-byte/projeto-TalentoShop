@@ -202,6 +202,7 @@ const VendedorRegister: React.FC = () => {
             cpf: formData.cpf,
             birth_date: formData.nascimento,
             bio: formData.bio,
+            phone: formData.celular, // Added phone saving
             address: { ...address, cep: address.cep || '' },
             experience: {
               ...experience,
@@ -398,14 +399,51 @@ const VendedorRegister: React.FC = () => {
                 </div>
 
                 <input name="email" value={formData.email} onChange={handleInputChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="E-mail" type="email" />
-                <div className="relative group">
+                <div className="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="relative group">
+                    <div className="relative">
+                      <input
+                        className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5 pr-10"
+                        placeholder="Senha"
+                        type={showPassword ? "text" : "password"}
+                        value={formData.password}
+                        onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-2.5 text-slate-400 hover:text-primary transition-colors"
+                      >
+                        <span className="material-icons-round text-lg">{showPassword ? 'visibility_off' : 'visibility'}</span>
+                      </button>
+                    </div>
+                    {formData.password && (
+                      <div className="mt-2 space-y-1 animate-fade-in">
+                        <div className="flex h-1.5 w-full rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                          <div
+                            className={`h-full transition-all duration-500 ${calculateStrength(formData.password) <= 1 ? 'bg-red-500 w-1/4' :
+                              calculateStrength(formData.password) === 2 ? 'bg-yellow-500 w-2/4' :
+                                calculateStrength(formData.password) === 3 ? 'bg-blue-500 w-3/4' :
+                                  'bg-green-500 w-full'
+                              }`}
+                          ></div>
+                        </div>
+                        <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 text-right">
+                          {calculateStrength(formData.password) <= 1 ? 'Fraca' :
+                            calculateStrength(formData.password) === 2 ? 'Média' :
+                              calculateStrength(formData.password) === 3 ? 'Boa' :
+                                'Forte'}
+                        </p>
+                      </div>
+                    )}
+                  </div>
                   <div className="relative">
                     <input
                       className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5 pr-10"
-                      placeholder="Senha"
+                      placeholder="Confirmar Senha"
                       type={showPassword ? "text" : "password"}
-                      value={formData.password}
-                      onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                      value={formData.confirmPassword}
+                      onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
                     />
                     <button
                       type="button"
@@ -415,41 +453,6 @@ const VendedorRegister: React.FC = () => {
                       <span className="material-icons-round text-lg">{showPassword ? 'visibility_off' : 'visibility'}</span>
                     </button>
                   </div>
-                  {formData.password && (
-                    <div className="mt-2 space-y-1 animate-fade-in">
-                      <div className="flex h-1.5 w-full rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
-                        <div
-                          className={`h-full transition-all duration-500 ${calculateStrength(formData.password) <= 1 ? 'bg-red-500 w-1/4' :
-                            calculateStrength(formData.password) === 2 ? 'bg-yellow-500 w-2/4' :
-                              calculateStrength(formData.password) === 3 ? 'bg-blue-500 w-3/4' :
-                                'bg-green-500 w-full'
-                            }`}
-                        ></div>
-                      </div>
-                      <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 text-right">
-                        {calculateStrength(formData.password) <= 1 ? 'Fraca' :
-                          calculateStrength(formData.password) === 2 ? 'Média' :
-                            calculateStrength(formData.password) === 3 ? 'Boa' :
-                              'Forte'}
-                      </p>
-                    </div>
-                  )}
-                </div>
-                <div className="relative">
-                  <input
-                    className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5 pr-10"
-                    placeholder="Confirmar Senha"
-                    type={showPassword ? "text" : "password"}
-                    value={formData.confirmPassword}
-                    onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-2.5 text-slate-400 hover:text-primary transition-colors"
-                  >
-                    <span className="material-icons-round text-lg">{showPassword ? 'visibility_off' : 'visibility'}</span>
-                  </button>
                 </div>
               </div>
             </div>
