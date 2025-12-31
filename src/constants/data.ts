@@ -20,6 +20,7 @@ export const SHOPPINGS_LIST = [
     "Pantanal Shopping (MT)", "Goiabeiras Shopping (MT)",
     "Midway Mall (RN)", "Natal Shopping (RN)",
     "Shopping Guararapes (PE)", "Shopping Tacaruna (PE)",
+    "RioMar Recife (PE)", "RioMar Fortaleza (CE)",
     "Jockey Plaza (PR)", "ParkShopping Barigüi (PR)", "Shopping Curitiba (PR)"
 ];
 
