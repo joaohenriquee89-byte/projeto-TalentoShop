@@ -246,14 +246,14 @@ const LojistaRegister: React.FC = () => {
             unit_type: companyData.tipoUnidade,
             sector: isOtherSetor ? manualSetor : selectedSetor,
             shopping_mall: selectedShopping,
-            address: { ...address, cep },
-            cnpj: companyData.cnpj,
-            phone: responsibleData.celular,
+            address: { ...address, cep: cep.replace(/\D/g, '') },
+            cnpj: companyData.cnpj.replace(/\D/g, ''),
+            phone: responsibleData.celular.replace(/\D/g, ''),
             responsible_contact: {
               nome: responsibleData.nome,
-              cpf: responsibleData.cpf,
+              cpf: responsibleData.cpf.replace(/\D/g, ''),
               funcao: responsibleData.funcao,
-              celular: responsibleData.celular,
+              celular: responsibleData.celular.replace(/\D/g, ''),
               email: responsibleData.email
             }
           }

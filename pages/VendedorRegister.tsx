@@ -42,7 +42,7 @@ const VendedorRegister: React.FC = () => {
 
   const [address, setAddress] = useState({
     cep: '',
-    logradouro: '',
+    rua: '',
     numero: '',
     complemento: '',
     bairro: '',
@@ -186,7 +186,7 @@ const VendedorRegister: React.FC = () => {
             if (!data.erro) {
               setAddress(prev => ({
                 ...prev,
-                logradouro: data.logradouro || '',
+                rua: data.logradouro || '',
                 bairro: data.bairro || '',
                 cidade: data.localidade || '',
                 uf: data.uf || ''
@@ -209,7 +209,7 @@ const VendedorRegister: React.FC = () => {
               data = await response.json();
               setAddress(prev => ({
                 ...prev,
-                logradouro: data.street || '',
+                rua: data.street || '',
                 bairro: data.neighborhood || '',
                 cidade: data.city || '',
                 uf: data.state || ''
@@ -270,18 +270,20 @@ const VendedorRegister: React.FC = () => {
           data: {
             full_name: `${formData.nome} ${formData.sobrenome}`,
             user_type: 'vendedor',
-            cpf: formData.cpf,
+            cpf: formData.cpf.replace(/\D/g, ''),
             birth_date: formData.nascimento,
             bio: formData.bio,
-            phone: formData.celular,
+            phone: formData.celular.replace(/\D/g, ''),
             escolaridade: formData.escolaridade,
             disponibilidade: formData.disponibilidade,
-            address: { ...address, cep: address.cep || '' },
+            address: { ...address, cep: address.cep.replace(/\D/g, '') },
+            company_name: '', // For trigger compatibility
+            shopping_mall: '', // For trigger compatibility
             experiences: experiences.map(exp => ({
               ...exp,
-              shopping: exp.shopping
+              referenciaTel: exp.referenciaTel.replace(/\D/g, '')
             })),
-            skills: formData.tags.split(',').map(s => s.trim())
+            skills: formData.tags.split(',').map(s => s.trim()).filter(s => s !== '')
           }
         }
       });
@@ -423,9 +425,9 @@ const VendedorRegister: React.FC = () => {
                   </div>
                   <input
                     className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5 md:col-span-2"
-                    placeholder="Logradouro / Rua"
-                    value={address.logradouro}
-                    onChange={(e) => setAddress({ ...address, logradouro: e.target.value })}
+                    placeholder="Rua / Logradouro"
+                    value={address.rua}
+                    onChange={(e) => setAddress({ ...address, rua: e.target.value })}
                   />
                   <input
                     className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5"
@@ -700,20 +702,39 @@ const VendedorRegister: React.FC = () => {
               </div>
             </div>
           )}
-          {step === 3 && (
-            <div className="animate-fade-in-up">
-              <h2 className="text-xl font-semibold mb-6 flex items-center text-primary dark:text-accent"><span className="material-symbols-outlined mr-2">psychology</span>Palavras-chave & Perfil</h2>
-              <p className="text-sm text-gray-500 dark:text-slate-400 mb-6">Insira termos que definem suas competências (ex: Moda, Luxo, Pós-venda, CRM).</p>
+          <div className="animate-fade-in-up space-y-6">
+            <h2 className="text-xl font-bold mb-4 flex items-center text-primary dark:text-accent"><span className="material-symbols-outlined mr-2">psychology</span>Palavras-chave & Perfil</h2>
+            <p className="text-sm text-gray-500 dark:text-slate-400 mb-6 leading-relaxed">Insira termos que definem suas competências (ex: Moda, Luxo, Pós-venda, CRM).</p>
 
-              <div className="space-y-4">
-                <input name="tags" value={formData.tags} onChange={handleInputChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="Adicione palavras-chave separadas por vírgula" />
-                <div className="p-4 bg-yellow-50 dark:bg-yellow-900/10 border-l-4 border-yellow-400 text-yellow-800 dark:text-yellow-200 text-sm">
-                  <strong>Aviso:</strong> Use apenas palavras verdadeiras. Sua reputação na rede depende da sua integridade.
-                </div>
-                <textarea name="bio" value={formData.bio} onChange={handleInputChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="Breve resumo sobre você (Bio)..." rows={4} />
+            <div className="space-y-5">
+              <div className="group">
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">Competências Principais</label>
+                <input
+                  name="tags"
+                  value={formData.tags}
+                  onChange={handleInputChange}
+                  className="w-full rounded-xl border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-3.5 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
+                  placeholder="Ex: Moda, Atendimento, CRM, Vendas"
+                />
+              </div>
+
+              <div className="p-4 bg-yellow-50 dark:bg-yellow-900/10 border-l-4 border-yellow-400 text-yellow-800 dark:text-yellow-200 text-sm rounded-r-xl">
+                <strong>Aviso:</strong> Use apenas palavras verdadeiras. Sua reputação na rede depende da sua integridade.
+              </div>
+
+              <div className="group">
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">Sobre Você / Bio Profissional</label>
+                <textarea
+                  name="bio"
+                  value={formData.bio}
+                  onChange={handleInputChange}
+                  className="w-full rounded-xl border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-3.5 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
+                  placeholder="Conte um pouco sobre sua trajetória profissional e seus objetivos..."
+                  rows={4}
+                />
               </div>
             </div>
-          )}
+          </div>
 
           <div className="mt-10 flex justify-between pt-6 border-t border-gray-200 dark:border-slate-700">
             <button className="px-6 py-2.5 border rounded-lg dark:text-white dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center gap-2" onClick={handlePrev}>
