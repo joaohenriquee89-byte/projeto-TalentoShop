@@ -305,19 +305,19 @@ const VendedorRegister: React.FC = () => {
           {step === 1 && (
             <div className="animate-fade-in-up space-y-4">
               <h2 className="text-xl font-semibold mb-6 flex items-center text-primary dark:text-accent"><span className="material-symbols-outlined mr-2">person</span>Dados Pessoais</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex flex-col md:grid md:grid-cols-2 gap-4">
                 <input name="nome" value={formData.nome} onChange={handleInputChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="Nome" />
                 <input name="sobrenome" value={formData.sobrenome} onChange={handleInputChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="Sobrenome" />
-                <div className="col-span-1 md:col-span-1">
+                <div className="w-full">
                   <label className="block text-xs text-gray-500 mb-1 ml-1">Data de Nascimento</label>
                   <input name="nascimento" value={formData.nascimento} onChange={handleInputChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" type="date" />
                 </div>
-                <div className="col-span-1 md:col-span-1">
+                <div className="w-full">
                   <label className="block text-xs text-gray-500 mb-1 ml-1">CPF</label>
                   <input name="cpf" value={formData.cpf} onChange={handleInputChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="000.000.000-00" />
                 </div>
 
-                <div className="col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="relative">
                     <input
                       className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5"
@@ -368,13 +368,13 @@ const VendedorRegister: React.FC = () => {
                   <input name="celular" value={formData.celular} onChange={handleInputChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="Celular" />
                 </div>
                 {address.lat && (
-                  <div className="col-span-2 p-2 bg-blue-50 dark:bg-slate-800/50 rounded text-[10px] text-gray-500 flex items-center gap-2">
+                  <div className="col-span-1 md:col-span-2 p-2 bg-blue-50 dark:bg-slate-800/50 rounded text-[10px] text-gray-500 flex items-center gap-2">
                     <span className="material-icons-round text-sm text-primary">location_on</span>
                     Coordenadas capturadas: {address.lat}, {address.lng}
                   </div>
                 )}
 
-                <div className="col-span-2">
+                <div className="col-span-1 md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Setor de Atuação Predominante</label>
                   <select
                     value={selectedSetor}
@@ -398,8 +398,10 @@ const VendedorRegister: React.FC = () => {
                   )}
                 </div>
 
-                <input name="email" value={formData.email} onChange={handleInputChange} className="w-full col-span-1 md:col-span-2 rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="E-mail" type="email" />
-                <div className="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="w-full md:col-span-2">
+                  <input name="email" value={formData.email} onChange={handleInputChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="E-mail" type="email" />
+                </div>
+                <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="relative group">
                     <div className="relative">
                       <input
@@ -463,7 +465,7 @@ const VendedorRegister: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input name="funcao" value={experience.funcao} onChange={handleExpChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="Função Atual/Última" />
                 <input name="empresa" value={experience.empresa} onChange={handleExpChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="Nome da Loja/Empresa" />
-                <textarea name="atividades" value={experience.atividades} onChange={handleExpChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5 col-span-2" placeholder="Principais Atividades" rows={2}></textarea>
+                <textarea name="atividades" value={experience.atividades} onChange={handleExpChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5 col-span-1 md:col-span-2" placeholder="Principais Atividades" rows={2}></textarea>
                 <div>
                   <label className="block text-xs text-gray-500 mb-1">Data Início</label>
                   <input name="inicio" value={experience.inicio} onChange={handleExpChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" type="date" />
@@ -472,7 +474,7 @@ const VendedorRegister: React.FC = () => {
                   <label className="block text-xs text-gray-500 mb-1">Data Fim (ou atual)</label>
                   <input name="fim" value={experience.fim} onChange={handleExpChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" type="date" />
                 </div>
-                <div className="col-span-2">
+                <div className="col-span-1 md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Shopping onde trabalhou</label>
                   <select
                     value={experience.shopping}
@@ -495,12 +497,12 @@ const VendedorRegister: React.FC = () => {
                     />
                   )}
                 </div>
-                <div className="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <h3 className="col-span-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mt-2">Referências Profissionais</h3>
+                <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <h3 className="col-span-1 md:col-span-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mt-2">Referências Profissionais</h3>
                   <input name="referenciaNome" value={experience.referenciaNome} onChange={handleExpChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="Nome do ex-gestor" />
                   <input name="referenciaTel" value={experience.referenciaTel} onChange={handleExpChange} className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5" placeholder="Telefone da Referência" />
                 </div>
-                <div className="col-span-2 mt-4 p-4 border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-xl text-center">
+                <div className="col-span-1 md:col-span-2 mt-4 p-4 border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-xl text-center">
                   <span className="material-symbols-outlined text-gray-400 text-3xl mb-2">picture_as_pdf</span>
                   <p className="text-sm text-gray-500 dark:text-slate-400">Anexe seu currículo em PDF (opcional)</p>
                   <button className="mt-2 text-primary font-bold text-sm">Clique para upload</button>

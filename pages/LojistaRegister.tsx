@@ -438,7 +438,7 @@ const LojistaRegister: React.FC = () => {
                     </div>
                   </div>
                   {address.lat && (
-                    <div className="mt-2 p-3 bg-blue-50 dark:bg-slate-800/50 rounded-xl text-xs text-slate-600 flex items-center gap-2 border border-blue-100 dark:border-slate-700">
+                    <div className="mt-2 p-3 bg-blue-50 dark:bg-slate-800/50 rounded-xl text-xs text-slate-600 flex items-center gap-2 border border-blue-100 dark:border-slate-700 col-span-full">
                       <span className="material-icons-round text-lg text-primary">check_circle</span>
                       Coordenadas capturadas: {address.lat}, {address.lng}
                     </div>
