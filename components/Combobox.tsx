@@ -85,13 +85,13 @@ const Combobox: React.FC<ComboboxProps> = ({
                         ))
                     ) : (
                         <div className="px-4 py-3 text-sm text-slate-400 flex flex-col gap-2">
-                            <span>Nenhum shopping encontrado.</span>
+                            <span>{allowCustom ? "Não encontramos na lista, mas você pode usar este nome:" : "Nenhum resultado encontrado."}</span>
                             {allowCustom && searchTerm && (
                                 <button
                                     onClick={() => handleSelect(searchTerm)}
-                                    className="text-primary font-bold hover:underline text-left flex items-center gap-1"
+                                    className="text-primary font-bold hover:underline text-left flex items-center gap-2 bg-primary/5 p-2 rounded-lg"
                                 >
-                                    <span className="material-icons-round text-xs">add</span>
+                                    <span className="material-icons-round text-sm">add_circle</span>
                                     Usar "{searchTerm}"
                                 </button>
                             )}

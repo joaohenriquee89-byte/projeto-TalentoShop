@@ -133,7 +133,7 @@ const Candidates: React.FC<CandidatesProps> = ({ user }) => {
                                 value={locationFilter}
                                 onChange={setLocationFilter}
                                 placeholder="Filtrar por Shopping"
-                                allowCustom={false}
+                                allowCustom={true}
                             />
                         </div>
                         <div>
