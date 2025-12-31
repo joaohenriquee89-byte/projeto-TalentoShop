@@ -5,10 +5,13 @@ interface CandidateProfileModalProps {
     isOpen: boolean;
     onClose: () => void;
     candidate: Candidate | null;
+    userPlan?: string;
 }
 
-const CandidateProfileModal: React.FC<CandidateProfileModalProps> = ({ isOpen, onClose, candidate }) => {
+const CandidateProfileModal: React.FC<CandidateProfileModalProps> = ({ isOpen, onClose, candidate, userPlan }) => {
     if (!isOpen || !candidate) return null;
+
+    const isPremium = userPlan === 'PRO' || userPlan === 'STANDARD';
 
     return (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
@@ -123,10 +126,20 @@ const CandidateProfileModal: React.FC<CandidateProfileModalProps> = ({ isOpen, o
                                     </div>
                                     <hr className="border-slate-200 dark:border-slate-700" />
                                     <div className="pt-2">
-                                        <button className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3 rounded-2xl font-bold text-sm shadow-lg hover:opacity-90 transition-all flex items-center justify-center gap-2">
-                                            <span className="material-icons-round text-base">download</span>
-                                            Baixar CV Completo
-                                        </button>
+                                        {isPremium ? (
+                                            <button className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3 rounded-2xl font-bold text-sm shadow-lg hover:opacity-90 transition-all flex items-center justify-center gap-2">
+                                                <span className="material-icons-round text-base">download</span>
+                                                Baixar CV Completo
+                                            </button>
+                                        ) : (
+                                            <button
+                                                disabled
+                                                className="w-full bg-slate-100 dark:bg-slate-800 text-slate-400 py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 cursor-not-allowed border border-dashed border-slate-300 dark:border-slate-700"
+                                            >
+                                                <span className="material-icons-round text-base">lock</span>
+                                                Baixar CV (Premium)
+                                            </button>
+                                        )}
                                         <button className="w-full mt-3 bg-primary text-white py-4 rounded-2xl font-bold text-lg shadow-xl shadow-primary/20 hover:bg-opacity-90 transition-all flex items-center justify-center gap-2">
                                             Convidar para Chat
                                         </button>

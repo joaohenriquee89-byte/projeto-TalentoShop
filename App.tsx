@@ -97,7 +97,7 @@ const MainRoutes: React.FC<{ theme: 'light' | 'dark', toggleTheme: () => void, s
                   <Layout user={localUser} setUser={handleSetUser} theme={theme} toggleTheme={toggleTheme}>
                     <Routes>
                       <Route path="/" element={<LojistaOverview user={localUser} />} />
-                      <Route path="candidates" element={<LojistaCandidates />} />
+                      <Route path="candidates" element={<LojistaCandidates user={localUser} />} />
                       <Route path="jobs" element={<LojistaJobs />} />
                       <Route path="messages" element={<LojistaMessages />} />
                       <Route path="settings" element={<LojistaSettings user={localUser} setUser={handleSetUser} />} />

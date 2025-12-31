@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
-import { Candidate } from '../../types';
+import { Candidate, User } from '../../types';
 import { SHOPPINGS_LIST } from '../../src/constants/data';
 import UpgradeModal from '../../components/UpgradeModal';
 import CandidateProfileModal from '../../components/CandidateProfileModal';
 
-const Candidates: React.FC = () => {
+interface CandidatesProps {
+    user: User;
+}
+
+const Candidates: React.FC<CandidatesProps> = ({ user }) => {
     const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
     const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
     const [profileModalOpen, setProfileModalOpen] = useState(false);
@@ -76,6 +80,7 @@ const Candidates: React.FC = () => {
                     setSelectedCandidate(null);
                 }}
                 candidate={selectedCandidate}
+                userPlan={user.plan}
             />
 
             <div className="flex justify-between items-center mb-8">
