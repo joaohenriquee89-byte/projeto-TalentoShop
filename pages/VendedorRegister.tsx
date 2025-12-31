@@ -71,6 +71,35 @@ const VendedorRegister: React.FC = () => {
     return Math.min(score, 4);
   };
 
+  // Funções de Máscara e Formatação
+  const formatCPF = (value: string) => {
+    return value
+      .replace(/\D/g, '') // remove tudo que não é dígito
+      .replace(/(\d{3})(\d)/, '$1.$2') // coloca ponto após os 3 primeiros dígitos
+      .replace(/(\d{3})(\d)/, '$1.$2') // coloca ponto após os 6 primeiros dígitos
+      .replace(/(\d{3})(\d{1,2})/, '$1-$2') // coloca hífen após os 9 primeiros dígitos
+      .replace(/(-\d{2})\d+?$/, '$1'); // limita a quantidade de caracteres
+  };
+
+  const formatPhone = (value: string) => {
+    return value
+      .replace(/\D/g, '')
+      .replace(/(\d{2})(\d)/, '($1) $2')
+      .replace(/(\d{5})(\d)/, '$1-$2')
+      .replace(/(-\d{4})\d+?$/, '$1');
+  };
+
+  const formatCEP = (value: string) => {
+    return value
+      .replace(/\D/g, '')
+      .replace(/(\d{5})(\d)/, '$1-$2')
+      .replace(/(-\d{3})\d+?$/, '$1');
+  };
+
+  const validateEmail = (email: string) => {
+    return /\S+@\S+\.\S+/.test(email);
+  };
+
 
 
   const navigate = useNavigate();
@@ -79,12 +108,24 @@ const VendedorRegister: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    let formattedValue = value;
+
+    if (name === 'cpf') formattedValue = formatCPF(value);
+    if (name === 'celular') formattedValue = formatPhone(value);
+    if (name === 'nome' || name === 'sobrenome') {
+      // Garantir que nomes não tenham números
+      formattedValue = value.replace(/[0-9]/g, '');
+    }
+
+    setFormData(prev => ({ ...prev, [name]: formattedValue }));
   };
 
   const handleExpChange = (index: number, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    const val = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
+    let val: any = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
+
+    if (name === 'referenciaTel') val = formatPhone(value);
+
     const newExperiences = [...experiences];
     newExperiences[index] = { ...newExperiences[index], [name]: val };
     setExperiences(newExperiences);
@@ -374,7 +415,7 @@ const VendedorRegister: React.FC = () => {
                       className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5"
                       placeholder="CEP (Ex: 00000-000)"
                       value={address.cep}
-                      onChange={(e) => setAddress({ ...address, cep: e.target.value })}
+                      onChange={(e) => setAddress({ ...address, cep: formatCEP(e.target.value) })}
                       onBlur={handleCepBlur}
                     />
                     {loadingCep && <span className="absolute right-2 top-3 text-[10px] text-primary animate-pulse">Buscando...</span>}

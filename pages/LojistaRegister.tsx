@@ -59,7 +59,16 @@ const LojistaRegister: React.FC = () => {
 
   const handleResponsibleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setResponsibleData(prev => ({ ...prev, [name]: value }));
+    let formattedValue = value;
+
+    if (name === 'cpf') formattedValue = formatCPF(value);
+    if (name === 'celular') formattedValue = formatPhone(value);
+    if (name === 'nome') {
+      // Impedir números no nome
+      formattedValue = value.replace(/[0-9]/g, '');
+    }
+
+    setResponsibleData(prev => ({ ...prev, [name]: formattedValue }));
   };
 
   const fetchCoordinates = async (logradouro: string, cidade: string, uf: string) => {
@@ -91,6 +100,31 @@ const LojistaRegister: React.FC = () => {
     if (/[0-9]/.test(password)) score += 1;
     if (/[^A-Za-z0-9]/.test(password)) score += 1;
     return Math.min(score, 4);
+  };
+
+  // Funções de Máscara e Formatação
+  const formatCPF = (value: string) => {
+    return value
+      .replace(/\D/g, '')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d{1,2})/, '$1-$2')
+      .replace(/(-\d{2})\d+?$/, '$1');
+  };
+
+  const formatPhone = (value: string) => {
+    return value
+      .replace(/\D/g, '')
+      .replace(/(\d{2})(\d)/, '($1) $2')
+      .replace(/(\d{5})(\d)/, '$1-$2')
+      .replace(/(-\d{4})\d+?$/, '$1');
+  };
+
+  const formatCEP = (value: string) => {
+    return value
+      .replace(/\D/g, '')
+      .replace(/(\d{5})(\d)/, '$1-$2')
+      .replace(/(-\d{3})\d+?$/, '$1');
   };
 
   const handleCepBlur = async () => {
@@ -396,7 +430,7 @@ const LojistaRegister: React.FC = () => {
                           className="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white p-3 focus:ring-primary focus:border-primary transition-shadow shadow-sm"
                           placeholder="00000-000"
                           value={cep}
-                          onChange={(e) => setCep(e.target.value)}
+                          onChange={(e) => setCep(formatCEP(e.target.value))}
                           onBlur={handleCepBlur}
                         />
                         {loadingCep && <span className="absolute right-3 top-3.5 text-[10px] text-primary font-bold animate-pulse">BUSCANDO...</span>}
