@@ -17,37 +17,49 @@ const CandidateProfileModal: React.FC<CandidateProfileModalProps> = ({ isOpen, o
 
     return (
         <div
-            className="fixed inset-0 z-[60] flex items-center justify-center p-0 md:p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/90 backdrop-blur-md transition-all duration-300"
             onClick={(e) => {
-                if (e.target === e.currentTarget) onClose();
+                // Improved backdrop click logic
+                if (e.target === e.currentTarget) {
+                    console.log('Backdrop clicked, closing modal');
+                    onClose();
+                }
             }}
         >
-            <div className="bg-white dark:bg-slate-900 w-full max-w-2xl md:rounded-3xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col h-full md:h-[90vh]">
+            <div className="bg-white dark:bg-slate-900 w-full max-w-2xl md:rounded-3xl shadow-2xl overflow-hidden dark:border dark:border-slate-800 flex flex-col h-full md:h-[90vh] md:max-h-[90vh] relative animate-fade-in">
                 {/* Header */}
-                <div className="relative h-32 md:h-40 bg-gradient-to-r from-primary to-petrol-600">
+                <div className="relative h-24 md:h-40 bg-gradient-to-r from-primary to-petrol-600 shrink-0">
                     <button
-                        onClick={onClose}
-                        className="absolute top-4 left-4 md:hidden flex items-center gap-2 bg-black/20 hover:bg-black/30 text-white px-4 py-2 rounded-full backdrop-blur-md transition-colors font-bold text-sm"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            console.log('Voltar button clicked');
+                            onClose();
+                        }}
+                        className="absolute top-6 left-4 md:hidden flex items-center gap-2 bg-black/40 hover:bg-black/60 text-white px-4 py-2 rounded-full backdrop-blur-md transition-colors font-bold text-xs shadow-xl z-[150]"
                     >
                         <span className="material-icons-round text-base">arrow_back</span>
                         Voltar
                     </button>
                     <button
-                        onClick={onClose}
-                        className="absolute top-4 right-4 bg-white/20 hover:bg-white/30 text-white p-2 rounded-full backdrop-blur-md transition-colors"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            console.log('Close icon clicked');
+                            onClose();
+                        }}
+                        className="absolute top-6 right-4 bg-white/20 hover:bg-white/40 text-white p-2.5 rounded-full backdrop-blur-md transition-colors shadow-lg z-[150]"
                     >
                         <span className="material-icons-round">close</span>
                     </button>
                 </div>
 
                 {/* Profile Content */}
-                <div className="px-8 pb-8 -mt-12 relative flex-1 overflow-y-auto">
-                    <div className="flex flex-col md:flex-row md:items-end gap-6 mb-8">
-                        <div className="relative">
+                <div className="px-5 md:px-8 pb-8 -mt-8 md:-mt-12 relative flex-1 overflow-y-auto">
+                    <div className="flex flex-col md:flex-row md:items-end gap-4 md:gap-6 mb-8 mt-4 md:mt-0">
+                        <div className="relative shrink-0">
                             <img
                                 src={candidate.avatar}
                                 alt={candidate.name}
-                                className="w-32 h-32 rounded-3xl object-cover border-4 border-white dark:border-slate-900 shadow-xl"
+                                className="w-24 h-24 md:w-32 md:h-32 rounded-3xl object-cover border-4 border-white dark:border-slate-900 shadow-xl"
                             />
                             <div className="absolute -bottom-2 -right-2 bg-green-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg border-2 border-white dark:border-slate-900">
                                 DISPONÍVEL
@@ -177,6 +189,21 @@ const CandidateProfileModal: React.FC<CandidateProfileModalProps> = ({ isOpen, o
                             </div>
                         </div>
                     </div>
+                </div>
+
+                {/* Mobile Bottom Bar */}
+                <div className="md:hidden p-4 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 shrink-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            console.log('Mobile bottom close clicked');
+                            onClose();
+                        }}
+                        className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg"
+                    >
+                        <span className="material-icons-round">close</span>
+                        Fechar Perfil
+                    </button>
                 </div>
             </div>
         </div>

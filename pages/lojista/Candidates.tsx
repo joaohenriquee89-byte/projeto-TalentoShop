@@ -102,6 +102,7 @@ const Candidates: React.FC<CandidatesProps> = ({ user }) => {
             <CandidateProfileModal
                 isOpen={profileModalOpen}
                 onClose={() => {
+                    console.log('Closing Profile Modal');
                     setProfileModalOpen(false);
                     setSelectedCandidate(null);
                 }}
@@ -215,14 +216,15 @@ const Candidates: React.FC<CandidatesProps> = ({ user }) => {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-3 opacity-80 group-hover:opacity-100 transition-opacity">
-                                    <button className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">Exportar CV</button>
+                                <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row justify-end gap-3 opacity-80 group-hover:opacity-100 transition-opacity">
+                                    <button className="w-full sm:w-auto px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">Exportar CV</button>
                                     <button
                                         onClick={() => {
+                                            console.log('Opening Profile Modal for:', candidate.id);
                                             setSelectedCandidate(candidate);
                                             setProfileModalOpen(true);
                                         }}
-                                        className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-petrol-700 shadow-sm transition-all flex items-center gap-1"
+                                        className="w-full sm:w-auto px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-petrol-700 shadow-sm transition-all flex items-center justify-center gap-1"
                                     >
                                         <span className="material-icons-round text-base">visibility</span>
                                         Ver Perfil
