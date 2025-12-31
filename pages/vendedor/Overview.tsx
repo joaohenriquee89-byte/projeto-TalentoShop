@@ -1,6 +1,6 @@
-
 import React, { useState, useRef } from 'react';
 import { User, Job } from '../../types';
+import UpgradeModal from '../../components/UpgradeModal';
 
 interface VendedorDashboardProps {
   user: User;
@@ -14,6 +14,11 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
     { id: '1', companyName: 'Reserva', title: 'Vendedor Jr.', location: 'Shopping Morumbi', compatibility: 98, logoInitial: 'R' },
     { id: '2', companyName: 'Zara', title: 'Gerente de Seção', location: 'Shopping Eldorado', logoInitial: 'Z' },
   ]);
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
+  const [upgradeConfig, setUpgradeConfig] = useState({ title: '', feature: '' });
+
+  const userPlan = user.plan?.toUpperCase() || 'FREE';
+  const isPremium = userPlan === 'PRO' || userPlan === 'STANDARD';
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -81,6 +86,12 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
 
   return (
     <div className="space-y-6">
+      <UpgradeModal
+        isOpen={upgradeModalOpen}
+        onClose={() => setUpgradeModalOpen(false)}
+        title={upgradeConfig.title}
+        featureName={upgradeConfig.feature}
+      />
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Olá, {user.name.split(' ')[0]}! 👋</h1>
@@ -199,7 +210,22 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
                       )}
                     </div>
                   </div>
-                  <button className="text-primary dark:text-secondary font-medium text-sm hover:underline">Ver Detalhes</button>
+                  <button
+                    onClick={() => {
+                      if (!isPremium) {
+                        setUpgradeConfig({
+                          title: "Candidatura Bloqueada",
+                          feature: "candidatar-se a vagas e ver detalhes exclusivos"
+                        });
+                        setUpgradeModalOpen(true);
+                        return;
+                      }
+                      // Actual detail logic here
+                    }}
+                    className="text-primary dark:text-secondary font-medium text-sm hover:underline"
+                  >
+                    {isPremium ? 'Ver Detalhes' : 'Desbloquear Vaga'}
+                  </button>
                 </div>
               ))}
 

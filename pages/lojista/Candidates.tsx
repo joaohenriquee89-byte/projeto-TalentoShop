@@ -22,6 +22,10 @@ const Candidates: React.FC<CandidatesProps> = ({ user }) => {
     // Filters State
     const [locationFilter, setLocationFilter] = useState('');
     const [experienceFilter, setExperienceFilter] = useState(0);
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const userPlan = user.plan?.toUpperCase() || 'FREE';
+    const isPremium = userPlan === 'PRO' || userPlan === 'STANDARD';
 
     const [candidates] = useState<Candidate[]>([
         {
@@ -124,15 +128,34 @@ const Candidates: React.FC<CandidatesProps> = ({ user }) => {
                 isInvited={selectedCandidate ? invitedCandidateIds.includes(selectedCandidate.id) : false}
             />
 
-            <div className="flex justify-between items-center mb-8">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Buscar Candidatos</h1>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Encontre o vendedor ideal para sua loja</p>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-                    <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                    {filteredCandidates.length + 340} Vendedores disponíveis
+                <div className="flex flex-col items-end gap-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                        <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                        {filteredCandidates.length + 340} Vendedores disponíveis
+                    </div>
+                    {!isPremium && (
+                        <span className="text-[10px] font-bold text-orange-500 bg-orange-50 dark:bg-orange-900/20 px-2 py-1 rounded">
+                            PLANO FREE: 3 de 5 buscas diárias restantes
+                        </span>
+                    )}
                 </div>
+            </div>
+
+            {/* Global Search Bar */}
+            <div className="mb-6 relative group">
+                <span className="material-icons-round absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors">search</span>
+                <input
+                    type="text"
+                    placeholder="Busque por nome, cargo ou palavra-chave (ex: Moda, CRM, Inglês)..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full bg-white dark:bg-surface-dark border border-gray-200 dark:border-gray-700 rounded-xl py-4 pl-12 pr-4 shadow-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-gray-700 dark:text-white"
+                />
             </div>
 
             <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
@@ -227,17 +250,28 @@ const Candidates: React.FC<CandidatesProps> = ({ user }) => {
                                 </div>
                                 <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row justify-end gap-3 opacity-80 group-hover:opacity-100 transition-opacity">
                                     <button className="w-full sm:w-auto px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">Exportar CV</button>
-                                    <button
-                                        onClick={() => {
-                                            console.log('Opening Profile Modal for:', candidate.id);
-                                            setSelectedCandidate(candidate);
-                                            setProfileModalOpen(true);
-                                        }}
-                                        className="w-full sm:w-auto px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-petrol-700 shadow-sm transition-all flex items-center justify-center gap-1"
-                                    >
-                                        <span className="material-icons-round text-base">visibility</span>
-                                        Ver Perfil
-                                    </button>
+                                    <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row justify-end gap-3 opacity-80 group-hover:opacity-100 transition-opacity">
+                                        <button className="w-full sm:w-auto px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">Exportar CV</button>
+                                        <button
+                                            onClick={() => {
+                                                if (!isPremium) {
+                                                    setUpgradeConfig({
+                                                        title: "Acesso Limitado",
+                                                        feature: "visualização completa de perfil e contato direto"
+                                                    });
+                                                    setUpgradeModalOpen(true);
+                                                    return;
+                                                }
+                                                console.log('Opening Profile Modal for:', candidate.id);
+                                                setSelectedCandidate(candidate);
+                                                setProfileModalOpen(true);
+                                            }}
+                                            className="w-full sm:w-auto px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-petrol-700 shadow-sm transition-all flex items-center justify-center gap-1"
+                                        >
+                                            <span className="material-icons-round text-base">visibility</span>
+                                            {isPremium ? 'Ver Perfil' : 'Desbloquear Perfil'}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         ))}
