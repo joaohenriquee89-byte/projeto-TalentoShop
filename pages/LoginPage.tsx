@@ -197,7 +197,7 @@ const LoginPage: React.FC<LoginPageProps> = () => {
                 "Com a ajuda da IA do TalentoShop, reduzimos o tempo de contratação em 40% e encontramos vendedores alinhados com a cultura da nossa loja."
               </blockquote>
               <div className="mt-6 flex items-center gap-3">
-                <img alt="Avatar User" className="w-10 h-10 rounded-full border-2 border-secondary" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDWNj8CXVhxxIJ59JVgAam3T-AWfRJtmzsHg7EVmZclmNbKkJupKsuG4f_jKR8EF324U92omED-PKzgFEpOi8aDr06b2XTpUXbStVqejLQGGBdVjdkgxvy9YA2iQEMtYjrH8c9mpse-bEC1ZWq6wOxnVQHpi3i4XjdGm1I8Pd2z4LIDpD1uiPBnrvkZfPhpopQoxhwFzNQ1DTmqJh_zBWmemWcNwz0KqdOAlqX8EbceQZl2pG0rDVSEj9A-aQ5Wh28oOUHCmTZNAJ4" />
+                <img alt="Avatar User" className="w-10 h-10 rounded-full border-2 border-secondary" src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200" />
                 <div>
                   <div className="font-semibold text-white">Mariana Costa</div>
                   <div className="text-sm text-slate-300">Gerente de Shopping</div>

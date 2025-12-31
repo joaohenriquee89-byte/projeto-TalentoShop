@@ -86,7 +86,7 @@ const LandingPage: React.FC = () => {
               </p>
               <div className="flex items-center gap-6">
                 <div className="w-16 h-16 rounded-full bg-slate-200 overflow-hidden border-4 border-white dark:border-slate-800 shadow-lg">
-                  <img src="https://i.pravatar.cc/150?u=fernanda" alt="CEO" className="w-full h-full object-cover" />
+                  <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200" alt="Fernanda Siqueira" className="w-full h-full object-cover" />
                 </div>
                 <div>
                   <p className="font-bold text-xl text-slate-900 dark:text-white italic">Fernanda Siqueira</p>
