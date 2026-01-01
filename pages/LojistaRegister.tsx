@@ -39,6 +39,7 @@ const LojistaRegister: React.FC = () => {
   const [responsibleData, setResponsibleData] = useState({
     nome: '',
     cpf: '',
+    rg: '',
     funcao: '',
     celular: '',
     email: '',
@@ -221,12 +222,12 @@ const LojistaRegister: React.FC = () => {
   });
 
   const handleRegister = async () => {
-    if (!responsibleData.email || !responsibleData.password) {
+    if (!responsibleData.email || !responsibleData.password || !responsibleData.rg) {
       setModalConfig({
         isOpen: true,
         type: 'error',
         title: 'Campos obrigatórios',
-        message: 'Por favor, preencha email e senha.',
+        message: 'Por favor, preencha todos os campos obrigatórios (*).',
         buttonText: 'Entendi',
         redirectUrl: ''
       });
@@ -249,9 +250,11 @@ const LojistaRegister: React.FC = () => {
             address: { ...address, cep: cep.replace(/\D/g, '') },
             cnpj: companyData.cnpj.replace(/\D/g, ''),
             phone: responsibleData.celular.replace(/\D/g, ''),
+            rg: responsibleData.rg.replace(/\D/g, ''),
             responsible_contact: {
               nome: responsibleData.nome,
               cpf: responsibleData.cpf.replace(/\D/g, ''),
+              rg: responsibleData.rg.replace(/\D/g, ''),
               funcao: responsibleData.funcao,
               celular: responsibleData.celular.replace(/\D/g, ''),
               email: responsibleData.email
@@ -555,6 +558,16 @@ const LojistaRegister: React.FC = () => {
                       onChange={handleResponsibleChange}
                       className="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white p-3 focus:ring-primary focus:border-primary transition-shadow shadow-sm"
                       placeholder="000.000.000-00"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Identidade (RG) *</label>
+                    <input
+                      name="rg"
+                      value={responsibleData.rg}
+                      onChange={handleResponsibleChange}
+                      className="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white p-3 focus:ring-primary focus:border-primary transition-shadow shadow-sm"
+                      placeholder="00.000.000-0"
                     />
                   </div>
                   <div>

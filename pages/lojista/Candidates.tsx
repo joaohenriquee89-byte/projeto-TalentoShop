@@ -36,7 +36,8 @@ const Candidates: React.FC<CandidatesProps> = ({ user }) => {
                 const { data, error } = await supabase
                     .from('profiles')
                     .select('*')
-                    .eq('user_type', 'vendedor');
+                    .eq('user_type', 'vendedor')
+                    .limit(50);
 
                 if (error) throw error;
 

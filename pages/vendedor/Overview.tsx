@@ -27,7 +27,8 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
-          .eq('user_type', 'lojista');
+          .eq('user_type', 'lojista')
+          .limit(50);
 
         if (error) throw error;
 
