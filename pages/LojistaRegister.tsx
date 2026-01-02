@@ -34,6 +34,8 @@ const LojistaRegister: React.FC = () => {
     lng: ''
   });
   const [loadingCep, setLoadingCep] = useState(false);
+  const [loadingCnpj, setLoadingCnpj] = useState(false);
+  const [cnpjError, setCnpjError] = useState('');
 
   // Responsible Data
   const [responsibleData, setResponsibleData] = useState({
@@ -209,6 +211,53 @@ const LojistaRegister: React.FC = () => {
       }
     } else if (cleanCep.length > 0 && cleanCep.length < 8) {
       setCepError("CEP inválido.");
+    }
+  };
+
+  const handleCnpjBlur = async () => {
+    const cleanCnpj = companyData.cnpj.replace(/\D/g, '');
+    setCnpjError('');
+
+    if (cleanCnpj.length === 14) {
+      setLoadingCnpj(true);
+      try {
+        const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cleanCnpj}`);
+        if (!response.ok) throw new Error('CNPJ não encontrado');
+
+        const data = await response.json();
+
+        // Populate Company Data
+        setCompanyData(prev => ({
+          ...prev,
+          nomeEmpresa: data.nome_fantasia || data.razao_social || prev.nomeEmpresa
+        }));
+
+        // Populate Address
+        setAddress(prev => ({
+          ...prev,
+          rua: data.logradouro || prev.rua,
+          bairro: data.bairro || prev.bairro,
+          cidade: data.municipio || prev.cidade,
+          uf: data.uf || prev.uf
+        }));
+
+        if (data.cep) {
+          setCep(formatCEP(data.cep));
+        }
+
+        // Fetch coordinates if we have enough address data
+        if (data.logradouro && data.municipio) {
+          await fetchCoordinates(data.logradouro, data.municipio, data.uf);
+        }
+
+      } catch (error) {
+        console.error("Erro ao buscar CNPJ:", error);
+        setCnpjError("CNPJ não encontrado ou erro na busca.");
+      } finally {
+        setLoadingCnpj(false);
+      }
+    } else if (cleanCnpj.length > 0 && cleanCnpj.length < 14) {
+      setCnpjError("CNPJ inválido.");
     }
   };
 
@@ -413,13 +462,23 @@ const LojistaRegister: React.FC = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">CNPJ *</label>
-                  <input
-                    name="cnpj"
-                    value={companyData.cnpj}
-                    onChange={handleCompanyChange}
-                    className="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white p-3 focus:ring-primary focus:border-primary transition-shadow shadow-sm"
-                    placeholder="00.000.000/0000-00"
-                  />
+                  <div className="relative">
+                    <input
+                      name="cnpj"
+                      value={companyData.cnpj}
+                      onChange={handleCompanyChange}
+                      onBlur={handleCnpjBlur}
+                      className="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white p-3 focus:ring-primary focus:border-primary transition-shadow shadow-sm"
+                      placeholder="00.000.000/0000-00"
+                    />
+                    {loadingCnpj && <span className="absolute right-3 top-3.5 text-[10px] text-primary font-bold animate-pulse">BUSCANDO...</span>}
+                  </div>
+                  {cnpjError && (
+                    <p className="mt-1 text-xs text-red-500 font-medium flex items-center gap-1 animate-fade-in">
+                      <span className="material-icons-round text-[14px]">error</span>
+                      {cnpjError}
+                    </p>
+                  )}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
