@@ -65,9 +65,9 @@ serve(async (req) => {
             payer: { email: user.email },
             auto_return: 'approved',
             back_urls: {
-                success: `https://talentoshop.vercel.app/#/dashboard/${dashboardPath}`,
-                failure: `https://talentoshop.vercel.app/#/dashboard/${dashboardPath}/plans`,
-                pending: `https://talentoshop.vercel.app/#/dashboard/${dashboardPath}/plans`
+                success: `https://talentoshop.vercel.app/dashboard/${dashboardPath}`,
+                failure: `https://talentoshop.vercel.app/dashboard/${dashboardPath}/plans`,
+                pending: `https://talentoshop.vercel.app/dashboard/${dashboardPath}/plans`
             },
             notification_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/webhook-mp`,
             external_reference: `${userId}|${plan_name}`
