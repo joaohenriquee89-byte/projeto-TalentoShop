@@ -1,15 +1,16 @@
 import React from 'react';
-// Tente este caminho, que é o padrão se 'lib' e 'pages' estiverem na 'src'
-// Se a pasta 'lib' estiver dentro de 'src', use este caminho:
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../src/lib/supabase';
+
 const PricingPage: React.FC = () => {
+  const navigate = useNavigate();
   const [role, setRole] = React.useState<'vendedor' | 'lojista'>('lojista');
 
   const handleCheckout = async (planName: string, price: number, planCode: string) => {
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-      window.location.href = `/login?redirect=/pricing`;
+      navigate(`/login?redirect=/pricing`);
       return;
     }
 
@@ -88,7 +89,6 @@ const PricingPage: React.FC = () => {
 
               <button
                 onClick={() => handleCheckout(plan.name, plan.price, plan.code)}
-                disabled={plan.price === 0}
                 className={`w-full py-4 rounded-2xl font-bold transition-all transform group-hover:-translate-y-1 ${plan.recommended ? 'bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-700'}`}
               >
                 {plan.price === 0 ? 'Plano Atual' : 'Escolher Plano'}

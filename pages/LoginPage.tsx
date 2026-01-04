@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { UserRole, User } from '../types';
 
 import { supabase } from '../src/lib/supabase';
@@ -18,15 +17,21 @@ const LoginPage: React.FC<LoginPageProps> = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectPath = searchParams.get('redirect');
 
   const [errorMsg, setErrorMsg] = useState('');
 
   // Auto-redirect if already logged in
   useEffect(() => {
     if (user) {
-      navigate(user.role === UserRole.VENDEDOR ? '/dashboard/vendedor' : '/dashboard/lojista');
+      if (redirectPath) {
+        navigate(redirectPath);
+      } else {
+        navigate(user.role === UserRole.VENDEDOR ? '/dashboard/vendedor' : '/dashboard/lojista');
+      }
     }
-  }, [user, navigate]);
+  }, [user, navigate, redirectPath]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
