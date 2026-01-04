@@ -263,18 +263,12 @@ const VendedorRegister: React.FC = () => {
     }
     setLoading(true);
     try {
-      console.log('Step 1: Creating auth user...');
+      console.log('Step 1: Creating auth user WITHOUT metadata...');
 
-      // 1. Create auth user with minimal metadata (bypass broken trigger)
+      // 1. Create auth user WITHOUT any metadata to avoid trigger issues
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            full_name: `${formData.nome} ${formData.sobrenome}`,
-            user_type: 'vendedor'
-          }
-        }
+        password: formData.password
       });
 
       if (authError) {
