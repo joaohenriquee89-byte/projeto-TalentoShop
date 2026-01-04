@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { User, Job } from '../../types';
 import UpgradeModal from '../../components/UpgradeModal';
 import { supabase } from '../../src/lib/supabase';
@@ -148,7 +149,7 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
           <span className="material-icons-round text-primary dark:text-secondary mr-2">verified</span>
           <span className="text-sm font-medium text-primary dark:text-white mr-2">Plano Atual:</span>
           <span className="text-sm font-bold text-gray-500 dark:text-gray-400">FREE</span>
-          <a className="ml-4 text-sm font-semibold text-secondary hover:text-green-600 underline decoration-2 underline-offset-2" href="#/dashboard/vendedor/plans">Fazer Upgrade</a>
+          <Link className="ml-4 text-sm font-semibold text-secondary hover:text-green-600 underline decoration-2 underline-offset-2" to="/dashboard/vendedor/plans">Fazer Upgrade</Link>
         </div>
       </div>
 
@@ -219,9 +220,9 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
                   Usuários Premium aparecem no topo das buscas e têm acesso ilimitado.
                 </p>
               </div>
-              <a href="#/dashboard/vendedor/plans" className="bg-secondary hover:bg-green-500 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 transform hover:scale-105 inline-block text-center">
+              <Link to="/dashboard/vendedor/plans" className="bg-secondary hover:bg-green-500 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 transform hover:scale-105 inline-block text-center">
                 Quero ser Premium
-              </a>
+              </Link>
             </div>
           </div>
 
