@@ -263,8 +263,32 @@ const VendedorRegister: React.FC = () => {
     }
     setLoading(true);
     try {
-      // Prepare metadata - stringify complex objects for Supabase compatibility
-      const metadata = {
+      console.log('Step 1: Creating auth user...');
+
+      // 1. Create auth user with minimal metadata (bypass broken trigger)
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: `${formData.nome} ${formData.sobrenome}`,
+            user_type: 'vendedor'
+          }
+        }
+      });
+
+      if (authError) {
+        console.error('Auth error:', authError);
+        throw authError;
+      }
+      if (!authData.user) throw new Error("Erro ao criar usuário");
+
+      console.log('Step 2: Auth user created, ID:', authData.user.id);
+
+      // 2. Manually create profile (bypass broken trigger)
+      const profileData = {
+        id: authData.user.id,
+        email: formData.email,
         full_name: `${formData.nome} ${formData.sobrenome}`,
         user_type: 'vendedor',
         cpf: formData.cpf.replace(/\D/g, ''),
@@ -274,37 +298,28 @@ const VendedorRegister: React.FC = () => {
         phone: formData.celular.replace(/\D/g, ''),
         escolaridade: formData.escolaridade || '',
         disponibilidade: formData.disponibilidade || '',
-        // Stringify complex objects to avoid trigger issues
-        address: JSON.stringify({ ...address, cep: address.cep.replace(/\D/g, '') }),
-        company_name: '', // For trigger compatibility
-        shopping_mall: '', // For trigger compatibility
-        experiences: JSON.stringify(experiences.map(exp => ({
+        address: { ...address, cep: address.cep.replace(/\D/g, '') },
+        company_name: '',
+        shopping_mall: '',
+        experiences: experiences.map(exp => ({
           ...exp,
           referenciaTel: exp.referenciaTel.replace(/\D/g, '')
-        }))),
-        skills: JSON.stringify(formData.tags.split(',').map(s => s.trim()).filter(s => s !== ''))
+        })),
+        skills: formData.tags.split(',').map(s => s.trim()).filter(s => s !== '')
       };
 
-      console.log('Attempting registration with metadata:', metadata);
+      console.log('Step 3: Creating profile manually...');
 
-      // 1. SignUp with Metadata
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: metadata
-        }
-      });
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert([profileData]);
 
-      if (authError) {
-        console.error('Auth error details:', {
-          message: authError.message,
-          status: authError.status,
-          name: authError.name
-        });
-        throw authError;
+      if (profileError) {
+        console.error('Profile error:', profileError);
+        throw new Error(`Erro ao criar perfil: ${profileError.message}`);
       }
-      if (!authData.user) throw new Error("Erro ao criar usuário");
+
+      console.log('Step 4: Profile created successfully!');
 
       // Success
       setModalConfig({
