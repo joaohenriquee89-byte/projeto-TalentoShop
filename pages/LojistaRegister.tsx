@@ -284,39 +284,61 @@ const LojistaRegister: React.FC = () => {
     }
     setLoading(true);
     try {
-      // 1. SignUp with Metadata
+      console.log('Step 1: Creating auth user WITHOUT metadata...');
+
+      // 1. Create auth user WITHOUT metadata to avoid trigger issues
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: responsibleData.email,
-        password: responsibleData.password,
-        options: {
-          data: {
-            full_name: responsibleData.nome,
-            user_type: 'lojista',
-            company_name: companyData.nomeEmpresa,
-            unit_type: companyData.tipoUnidade,
-            sector: isOtherSetor ? manualSetor : selectedSetor,
-            shopping_mall: selectedShopping,
-            address: { ...address, cep: cep.replace(/\D/g, '') },
-            cnpj: companyData.cnpj.replace(/\D/g, ''),
-            phone: responsibleData.celular.replace(/\D/g, ''),
-            rg: responsibleData.rg.replace(/\D/g, ''),
-            responsible_cpf: responsibleData.cpf.replace(/\D/g, ''),
-            responsible_phone: responsibleData.celular.replace(/\D/g, ''),
-            responsible_function: responsibleData.funcao,
-            responsible_contact: {
-              nome: responsibleData.nome,
-              cpf: responsibleData.cpf.replace(/\D/g, ''),
-              rg: responsibleData.rg.replace(/\D/g, ''),
-              funcao: responsibleData.funcao,
-              celular: responsibleData.celular.replace(/\D/g, ''),
-              email: responsibleData.email
-            }
-          }
-        }
+        password: responsibleData.password
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        console.error('Auth error:', authError);
+        throw authError;
+      }
       if (!authData.user) throw new Error("Erro ao criar usuário");
+
+      console.log('Step 2: Auth user created, ID:', authData.user.id);
+
+      // 2. Manually create profile
+      const profileData = {
+        id: authData.user.id,
+        email: responsibleData.email,
+        full_name: responsibleData.nome,
+        user_type: 'lojista',
+        company_name: companyData.nomeEmpresa,
+        unit_type: companyData.tipoUnidade,
+        sector: isOtherSetor ? manualSetor : selectedSetor,
+        shopping_mall: selectedShopping,
+        address: { ...address, cep: cep.replace(/\D/g, '') },
+        cnpj: companyData.cnpj.replace(/\D/g, ''),
+        phone: responsibleData.celular.replace(/\D/g, ''),
+        rg: responsibleData.rg.replace(/\D/g, ''),
+        responsible_cpf: responsibleData.cpf.replace(/\D/g, ''),
+        responsible_phone: responsibleData.celular.replace(/\D/g, ''),
+        responsible_function: responsibleData.funcao,
+        responsible_contact: {
+          nome: responsibleData.nome,
+          cpf: responsibleData.cpf.replace(/\D/g, ''),
+          rg: responsibleData.rg.replace(/\D/g, ''),
+          funcao: responsibleData.funcao,
+          celular: responsibleData.celular.replace(/\D/g, ''),
+          email: responsibleData.email
+        }
+      };
+
+      console.log('Step 3: Creating profile manually...');
+
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert([profileData]);
+
+      if (profileError) {
+        console.error('Profile error:', profileError);
+        throw new Error(`Erro ao criar perfil: ${profileError.message}`);
+      }
+
+      console.log('Step 4: Profile created successfully!');
 
       // Success
       setModalConfig({
