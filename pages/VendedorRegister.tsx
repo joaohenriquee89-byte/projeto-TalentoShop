@@ -263,34 +263,47 @@ const VendedorRegister: React.FC = () => {
     }
     setLoading(true);
     try {
+      // Prepare metadata - stringify complex objects for Supabase compatibility
+      const metadata = {
+        full_name: `${formData.nome} ${formData.sobrenome}`,
+        user_type: 'vendedor',
+        cpf: formData.cpf.replace(/\D/g, ''),
+        rg: formData.rg.replace(/\D/g, ''),
+        birth_date: formData.nascimento,
+        bio: formData.bio || '',
+        phone: formData.celular.replace(/\D/g, ''),
+        escolaridade: formData.escolaridade || '',
+        disponibilidade: formData.disponibilidade || '',
+        // Stringify complex objects to avoid trigger issues
+        address: JSON.stringify({ ...address, cep: address.cep.replace(/\D/g, '') }),
+        company_name: '', // For trigger compatibility
+        shopping_mall: '', // For trigger compatibility
+        experiences: JSON.stringify(experiences.map(exp => ({
+          ...exp,
+          referenciaTel: exp.referenciaTel.replace(/\D/g, '')
+        }))),
+        skills: JSON.stringify(formData.tags.split(',').map(s => s.trim()).filter(s => s !== ''))
+      };
+
+      console.log('Attempting registration with metadata:', metadata);
+
       // 1. SignUp with Metadata
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
-          data: {
-            full_name: `${formData.nome} ${formData.sobrenome}`,
-            user_type: 'vendedor',
-            cpf: formData.cpf.replace(/\D/g, ''),
-            rg: formData.rg.replace(/\D/g, ''),
-            birth_date: formData.nascimento,
-            bio: formData.bio,
-            phone: formData.celular.replace(/\D/g, ''),
-            escolaridade: formData.escolaridade,
-            disponibilidade: formData.disponibilidade,
-            address: { ...address, cep: address.cep.replace(/\D/g, '') },
-            company_name: '', // For trigger compatibility
-            shopping_mall: '', // For trigger compatibility
-            experiences: experiences.map(exp => ({
-              ...exp,
-              referenciaTel: exp.referenciaTel.replace(/\D/g, '')
-            })),
-            skills: formData.tags.split(',').map(s => s.trim()).filter(s => s !== '')
-          }
+          data: metadata
         }
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        console.error('Auth error details:', {
+          message: authError.message,
+          status: authError.status,
+          name: authError.name
+        });
+        throw authError;
+      }
       if (!authData.user) throw new Error("Erro ao criar usuário");
 
       // Success
@@ -305,6 +318,14 @@ const VendedorRegister: React.FC = () => {
 
     } catch (error: any) {
       console.error("Erro no cadastro:", error);
+      console.error("Error stack:", error.stack);
+      console.error("Error details:", {
+        message: error.message,
+        name: error.name,
+        code: error.code,
+        status: error.status
+      });
+
       let msg = error.message || "Erro ao realizar cadastro.";
       let title = "Erro no Cadastro";
       let btnText = "Tentar Novamente";
@@ -315,6 +336,9 @@ const VendedorRegister: React.FC = () => {
         msg = "Este e-mail já está cadastrado. Por favor, faça login.";
         btnText = "Ir para Login";
         redirect = "/login";
+      } else if (msg.includes("Database error")) {
+        title = "Erro no Cadastro";
+        msg = "Erro ao salvar seus dados. Por favor, verifique se todos os campos estão preenchidos corretamente e tente novamente.";
       }
 
       setModalConfig({
