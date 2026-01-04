@@ -300,6 +300,9 @@ const LojistaRegister: React.FC = () => {
             cnpj: companyData.cnpj.replace(/\D/g, ''),
             phone: responsibleData.celular.replace(/\D/g, ''),
             rg: responsibleData.rg.replace(/\D/g, ''),
+            responsible_cpf: responsibleData.cpf.replace(/\D/g, ''),
+            responsible_phone: responsibleData.celular.replace(/\D/g, ''),
+            responsible_function: responsibleData.funcao,
             responsible_contact: {
               nome: responsibleData.nome,
               cpf: responsibleData.cpf.replace(/\D/g, ''),

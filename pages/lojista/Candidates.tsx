@@ -27,7 +27,7 @@ const Candidates: React.FC<CandidatesProps> = ({ user }) => {
     const [isLoading, setIsLoading] = useState(true);
 
     const userPlan = user.plan?.toUpperCase() || 'FREE';
-    const isPremium = userPlan === 'PRO' || userPlan === 'STANDARD';
+    const isPremium = userPlan !== 'FREE' && userPlan !== 'GRÁTIS';
 
     useEffect(() => {
         const fetchCandidates = async () => {

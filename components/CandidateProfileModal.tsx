@@ -13,7 +13,7 @@ interface CandidateProfileModalProps {
 const CandidateProfileModal: React.FC<CandidateProfileModalProps> = ({ isOpen, onClose, candidate, userPlan, onInvite, isInvited }) => {
     if (!isOpen || !candidate) return null;
 
-    const isPremium = userPlan === 'PRO' || userPlan === 'STANDARD';
+    const isPremium = userPlan?.toUpperCase() !== 'FREE' && userPlan?.toUpperCase() !== 'GRÁTIS' && userPlan !== undefined;
 
     return (
         <div

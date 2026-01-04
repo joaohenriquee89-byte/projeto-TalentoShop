@@ -116,15 +116,7 @@ serve(async (req) => {
                 const expiresAt = new Date();
                 expiresAt.setDate(expiresAt.getDate() + 30);
 
-                // Update Profiles (User Request)
-                const { error: profileError } = await supabaseAdmin.from('profiles').update({
-                    plan_type: planName === 'Plano PRO' || planName.includes('Premium') ? 'premium' : 'free',
-                    subscription_status: 'active'
-                }).eq('id', userId);
-
-                if (profileError) console.error('Error updating profile:', profileError);
-
-                // Update Subscriptions (App Logic)
+                // Update Subscriptions (App Logic - Primary source of truth)
                 // Upsert logic to handle existing or new
                 const { data: existingSub } = await supabaseAdmin
                     .from('subscriptions')

@@ -17,8 +17,8 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const [upgradeConfig, setUpgradeConfig] = useState({ title: '', feature: '' });
 
-  const userPlan = user.plan?.toUpperCase() || 'FREE';
-  const isPremium = userPlan === 'PRO' || userPlan === 'STANDARD';
+  const userPlan = user?.plan?.toUpperCase() || 'FREE';
+  const isPremium = userPlan !== 'FREE' && userPlan !== 'GRÁTIS' || userPlan === 'STANDARD';
 
   useEffect(() => {
     const fetchStores = async () => {
