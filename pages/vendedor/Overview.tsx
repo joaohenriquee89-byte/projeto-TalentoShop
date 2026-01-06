@@ -15,52 +15,81 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
   const [jobs, setJobs] = useState<Job[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const [upgradeConfig, setUpgradeConfig] = useState({ title: '', feature: '' });
+
+  // Full Profile State
+  const [profileData, setProfileData] = useState({
+    phone: '',
+    experience_years: '',
+    specialty: '', // Will use first item of specialties array or 'Vendas'
+    shopping_mall: '',
+    bio: ''
+  });
 
   const userPlan = user?.plan?.toUpperCase() || 'FREE';
   const isPremium = userPlan !== 'FREE' && userPlan !== 'GRÁTIS' || userPlan === 'STANDARD';
 
   useEffect(() => {
-    const fetchStores = async () => {
+    const fetchDashboardData = async () => {
       try {
         setIsLoading(true);
-        const { data, error } = await supabase
+
+        // 1. Fetch User's Full Profile
+        const { data: userProfile, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+
+        if (userProfile) {
+          setProfileData({
+            phone: userProfile.phone || '',
+            experience_years: userProfile.experience_years || '',
+            specialty: userProfile.specialties?.[0] || 'Vendas',
+            shopping_mall: userProfile.shopping_mall || '',
+            bio: userProfile.bio || 'Vendedor focado em resultados...'
+          });
+
+          // Update prop user avatar if changed remotely (optional sync)
+          if (userProfile.avatar_url && userProfile.avatar_url !== user.avatar) {
+            setUser({ ...user, avatar: userProfile.avatar_url });
+          }
+        }
+
+        // 2. Fetch Stores (Jobs)
+        const { data: storesData, error: storesError } = await supabase
           .from('profiles')
           .select('*')
           .eq('user_type', 'lojista')
           .limit(50);
 
-        if (error) throw error;
-
-        if (data) {
-          // Filter out profiles without company name to avoid "Loja Sem Nome"
-          const validProfiles = data.filter(profile => profile.company_name && profile.company_name.trim() !== '');
+        if (storesData) {
+          const validProfiles = storesData.filter(profile => profile.company_name && profile.company_name.trim() !== '');
 
           const mappedJobs: Job[] = validProfiles.map(profile => ({
             id: profile.id,
             companyName: profile.company_name,
             title: profile.sector || 'Varejo',
             location: profile.shopping_mall || profile.address?.cidade || 'Localização não informada',
-            compatibility: Math.floor(Math.random() * (99 - 70 + 1)) + 70, // Simulated for now
+            compatibility: Math.floor(Math.random() * (99 - 70 + 1)) + 70,
             logoInitial: (profile.company_name || 'L').charAt(0).toUpperCase()
           }));
           setJobs(mappedJobs);
         }
       } catch (err) {
-        console.error('Error fetching stores:', err);
+        console.error('Error fetching dashboard data:', err);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchStores();
-  }, []);
+    fetchDashboardData();
+  }, [user.id]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Search is already real-time via filteredJobs, 
-    // but the button can trigger a refresh or just visual feedback
     setIsLoading(true);
     setTimeout(() => setIsLoading(false), 500);
   };
@@ -78,8 +107,45 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
       reader.onloadend = () => {
         const base64String = reader.result as string;
         setUser({ ...user, avatar: base64String });
+        // TODO: In a real app, upload this file to Supabase Storage and get URL
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    setIsSaving(true);
+    try {
+      // Prepare specialties array
+      const specialtiesArray = profileData.specialty.split(',').map(s => s.trim()).filter(s => s !== '');
+
+      const updates = {
+        full_name: user.name,
+        // email: user.email, // Email change usually requires auth re-verification
+        phone: profileData.phone,
+        experience_years: profileData.experience_years,
+        specialties: specialtiesArray,
+        shopping_mall: profileData.shopping_mall,
+        bio: profileData.bio,
+        updated_at: new Date().toISOString(),
+        // avatar_url: user.avatar // Assuming we eventually upload
+      };
+
+      const { error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      setIsEditing(false);
+      alert('Perfil atualizado com sucesso!');
+
+    } catch (err) {
+      console.error("Erro ao salvar perfil:", err);
+      alert("Erro ao salvar alterações. Tente novamente.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -87,48 +153,126 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
 
   if (isEditing) {
     return (
-      <div className="max-w-3xl mx-auto animate-fade-in">
-        <button onClick={() => setIsEditing(false)} className="mb-6 flex items-center gap-2 text-primary font-medium">
+      <div className="max-w-3xl mx-auto animate-fade-in pb-10">
+        <button onClick={() => setIsEditing(false)} className="mb-6 flex items-center gap-2 text-primary font-medium hover:underline">
           <span className="material-icons-round">arrow_back</span> Voltar ao Dashboard
         </button>
-        <div className="bg-surface-light dark:bg-surface-dark shadow rounded-xl p-8 border border-gray-100 dark:border-gray-700">
-          <h2 className="text-2xl font-bold mb-6 dark:text-white">Editar Perfil Profissional</h2>
+        <div className="bg-surface-light dark:bg-surface-dark shadow-2xl rounded-2xl p-8 border border-gray-100 dark:border-gray-700">
+          <h2 className="text-2xl font-bold mb-8 dark:text-white flex items-center gap-2">
+            <span className="material-icons-round text-primary">edit_note</span>
+            Editar Perfil Profissional
+          </h2>
 
           <div className="flex flex-col items-center mb-8">
             <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-              <img alt="Profile" className="h-32 w-32 rounded-full border-4 border-primary shadow-lg object-cover" src={currentAvatar} />
-              <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <img alt="Profile" className="h-32 w-32 rounded-full border-4 border-primary shadow-lg object-cover transition-transform group-hover:scale-105" src={currentAvatar} />
+              <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">
                 <span className="material-icons-round text-white text-3xl">photo_camera</span>
               </div>
             </div>
             <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
-            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Clique na foto para alterar</p>
+            <p className="mt-3 text-sm font-medium text-primary cursor-pointer hover:underline" onClick={() => fileInputRef.current?.click()}>Alterar foto de perfil</p>
           </div>
 
           <div className="space-y-6">
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-2">Informações Pessoais</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input
-                className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5"
-                placeholder="Nome Completo"
-                value={user.name}
-                onChange={(e) => setUser({ ...user, name: e.target.value })}
-              />
-              <input
-                className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5"
-                placeholder="E-mail"
-                value={user.email}
-                onChange={(e) => setUser({ ...user, email: e.target.value })}
-              />
-              <textarea
-                className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5 col-span-2"
-                placeholder="Bio Profissional"
-                defaultValue="Vendedor focado em resultados com 5 anos de experiência..."
-                rows={4}
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nome Completo</label>
+                <input
+                  className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                  value={user.name}
+                  onChange={(e) => setUser({ ...user, name: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">E-mail (apenas leitura)</label>
+                <input
+                  className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-900 text-gray-500 dark:text-gray-400 p-2.5 cursor-not-allowed"
+                  value={user.email}
+                  disabled
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Telefone / WhatsApp</label>
+                <input
+                  className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                  placeholder="(11) 99999-9999"
+                  value={profileData.phone}
+                  onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Localização / Shopping</label>
+                <input
+                  className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                  placeholder="Ex: Shopping Morumbi, SP"
+                  value={profileData.shopping_mall}
+                  onChange={(e) => setProfileData({ ...profileData, shopping_mall: e.target.value })}
+                />
+              </div>
             </div>
-            <button onClick={() => setIsEditing(false)} className="w-full bg-primary text-white font-bold py-3 rounded-lg shadow-lg hover:bg-opacity-90 transition-all">
-              Salvar Alterações
-            </button>
+
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-2 pt-4">Carreira & Experiência</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Anos de Experiência</label>
+                <select
+                  className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                  value={profileData.experience_years}
+                  onChange={(e) => setProfileData({ ...profileData, experience_years: e.target.value })}
+                >
+                  <option value="">Selecione...</option>
+                  <option value="Sem experiência">Sem experiência</option>
+                  <option value="Menos de 1 ano">Menos de 1 ano</option>
+                  <option value="1 a 3 anos">1 a 3 anos</option>
+                  <option value="3 a 5 anos">3 a 5 anos</option>
+                  <option value="Mais de 5 anos">Mais de 5 anos</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Especialidade Principal</label>
+                <input
+                  className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                  placeholder="Ex: Vendas, Gerência, Moda..."
+                  value={profileData.specialty}
+                  onChange={(e) => setProfileData({ ...profileData, specialty: e.target.value })}
+                />
+              </div>
+              <div className="col-span-1 md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Bio Profissional / Sobre Mim</label>
+                <textarea
+                  className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5 focus:ring-2 focus:ring-primary focus:border-transparent transition-all min-h-[120px]"
+                  placeholder="Conte um pouco sobre sua trajetória profissional..."
+                  value={profileData.bio}
+                  onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
+                />
+                <p className="text-xs text-gray-500 mt-1">Dica: Descreva suas principais conquistas e o que você busca na próxima oportunidade.</p>
+              </div>
+            </div>
+
+            <div className="pt-6 flex gap-3">
+              <button onClick={() => setIsEditing(false)} className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors">
+                Cancelar
+              </button>
+              <button
+                onClick={handleSaveProfile}
+                disabled={isSaving}
+                className="flex-1 bg-primary text-white font-bold py-3 rounded-lg shadow-lg hover:bg-petrol-700 transition-all flex justify-center items-center gap-2"
+              >
+                {isSaving ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Salvando...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-icons-round">save</span>
+                    Salvar Alterações
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -166,15 +310,17 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
                 <img alt="Profile" className="h-24 w-24 rounded-full border-4 border-white dark:border-gray-800 shadow-md object-cover" src={currentAvatar} />
               </div>
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">{user.name}</h2>
-              <p className="text-primary dark:text-secondary font-medium text-sm mb-4">Shopping Morumbi • São Paulo, SP</p>
+              <p className="text-primary dark:text-secondary font-medium text-sm mb-4">
+                {profileData.shopping_mall || 'Localização não definida'}
+              </p>
               <div className="space-y-3">
                 <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
                   <span className="material-icons-round mr-2 text-gray-400">work_outline</span>
-                  <span>Experiência: 5 anos</span>
+                  <span>Experiência: {profileData.experience_years || '--'}</span>
                 </div>
                 <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
                   <span className="material-icons-round mr-2 text-gray-400">grade</span>
-                  <span>Especialidade: Moda Masculina</span>
+                  <span>Especialidade: {profileData.specialty || '--'}</span>
                 </div>
               </div>
               <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
