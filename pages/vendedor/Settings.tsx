@@ -161,7 +161,6 @@ const AITester: React.FC = () => {
 
     return (
         <div className="space-y-4">
-            <div className="text-xs text-slate-500 font-mono">Target: {url}</div>
             <button
                 onClick={runTest}
                 disabled={loading}

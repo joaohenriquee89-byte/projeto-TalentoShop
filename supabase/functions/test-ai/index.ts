@@ -61,36 +61,45 @@ serve(async (req) => {
 
     userPlan = profile?.plan || 'FREE';
 
-    // 6. AI Logic
-    const openAiKey = Deno.env.get('OPENAI_API_KEY');
-    if (openAiKey) {
-      modelUsed = "gpt-model-real";
-      // Implement actual call if needed, currently keeping mock/logic clean for connectivity test
-      // Use the previous logic if key exists
+    // 6. AI Logic (Gemini Integration)
+    const geminiKey = Deno.env.get('GEMINI_API_KEY');
+
+    if (geminiKey) {
+      modelUsed = "gemini-1.5-flash";
       try {
-        const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${openAiKey}`
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            model: "gpt-4o-mini",
-            messages: [
-              { role: 'system', content: 'Você é um assistente útil.' },
-              { role: 'user', content: finalPrompt }
-            ],
-            max_tokens: 150
+            contents: [{
+              parts: [{ text: `Você é um assistente útil do TalentoShop. Responda de forma concisa. User: ${finalPrompt}` }]
+            }]
           })
         });
-        const aiData = await aiResponse.json();
-        if (aiData.error) throw new Error(aiData.error.message);
-        modelUsed = aiData.model || "gpt-4o-mini";
-        responseContent = aiData.choices?.[0]?.message?.content || "Sem resposta da AI";
+
+        if (!geminiResponse.ok) {
+          const errorData = await geminiResponse.text();
+          throw new Error(`Gemini API Error: ${geminiResponse.status} - ${errorData}`);
+        }
+
+        const geminiData = await geminiResponse.json();
+        const textResult = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (textResult) {
+          responseContent = textResult;
+        } else {
+          responseContent = "Gemini não retornou texto. Resposta bruta: " + JSON.stringify(geminiData);
+        }
+
       } catch (aiErr: any) {
         status = "erro na ai";
-        responseContent = "Falha na OpenAI: " + aiErr.message;
+        responseContent = "Falha no Gemini: " + aiErr.message;
       }
+    } else {
+      modelUsed = "gemini (simulated - chave ausente)";
+      responseContent = "Chave GEMINI_API_KEY não configurada no Supabase Secrets. O teste foi simulado.";
     }
 
     const endTime = Date.now();
