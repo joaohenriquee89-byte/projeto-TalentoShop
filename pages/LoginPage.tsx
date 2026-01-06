@@ -39,13 +39,29 @@ const LoginPage: React.FC<LoginPageProps> = () => {
     setErrorMsg(''); // Clear previous errors
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) throw error;
-      // No need to fetch profile or set user manually.
+
+      // Check if user exists but has no profile (edge case from previous broken registrations)
+      if (data.user) {
+        // Initial profile fetch to ensure it exists before redirecting
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', data.user.id)
+          .single();
+
+        if (!profile) {
+          console.warn("User logged in but has no profile. This shouldn't happen with new fixes.");
+          // Optional: Redirect to a "Complete Profile" page if we built one
+        }
+      }
+
+      // No need to fetch profile or set user manually here.
       // AuthContext detects onAuthStateChange -> fetches profile -> updates 'user' state -> useEffect above redirects.
 
     } catch (error: any) {
@@ -54,7 +70,7 @@ const LoginPage: React.FC<LoginPageProps> = () => {
       if (msg === "Invalid login credentials") {
         msg = "E-mail ou senha incorretos. Tente novamente.";
       } else if (msg === "Email not confirmed") {
-        msg = "E-mail não confirmado. Verifique sua caixa de entrada.";
+        msg = "E-mail não confirmado. Verifique sua caixa de entrada (incluindo SPAM) e clique no link de confirmação.";
       } else {
         msg = "Falha ao entrar: " + msg;
       }
