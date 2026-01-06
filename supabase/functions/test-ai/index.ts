@@ -66,22 +66,54 @@ serve(async (req) => {
 
     if (geminiKey) {
       modelUsed = "gemini-1.5-flash";
-      try {
-        const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
+
+      const callGemini = async (model: string) => {
+        const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            contents: [{
-              parts: [{ text: `Você é um assistente útil do TalentoShop. Responda de forma concisa. User: ${finalPrompt}` }]
-            }]
+            contents: [{ parts: [{ text: `Você é um assistente útil. Responda curto. User: ${finalPrompt}` }] }]
           })
         });
+        return resp;
+      };
+
+      try {
+        let geminiResponse = await callGemini('gemini-1.5-flash');
+
+        // Fallback strategy and specialized 404 debugging
+        if (geminiResponse.status === 404) {
+          // Try listing available models to debug
+          console.log("Model not found. Listing models...");
+          try {
+            const listResp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${geminiKey}`);
+            const listData = await listResp.json();
+            const modelNames = listData.models?.map((m: any) => m.name) || [];
+
+            // Try one more time with a known available model if found
+            const fallbackModel = modelNames.find((n: string) => n.includes('gemini-1.5-flash'))
+              || modelNames.find((n: string) => n.includes('gemini-pro'))
+              || "";
+
+            if (fallbackModel) {
+              // fallbackModel comes as "models/gemini-1.5-flash", we need just the name sometimes or full path
+              // The API expects models/{model}:generateContent. The list returns "models/gemini-..."
+              // My callGemini appends "models/" prefix? No, I put `models/${model}`.
+              // So if list returns "models/flash", I should strip "models/" or just use the suffix.
+              const cleanName = fallbackModel.replace('models/', '');
+              modelUsed = `${cleanName} (autodetected)`;
+              geminiResponse = await callGemini(cleanName);
+            } else {
+              throw new Error(`Nenhum modelo Gemini compatível encontrado. Disponíveis: ${modelNames.join(', ')}`);
+            }
+          } catch (listErr: any) {
+            // If listing fails, throw original 404
+          }
+        }
 
         if (!geminiResponse.ok) {
-          const errorData = await geminiResponse.text();
-          throw new Error(`Gemini API Error: ${geminiResponse.status} - ${errorData}`);
+          const errorText = await geminiResponse.text();
+          throw new Error(`Gemini API Error: ${geminiResponse.status} - ${errorText}`);
         }
 
         const geminiData = await geminiResponse.json();
@@ -90,7 +122,7 @@ serve(async (req) => {
         if (textResult) {
           responseContent = textResult;
         } else {
-          responseContent = "Gemini não retornou texto. Resposta bruta: " + JSON.stringify(geminiData);
+          responseContent = "Gemini não retornou texto. Debug: " + JSON.stringify(geminiData);
         }
 
       } catch (aiErr: any) {
