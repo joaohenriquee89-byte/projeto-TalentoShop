@@ -15,6 +15,7 @@ const LoginPage: React.FC<LoginPageProps> = () => {
   const [role, setRole] = useState<UserRole>(UserRole.VENDEDOR);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
