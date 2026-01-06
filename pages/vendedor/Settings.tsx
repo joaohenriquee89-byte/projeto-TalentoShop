@@ -113,6 +113,65 @@ const VendedorSettings: React.FC<VendedorSettingsProps> = ({ user, setUser }) =>
                 </div>
             </div>
         </div>
+
+            {/* AI Diagnostics Section */ }
+    <div className="mt-8 bg-surface-light dark:bg-surface-dark shadow rounded-xl p-8 border border-gray-100 dark:border-gray-700">
+        <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+            <span className="material-icons-round text-secondary">psychology</span>
+            Diagnóstico de IA
+        </h2>
+        <div className="space-y-4">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+                Use este botão para testar a conectividade com o módulo de Inteligência Artificial e verificar se sua chave de API e plano estão sendo reconhecidos corretamente.
+            </p>
+
+            <AITester />
+        </div>
+    </div>
+        </div >
+    );
+};
+
+const AITester: React.FC = () => {
+    const [result, setResult] = useState<any>(null);
+    const [loading, setLoading] = useState(false);
+
+    const runTest = async () => {
+        setLoading(true);
+        setResult(null);
+        try {
+            const { data, error } = await import('../../src/lib/supabase').then(m => m.supabase.functions.invoke('test-ai', {
+                body: { prompt: "Teste de conexão do usuário." }
+            }));
+
+            if (error) throw error;
+            setResult(data);
+        } catch (err: any) {
+            setResult({ error: err.message, status: 'client_error' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="space-y-4">
+            <button
+                onClick={runTest}
+                disabled={loading}
+                className="px-4 py-2 bg-slate-800 text-white rounded-lg flex items-center gap-2 hover:bg-slate-700 disabled:opacity-50 transition-colors"
+            >
+                {loading ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span> : <span className="material-icons-round">play_arrow</span>}
+                Executar Teste de IA
+            </button>
+
+            {result && (
+                <div className="bg-slate-900 rounded-lg p-4 overflow-x-auto border border-slate-700">
+                    <pre className="text-green-400 font-mono text-sm leading-relaxed">
+                        {JSON.stringify(result, null, 2)}
+                    </pre>
+                </div>
+            )}
+        </div>
     );
 };
 
