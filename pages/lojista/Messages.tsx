@@ -45,11 +45,7 @@ const Avatar: React.FC<{ src?: string; name: string; className?: string }> = ({ 
 const Messages: React.FC = () => {
     const [activeConversationId, setActiveConversationId] = React.useState(1);
     const [inputText, setInputText] = React.useState('');
-    const [messages, setMessages] = React.useState([
-        { id: 1, text: 'Olá, bom dia! Vi a vaga de Vendedora Sênior e gostaria de me candidatar.', sender: 'other' },
-        { id: 2, text: 'Tenho 5 anos de experiência em lojas de alto padrão.', sender: 'other' },
-        { id: 3, text: 'Olá Mariana! Obrigado pelo interesse. Seu perfil parece ótimo.', sender: 'me' }
-    ]);
+    const [messages, setMessages] = React.useState<any[]>([]);
 
     const conversations: any[] = [];
 

@@ -4,6 +4,7 @@ import { supabase } from '../src/lib/supabase';
 import { SHOPPINGS_LIST } from '../src/constants/data';
 import SuccessModal from '../components/SuccessModal';
 import Combobox from '../components/Combobox';
+import { formatCPF, formatCNPJ, formatPhone, formatCEP } from '../src/utils/formatters';
 
 const LojistaRegister: React.FC = () => {
   const [step, setStep] = useState(1);
@@ -107,40 +108,9 @@ const LojistaRegister: React.FC = () => {
     return Math.min(score, 4);
   };
 
-  // Funções de Máscara e Formatação
-  const formatCPF = (value: string) => {
-    return value
-      .replace(/\D/g, '')
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d{1,2})/, '$1-$2')
-      .replace(/(-\d{2})\d+?$/, '$1');
-  };
 
-  const formatPhone = (value: string) => {
-    return value
-      .replace(/\D/g, '')
-      .replace(/(\d{2})(\d)/, '($1) $2')
-      .replace(/(\d{5})(\d)/, '$1-$2')
-      .replace(/(-\d{4})\d+?$/, '$1');
-  };
 
-  const formatCEP = (value: string) => {
-    return value
-      .replace(/\D/g, '')
-      .replace(/(\d{5})(\d)/, '$1-$2')
-      .replace(/(-\d{3})\d+?$/, '$1');
-  };
-
-  const formatCNPJ = (value: string) => {
-    return value
-      .replace(/\D/g, '')
-      .replace(/^(\d{2})(\d)/, '$1.$2')
-      .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
-      .replace(/\.(\d{3})(\d)/, '.$1/$2')
-      .replace(/(\d{4})(\d)/, '$1-$2')
-      .replace(/(-\d{2})\d+?$/, '$1');
-  };
+  // Funções de Máscara e Formatação - Importadas de utils
 
   const handleCepBlur = async () => {
     const cleanCep = cep.replace(/\D/g, '');

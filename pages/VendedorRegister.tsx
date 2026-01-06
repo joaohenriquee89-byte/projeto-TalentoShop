@@ -5,6 +5,7 @@ import { supabase } from '../src/lib/supabase';
 import SuccessModal from '../components/SuccessModal';
 import { SHOPPINGS_LIST } from '../src/constants/data';
 import Combobox from '../components/Combobox';
+import { formatCPF, formatPhone, formatCEP } from '../src/utils/formatters';
 
 const VendedorRegister: React.FC = () => {
   const [step, setStep] = useState(1);
@@ -72,30 +73,7 @@ const VendedorRegister: React.FC = () => {
     return Math.min(score, 4);
   };
 
-  // Funções de Máscara e Formatação
-  const formatCPF = (value: string) => {
-    return value
-      .replace(/\D/g, '') // remove tudo que não é dígito
-      .replace(/(\d{3})(\d)/, '$1.$2') // coloca ponto após os 3 primeiros dígitos
-      .replace(/(\d{3})(\d)/, '$1.$2') // coloca ponto após os 6 primeiros dígitos
-      .replace(/(\d{3})(\d{1,2})/, '$1-$2') // coloca hífen após os 9 primeiros dígitos
-      .replace(/(-\d{2})\d+?$/, '$1'); // limita a quantidade de caracteres
-  };
 
-  const formatPhone = (value: string) => {
-    return value
-      .replace(/\D/g, '')
-      .replace(/(\d{2})(\d)/, '($1) $2')
-      .replace(/(\d{5})(\d)/, '$1-$2')
-      .replace(/(-\d{4})\d+?$/, '$1');
-  };
-
-  const formatCEP = (value: string) => {
-    return value
-      .replace(/\D/g, '')
-      .replace(/(\d{5})(\d)/, '$1-$2')
-      .replace(/(-\d{3})\d+?$/, '$1');
-  };
 
   const validateEmail = (email: string) => {
     return /\S+@\S+\.\S+/.test(email);

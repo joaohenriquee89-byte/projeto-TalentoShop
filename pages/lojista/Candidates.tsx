@@ -125,7 +125,7 @@ const Candidates: React.FC<CandidatesProps> = ({ user }) => {
                 <div className="flex flex-col items-end gap-2">
                     <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                         <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                        {isLoading ? '...' : filteredCandidates.length + 340} Vendedores disponíveis
+                        {isLoading ? '...' : filteredCandidates.length} Vendedores disponíveis
                     </div>
                     {!isPremium && (
                         <span className="text-[10px] font-bold text-orange-500 bg-orange-50 dark:bg-orange-900/20 px-2 py-1 rounded">

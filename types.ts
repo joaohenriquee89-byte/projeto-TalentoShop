@@ -15,11 +15,14 @@ export interface User {
 
 export interface Job {
   id: string;
-  companyName: string;
   title: string;
-  location: string;
-  compatibility?: number;
-  logoInitial?: string;
+  type: string;
+  description?: string;
+  status: 'Ativa' | 'Fechada' | 'Rascunho';
+  user_id: string;
+  company_name?: string;
+  candidates?: number; // Logic field (count)
+  created_at?: string;
 }
 
 export interface Candidate {

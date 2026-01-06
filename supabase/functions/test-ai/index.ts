@@ -154,15 +154,14 @@ serve(async (req) => {
     const endTime = Date.now();
     return new Response(
       JSON.stringify({
-        status: "client_error", // Explicit 'client_error' as requested
-        modelo_usado: modelUsed,
-        tempo_de_resposta: `${endTime - startTime}ms`,
-        user_id: userId, // Return what we managed to capture
-        error: error.message
+        ai_status: "unavailable",
+        fallback: true,
+        message: "IA temporariamente indisponível",
+        details: error.message
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200, // Return 200 even on error so frontend can parse JSON easily, or 400 with headers
+        status: 200,
       }
     )
   }

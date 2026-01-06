@@ -8,27 +8,12 @@ interface VendedorSettingsProps {
 }
 
 const VendedorSettings: React.FC<VendedorSettingsProps> = ({ user, setUser }) => {
-    const fileInputRef = useRef<HTMLInputElement>(null);
     const [showSuccess, setShowSuccess] = useState(false);
-    const [formData, setFormData] = useState({
-        name: user.name,
-        email: user.email,
-        bio: 'Vendedor com experiência em...',
-        cidade: '',
-        estado: ''
-    });
+    // Form data removed - Profile editing is in separate page
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const base64String = reader.result as string;
-                setUser({ ...user, avatar: base64String });
-            };
-            reader.readAsDataURL(file);
-        }
-    };
+
+    // Avatar upload removed from Settings
+
 
     const handleSave = () => {
         setUser({ ...user, ...formData });
