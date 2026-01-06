@@ -135,6 +135,8 @@ const VendedorSettings: React.FC<VendedorSettingsProps> = ({ user, setUser }) =>
 const AITester: React.FC = () => {
     const [result, setResult] = useState<any>(null);
     const [loading, setLoading] = useState(false);
+    // @ts-ignore
+    const url = supabase.supabaseUrl || "unknown";
 
     const runTest = async () => {
         setLoading(true);
@@ -147,7 +149,11 @@ const AITester: React.FC = () => {
             if (error) throw error;
             setResult(data);
         } catch (err: any) {
-            setResult({ error: err.message, status: 'client_error' });
+            setResult({
+                error: err.message,
+                status: 'client_error',
+                debug_url: url
+            });
         } finally {
             setLoading(false);
         }
@@ -155,6 +161,7 @@ const AITester: React.FC = () => {
 
     return (
         <div className="space-y-4">
+            <div className="text-xs text-slate-500 font-mono">Target: {url}</div>
             <button
                 onClick={runTest}
                 disabled={loading}
