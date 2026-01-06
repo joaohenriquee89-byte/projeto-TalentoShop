@@ -34,10 +34,13 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
         if (error) throw error;
 
         if (data) {
-          const mappedJobs: Job[] = data.map(profile => ({
+          // Filter out profiles without company name to avoid "Loja Sem Nome"
+          const validProfiles = data.filter(profile => profile.company_name && profile.company_name.trim() !== '');
+
+          const mappedJobs: Job[] = validProfiles.map(profile => ({
             id: profile.id,
-            companyName: profile.company_name || 'Loja Sem Nome',
-            title: 'Loja Parceira',
+            companyName: profile.company_name,
+            title: profile.sector || 'Varejo',
             location: profile.shopping_mall || profile.address?.cidade || 'Localização não informada',
             compatibility: Math.floor(Math.random() * (99 - 70 + 1)) + 70, // Simulated for now
             logoInitial: (profile.company_name || 'L').charAt(0).toUpperCase()

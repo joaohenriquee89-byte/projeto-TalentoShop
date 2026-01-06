@@ -174,15 +174,24 @@ const LoginPage: React.FC<LoginPageProps> = () => {
                   <span className="material-icons-round text-xl">lock</span>
                 </span>
                 <input
-                  className="pl-10 block w-full rounded-xl border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-primary focus:ring-primary sm:text-sm py-3 shadow-sm transition-all"
+                  className="pl-10 pr-10 block w-full rounded-xl border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-primary focus:ring-primary sm:text-sm py-3 shadow-sm transition-all"
                   id="password"
                   name="password"
                   placeholder="••••••••"
                   required
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-primary transition-colors focus:outline-none"
+                >
+                  <span className="material-icons-round text-xl">
+                    {showPassword ? 'visibility_off' : 'visibility'}
+                  </span>
+                </button>
               </div>
             </div>
             <div className="flex items-center justify-between">
