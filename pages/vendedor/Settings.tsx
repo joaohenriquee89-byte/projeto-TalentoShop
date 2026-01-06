@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { User } from '../../types';
+import { supabase } from '../../src/lib/supabase';
 
 interface VendedorSettingsProps {
     user: User;
@@ -139,9 +140,9 @@ const AITester: React.FC = () => {
         setLoading(true);
         setResult(null);
         try {
-            const { data, error } = await import('../../src/lib/supabase').then(m => m.supabase.functions.invoke('test-ai', {
+            const { data, error } = await supabase.functions.invoke('test-ai', {
                 body: { prompt: "Teste de conexão do usuário." }
-            }));
+            });
 
             if (error) throw error;
             setResult(data);
