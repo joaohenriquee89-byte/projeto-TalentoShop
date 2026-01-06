@@ -118,7 +118,7 @@ const Messages: React.FC = () => {
 
                         {/* Messages Amount */}
                         <div className="flex-1 p-6 overflow-y-auto space-y-4">
-                            {messages.map((msg, i) => (
+                            {messages.map((msg) => (
                                 <div key={msg.id} className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}>
                                     <div className={`${msg.sender === 'me' ? 'bg-primary text-white rounded-tr-none' : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border border-slate-100 dark:border-slate-700 rounded-tl-none'} p-3 rounded-2xl shadow-sm max-w-md text-sm animate-fade-in`}>
                                         {msg.text}
@@ -158,7 +158,6 @@ const Messages: React.FC = () => {
                 </div>
             )}
         </div>
-        </div >
     );
 };
 
