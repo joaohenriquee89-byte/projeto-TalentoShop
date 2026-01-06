@@ -15,11 +15,8 @@ const VendedorSettings: React.FC<VendedorSettingsProps> = ({ user, setUser }) =>
     // Avatar upload removed from Settings
 
 
-    const handleSave = () => {
-        setUser({ ...user, ...formData });
-        setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 3000);
-    };
+    // handleSave removed - no longer needed
+
 
     const currentAvatar = user.avatar || `https://picsum.photos/seed/${user.id}/200/200`;
 
