@@ -117,9 +117,34 @@ const LoginPage: React.FC<LoginPageProps> = () => {
           </div>
 
           {errorMsg && (
-            <div className="mb-6 p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 flex items-start gap-3 animate-fade-in">
-              <span className="material-icons-round text-red-500 mt-0.5">error</span>
-              <p className="text-sm text-red-600 dark:text-red-300 font-medium leading-relaxed">{errorMsg}</p>
+            <div className="mb-6 p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 flex flex-col items-start gap-3 animate-fade-in">
+              <div className="flex items-start gap-3">
+                <span className="material-icons-round text-red-500 mt-0.5">error</span>
+                <p className="text-sm text-red-600 dark:text-red-300 font-medium leading-relaxed">{errorMsg}</p>
+              </div>
+              {errorMsg.includes("não confirmado") && (
+                <button
+                  onClick={async () => {
+                    try {
+                      const { error } = await supabase.auth.resend({
+                        type: 'signup',
+                        email: email,
+                        options: {
+                          emailRedirectTo: window.location.origin
+                        }
+                      });
+                      if (error) throw error;
+                      alert("E-mail de confirmação reenviado! Verifique sua caixa de entrada.");
+                    } catch (err: any) {
+                      alert("Erro ao reenviar: " + err.message);
+                    }
+                  }}
+                  className="ml-9 text-xs font-bold text-primary hover:underline"
+                  type="button"
+                >
+                  Reenviar e-mail de confirmação
+                </button>
+              )}
             </div>
           )}
 
