@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../src/lib/supabase';
 
 const Jobs: React.FC = () => {
     const [jobs, setJobs] = useState<any[]>([]);
@@ -8,6 +8,7 @@ const Jobs: React.FC = () => {
     const [newJobTitle, setNewJobTitle] = useState('');
 
     const fetchJobs = async () => {
+        if (!supabase) return; // Proteção contra falha de inicialização
         try {
             setLoading(true);
             const { data, error } = await supabase
@@ -30,14 +31,21 @@ const Jobs: React.FC = () => {
 
     const handleCreateJob = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!newJobTitle.trim()) return;
+
         try {
             const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return;
+            if (!user) {
+                alert("Sessão expirada. Faça login novamente.");
+                return;
+            }
 
             const { error } = await supabase.from('jobs').insert({
                 title: newJobTitle,
                 user_id: user.id,
-                status: 'Ativa'
+                status: 'Ativa',
+                type: 'Moda', // Default type case it's missing
+                company_name: user.user_metadata?.company_name || 'Minha Loja'
             });
 
             if (error) throw error;
@@ -46,6 +54,7 @@ const Jobs: React.FC = () => {
             fetchJobs();
         } catch (error) {
             console.error('Erro ao criar:', error);
+            alert("Erro ao criar vaga.");
         }
     };
 
@@ -84,13 +93,14 @@ const Jobs: React.FC = () => {
 
             {isCreateModalOpen && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white dark:bg-slate-800 p-6 rounded-xl w-full max-w-md">
+                    <div className="bg-white dark:bg-slate-800 p-6 rounded-xl w-full max-w-md shadow-2xl">
                         <h2 className="text-xl font-bold mb-4 dark:text-white">Criar Vaga</h2>
                         <form onSubmit={handleCreateJob}>
                             <input
                                 className="w-full p-2 border rounded-lg mb-4 dark:bg-slate-900 dark:border-slate-700 dark:text-white"
                                 placeholder="Título da vaga"
                                 value={newJobTitle}
+                                required
                                 onChange={(e) => setNewJobTitle(e.target.value)}
                             />
                             <div className="flex gap-2">
