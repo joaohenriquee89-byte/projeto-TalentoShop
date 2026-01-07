@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // Corrigido: Adicionado useEffect
 import { Link } from 'react-router-dom';
 import SuccessModal from '../../components/SuccessModal';
-import { supabase } from '../../src/lib/supabase';
+import { supabase } from '../../lib/supabase'; // Corrigido: Caminho ajustado
 
 const Jobs: React.FC = () => {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -69,11 +69,7 @@ const Jobs: React.FC = () => {
     };
 
     const toggleActions = (id: number) => {
-        if (activeActionId === id) {
-            setActiveActionId(null);
-        } else {
-            setActiveActionId(id);
-        }
+        setActiveActionId(activeActionId === id ? null : id);
     };
 
     const handleDeleteJob = async (id: string) => {
@@ -100,7 +96,7 @@ const Jobs: React.FC = () => {
                                 <span className="material-icons-round">close</span>
                             </button>
                         </div>
-                        <div className="p-6 space-y-4">
+                        <form onSubmit={handleCreateJob} className="p-6 space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Título da Vaga</label>
                                 <input
@@ -108,6 +104,7 @@ const Jobs: React.FC = () => {
                                     placeholder="Ex: Vendedor"
                                     value={newJobTitle}
                                     onChange={e => setNewJobTitle(e.target.value)}
+                                    required
                                 />
                             </div>
                             <div>
@@ -125,27 +122,22 @@ const Jobs: React.FC = () => {
                                 </select>
                             </div>
                             <button
-                                onClick={handleCreateJob}
+                                type="submit"
                                 disabled={creating || !newJobTitle}
                                 className="w-full bg-primary text-white font-bold py-3 rounded-lg shadow-md hover:bg-petrol-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
                             >
                                 {creating ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span> : null}
                                 {creating ? 'Criando...' : 'Criar Vaga'}
                             </button>
-                        </div>
+                        </form>
                     </div>
                 </div>
             )}
 
             <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                    <Link to="/dashboard/lojista" className="md:hidden p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 transition-colors">
-                        <span className="material-icons-round">arrow_back</span>
-                    </Link>
-                    <div>
-                        <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Minhas Vagas</h1>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Gerencie suas oportunidades</p>
-                    </div>
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Minhas Vagas</h1>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Gerencie suas oportunidades</p>
                 </div>
                 <button
                     onClick={() => setIsCreateModalOpen(true)}
@@ -162,52 +154,24 @@ const Jobs: React.FC = () => {
                 </div>
             ) : jobs.length > 0 ? (
                 <div className="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden min-h-[400px]">
-                    <div className="overflow-visible">
+                    <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
                                     <th className="p-4 font-semibold text-sm text-slate-600 dark:text-slate-300">Título da Vaga</th>
                                     <th className="p-4 font-semibold text-sm text-slate-600 dark:text-slate-300">Tipo</th>
-                                    <th className="p-4 font-semibold text-sm text-slate-600 dark:text-slate-300">Candidatos</th>
-                                    <th className="p-4 font-semibold text-sm text-slate-600 dark:text-slate-300">Status</th>
                                     <th className="p-4 font-semibold text-sm text-slate-600 dark:text-slate-300 text-right">Ações</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                                 {jobs.map((job, idx) => (
-                                    <tr key={job.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors relative">
+                                    <tr key={job.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                                         <td className="p-4 text-slate-800 dark:text-white font-medium">{job.title}</td>
                                         <td className="p-4 text-slate-500 dark:text-slate-400">{job.type}</td>
-                                        <td className="p-4">
-                                            <div className="flex items-center gap-2">
-                                                <span className="material-icons-round text-slate-400 text-sm">person</span>
-                                                <span className="text-slate-800 dark:text-white">{job.candidates || 0}</span>
-                                            </div>
-                                        </td>
-                                        <td className="p-4">
-                                            <span className={`px-2.5 py-1 rounded-full text-xs font-medium border ${job.status === 'Ativa' ? 'bg-green-50 text-green-600 border-green-200 dark:bg-green-900/20 dark:border-green-800' : 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-slate-800 dark:border-slate-600'}`}>
-                                                {job.status}
-                                            </span>
-                                        </td>
-                                        <td className="p-4 text-right relative">
-                                            <button onClick={() => toggleActions(idx)} className="text-slate-400 hover:text-primary transition-colors p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
-                                                <span className="material-icons-round">more_vert</span>
+                                        <td className="p-4 text-right">
+                                            <button onClick={() => handleDeleteJob(job.id)} className="text-red-400 hover:text-red-600 p-2">
+                                                <span className="material-icons-round">delete</span>
                                             </button>
-
-                                            {activeActionId === idx && (
-                                                <div className="absolute right-8 top-8 z-20 w-32 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-100 dark:border-slate-700 animate-fade-in overflow-hidden">
-                                                    <button className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2">
-                                                        <span className="material-icons-round text-xs">edit</span> Editar
-                                                    </button>
-                                                    <button className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2">
-                                                        <span className="material-icons-round text-xs">visibility</span> Ver
-                                                    </button>
-                                                    <div className="h-px bg-slate-100 dark:bg-slate-700 my-1"></div>
-                                                    <button onClick={() => handleDeleteJob(job.id)} className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2">
-                                                        <span className="material-icons-round text-xs">delete</span> Excluir
-                                                    </button>
-                                                </div>
-                                            )}
                                         </td>
                                     </tr>
                                 ))}
@@ -217,26 +181,17 @@ const Jobs: React.FC = () => {
                 </div>
             ) : (
                 <div className="text-center py-20 bg-surface-light dark:bg-surface-dark rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
-                    <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <span className="material-icons-round text-4xl text-gray-400">campaign</span>
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">Nenhuma vaga publicada</h3>
-                    <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-8">
-                        Você ainda não criou nenhuma vaga. Comece a divulgar suas oportunidades para encontrar os melhores talentos.
-                    </p>
-                    <button
-                        onClick={() => setIsCreateModalOpen(true)}
-                        className="px-8 py-3 bg-primary text-white rounded-lg font-bold hover:bg-opacity-90 transition-all shadow-lg transform hover:-translate-y-0.5"
-                    >
-                        Criar Primeira Vaga
-                    </button>
+                    <span className="material-icons-round text-4xl text-gray-400 mb-4">campaign</span>
+                    <h3 className="text-xl font-bold text-gray-800 dark:text-white">Nenhuma vaga publicada</h3>
+                    <button onClick={() => setIsCreateModalOpen(true)} className="mt-4 px-8 py-3 bg-primary text-white rounded-lg font-bold">Criar Primeira Vaga</button>
                 </div>
             )}
+
             <SuccessModal
                 isOpen={showSuccessModal}
                 onClose={() => setShowSuccessModal(false)}
                 title="Vaga Criada"
-                message="Sua nova vaga foi publicada com sucesso e já está visível para candidatos compatíveis."
+                message="Sua nova vaga foi publicada com sucesso!"
                 buttonText="Ver Minhas Vagas"
             />
         </div>
