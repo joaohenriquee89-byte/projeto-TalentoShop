@@ -23,9 +23,10 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
   const [profileData, setProfileData] = useState({
     phone: '',
     experience_years: '',
-    specialty: '', // Will use first item of specialties array or 'Vendas'
+    specialty: '', // Will use first item of skills array or 'Vendas'
     shopping_mall: '',
-    bio: ''
+    bio: '',
+    resume_url: ''
   });
 
   const userPlan = user?.plan?.toUpperCase() || 'FREE';
@@ -47,12 +48,13 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
           setProfileData({
             phone: userProfile.phone || '',
             experience_years: userProfile.experience_years || '',
-            specialty: userProfile.specialties?.[0] || 'Vendas',
+            specialty: userProfile.skills?.[0] || 'Vendas',
             shopping_mall: userProfile.shopping_mall || '',
-            bio: userProfile.bio || 'Vendedor focado em resultados...'
+            bio: userProfile.bio || 'Vendedor focado em resultados...',
+            resume_url: userProfile.resume_url || ''
           });
 
-          // Update prop user avatar if changed remotely (optional sync)
+          // Update prop user avatar if changed remotely
           if (userProfile.avatar_url && userProfile.avatar_url !== user.avatar) {
             setUser({ ...user, avatar: userProfile.avatar_url });
           }
@@ -100,35 +102,91 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
     job.location.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result as string;
-        setUser({ ...user, avatar: base64String });
-        // TODO: In a real app, upload this file to Supabase Storage and get URL
-      };
-      reader.readAsDataURL(file);
+      try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${user.id}-${Math.random()}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('avatars')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('avatars')
+          .getPublicUrl(filePath);
+
+        setUser({ ...user, avatar: publicUrl });
+
+        // Update profile in DB immediately
+        await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', user.id);
+
+      } catch (error: any) {
+        alert('Erro ao carregar imagem: ' + error.message);
+      }
+    }
+  };
+
+  const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.type !== 'application/pdf') {
+        alert('Por favor, selecione um arquivo PDF.');
+        return;
+      }
+
+      setIsSaving(true);
+      try {
+        const fileName = `${user.id}/resume.pdf`;
+        const { error: uploadError } = await supabase.storage
+          .from('resumes')
+          .upload(fileName, file, {
+            upsert: true,
+            contentType: 'application/pdf'
+          });
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('resumes')
+          .getPublicUrl(fileName);
+
+        setProfileData(prev => ({ ...prev, resume_url: publicUrl }));
+
+        // Update profile in DB
+        await supabase.from('profiles').update({ resume_url: publicUrl }).eq('id', user.id);
+
+        setShowSaveSuccess(true);
+        setTimeout(() => setShowSaveSuccess(false), 3000);
+
+      } catch (error: any) {
+        alert('Erro ao carregar currículo: ' + error.message);
+      } finally {
+        setIsSaving(false);
+      }
     }
   };
 
   const handleSaveProfile = async () => {
     setIsSaving(true);
     try {
-      // Prepare specialties array
-      const specialtiesArray = profileData.specialty.split(',').map(s => s.trim()).filter(s => s !== '');
+      // Prepare skills array
+      const skillsArray = profileData.specialty.split(',').map(s => s.trim()).filter(s => s !== '');
 
       const updates = {
         full_name: user.name,
-        // email: user.email, // Email change usually requires auth re-verification
         phone: profileData.phone,
         experience_years: profileData.experience_years,
-        specialties: specialtiesArray,
+        skills: skillsArray,
         shopping_mall: profileData.shopping_mall,
         bio: profileData.bio,
         updated_at: new Date().toISOString(),
-        // avatar_url: user.avatar // Assuming we eventually upload
       };
 
       const { error } = await supabase
@@ -139,7 +197,8 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
       if (error) throw error;
 
       setIsEditing(false);
-      alert('Perfil atualizado com sucesso!');
+      setShowSaveSuccess(true);
+      setTimeout(() => setShowSaveSuccess(false), 4000);
 
     } catch (err) {
       console.error("Erro ao salvar perfil:", err);
@@ -249,6 +308,26 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
                 />
                 <p className="text-xs text-gray-500 mt-1">Dica: Descreva suas principais conquistas e o que você busca na próxima oportunidade.</p>
               </div>
+              <div className="col-span-1 md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Currículo (PDF)</label>
+                <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <span className="material-icons-round text-3xl text-gray-400">picture_as_pdf</span>
+                  <div className="flex-1">
+                    {profileData.resume_url ? (
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600 dark:text-gray-300 font-medium">Currículo atual carregado</span>
+                        <a href={profileData.resume_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline font-bold">Ver PDF</a>
+                      </div>
+                    ) : (
+                      <span className="text-sm text-gray-500 italic">Nenhum currículo carregado</span>
+                    )}
+                  </div>
+                  <input type="file" id="resume-upload" className="hidden" accept=".pdf" onChange={handleResumeUpload} />
+                  <label htmlFor="resume-upload" className="px-4 py-2 bg-white dark:bg-slate-900 border border-gray-300 dark:border-gray-600 rounded-lg text-xs font-bold text-gray-700 dark:text-gray-200 cursor-pointer hover:bg-gray-50 transition-colors">
+                    {profileData.resume_url ? 'Alterar PDF' : 'Enviar PDF'}
+                  </label>
+                </div>
+              </div>
             </div>
 
             <div className="pt-6 flex gap-3">
@@ -280,7 +359,13 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {showSaveSuccess && (
+        <div className="fixed top-24 right-8 bg-green-500 text-white px-6 py-3 rounded-lg shadow-2xl flex items-center gap-2 animate-bounce-in z-[100] border-2 border-white/20 backdrop-blur-sm">
+          <span className="material-icons-round">check_circle</span>
+          <span className="font-bold">Salvo com sucesso!</span>
+        </div>
+      )}
       <UpgradeModal
         isOpen={upgradeModalOpen}
         onClose={() => setUpgradeModalOpen(false)}
@@ -322,6 +407,19 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
                   <span className="material-icons-round mr-2 text-gray-400">grade</span>
                   <span>Especialidade: {profileData.specialty || '--'}</span>
                 </div>
+                {profileData.resume_url && (
+                  <div className="pt-2">
+                    <a
+                      href={profileData.resume_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center text-sm text-primary dark:text-secondary font-bold hover:underline"
+                    >
+                      <span className="material-icons-round mr-2">description</span>
+                      Ver Meu Currículo PDF
+                    </a>
+                  </div>
+                )}
               </div>
               <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
                 <div className="flex justify-between items-center mb-2">

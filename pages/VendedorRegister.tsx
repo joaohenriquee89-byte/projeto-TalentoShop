@@ -62,6 +62,9 @@ const VendedorRegister: React.FC = () => {
   const [loadingCep, setLoadingCep] = useState(false);
   const [cepError, setCepError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [uploadingResume, setUploadingResume] = useState(false);
+  const resumeInputRef = React.useRef<HTMLInputElement>(null);
 
   const calculateStrength = (password: string) => {
     let score = 0;
@@ -82,6 +85,25 @@ const VendedorRegister: React.FC = () => {
 
 
   const navigate = useNavigate();
+
+  const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== 'application/pdf') {
+      setModalConfig({
+        isOpen: true,
+        type: 'error',
+        title: 'Formato inválido',
+        message: 'Por favor, anexe apenas arquivos em formato PDF.',
+        buttonText: 'Entendido',
+        redirectUrl: ''
+      });
+      return;
+    }
+
+    setResumeFile(file);
+  };
 
   const shoppings = SHOPPINGS_LIST;
 
@@ -264,7 +286,8 @@ const VendedorRegister: React.FC = () => {
               ...exp,
               referenciaTel: exp.referenciaTel.replace(/\D/g, '')
             })),
-            skills: formData.tags.split(',').map(s => s.trim()).filter(s => s !== '')
+            skills: formData.tags.split(',').map(s => s.trim()).filter(s => s !== ''),
+            resume_url: ''
           }
         }
       });
@@ -276,7 +299,32 @@ const VendedorRegister: React.FC = () => {
 
       console.log('Registration success. User created:', authData.user?.id);
 
-      // 2. Success - Show modal immediately
+      // 2. Upload Resume if exists
+      if (resumeFile && authData.user) {
+        setUploadingResume(true);
+        try {
+          const fileName = `${authData.user.id}/resume.pdf`;
+          const { error: uploadError } = await supabase.storage
+            .from('resumes')
+            .upload(fileName, resumeFile, { upsert: true });
+
+          if (uploadError) throw uploadError;
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('resumes')
+            .getPublicUrl(fileName);
+
+          // Update profile with the URL
+          await supabase.from('profiles').update({ resume_url: publicUrl }).eq('id', authData.user.id);
+          console.log('Resume uploaded and profile updated');
+        } catch (uploadErr) {
+          console.error('Error uploading resume:', uploadErr);
+        } finally {
+          setUploadingResume(false);
+        }
+      }
+
+      // 3. Success - Show modal immediately
       setModalConfig({
         isOpen: true,
         type: 'success',
@@ -707,9 +755,37 @@ const VendedorRegister: React.FC = () => {
 
               <div className="col-span-1 md:col-span-2 mt-4 p-6 border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-2xl text-center bg-gray-50/50 dark:bg-slate-900/30">
                 <span className="material-symbols-outlined text-gray-400 text-3xl mb-2">picture_as_pdf</span>
-                <p className="text-sm font-medium text-gray-600 dark:text-slate-300">Anexe seu currículo em PDF (opcional)</p>
-                <p className="text-xs text-gray-400 mt-1">Isso ajuda lojas tradicionais a verem seu histórico completo.</p>
-                <button className="mt-4 text-primary font-bold text-sm bg-primary/10 px-6 py-2 rounded-full hover:bg-primary/20 transition-colors">Selecionar Arquivo</button>
+                <p className="text-sm font-medium text-gray-600 dark:text-slate-300">
+                  {resumeFile ? 'Currículo Selecionado!' : 'Anexe seu currículo em PDF (opcional)'}
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  {resumeFile ? `Arquivo: ${resumeFile.name}` : 'Isso ajuda lojas tradicionais a verem seu histórico completo.'}
+                </p>
+                <input
+                  type="file"
+                  ref={resumeInputRef}
+                  className="hidden"
+                  accept=".pdf"
+                  onChange={handleResumeUpload}
+                />
+                <button
+                  onClick={() => resumeInputRef.current?.click()}
+                  disabled={uploadingResume}
+                  className={`mt-4 font-bold text-sm px-6 py-2 rounded-full transition-colors flex items-center justify-center gap-2 mx-auto ${resumeFile ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-primary/10 text-primary hover:bg-primary/20'
+                    }`}
+                >
+                  {uploadingResume ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                      Carregando...
+                    </>
+                  ) : (
+                    <>
+                      <span className="material-icons-round text-sm">{resumeFile ? 'check_circle' : 'file_upload'}</span>
+                      {resumeFile ? 'Alterar Arquivo' : 'Selecionar Arquivo'}
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           )}
