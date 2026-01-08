@@ -104,15 +104,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch (err) {
             console.error('Unexpected error fetching profile/subscription:', err);
         } finally {
-            // Ensure any loading state dependent on this finishes
+            console.log('fetchProfile finished. Current user state:', user?.id ? 'LOGGED_IN' : 'NOT_LOGGED_IN');
         }
     };
 
     useEffect(() => {
+        console.log('AuthProvider mounted');
         // Fail-safe: Ensure loading is never stuck
         const failSafe = setTimeout(() => {
             if (loading) {
-                console.warn('Auth timeout: force hiding spinner');
+                console.warn('Auth timeout reached (5s). Forcing loading = false. This might happen due to slow Supabase response.');
                 setLoading(false);
             }
         }, 5000);
@@ -120,6 +121,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Get initial session
         supabase.auth.getSession()
             .then(({ data: { session } }) => {
+                console.log('Initial session check:', session ? 'SESSION_FOUND' : 'NO_SESSION');
                 setSession(session);
                 return fetchProfile(session);
             })
@@ -127,13 +129,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 console.error('Session init error:', err);
             })
             .finally(() => {
+                console.log('Auth initialization complete');
                 setLoading(false);
                 clearTimeout(failSafe);
             });
 
         // Listen for changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-            console.log('Auth state change:', _event, session?.user?.id);
+            console.log('Auth event transition:', _event, 'User ID:', session?.user?.id);
             setSession(session);
             try {
                 if (session) {
@@ -149,6 +152,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
 
         return () => {
+            console.log('AuthProvider unmounting');
             subscription.unsubscribe();
             clearTimeout(failSafe);
         };
