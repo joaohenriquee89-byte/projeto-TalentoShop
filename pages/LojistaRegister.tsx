@@ -723,7 +723,11 @@ const LojistaRegister: React.FC = () => {
             )}
 
             <div className="pt-6">
-              <button className="w-full bg-primary text-white font-bold py-4 rounded-xl shadow-lg hover:bg-petrol-700 hover:shadow-xl transform hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2" onClick={handleNext}>
+              <button
+                className="w-full bg-primary text-white font-bold py-4 rounded-xl shadow-lg hover:bg-petrol-700 hover:shadow-xl transform hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handleNext}
+                disabled={loading}
+              >
                 {step === 2 ? (loading ? 'Cadastrando...' : 'Finalizar Cadastro') : 'Continuar'}
                 <span className="material-icons-round">{step === 2 ? 'check_circle' : 'arrow_forward'}</span>
               </button>

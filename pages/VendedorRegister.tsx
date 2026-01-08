@@ -793,7 +793,11 @@ const VendedorRegister: React.FC = () => {
               <span className="material-symbols-outlined text-sm">arrow_back</span>
               Voltar
             </button>
-            <button className="px-8 py-2.5 bg-primary text-white font-medium rounded-lg shadow-md hover:bg-opacity-90 transition-all" onClick={handleNext}>
+            <button
+              className="px-8 py-2.5 bg-primary text-white font-medium rounded-lg shadow-md hover:bg-opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={handleNext}
+              disabled={loading}
+            >
               {step === 3 ? (loading ? 'Cadastrando...' : 'Finalizar Cadastro') : 'Próximo Passo'}
             </button>
           </div>

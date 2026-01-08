@@ -115,27 +115,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 console.warn('Auth timeout: force hiding spinner');
                 setLoading(false);
             }
-        }, 8000);
+        }, 5000);
 
         // Get initial session
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setSession(session);
-            fetchProfile(session).finally(() => {
+        supabase.auth.getSession()
+            .then(({ data: { session } }) => {
+                setSession(session);
+                return fetchProfile(session);
+            })
+            .catch(err => {
+                console.error('Session init error:', err);
+            })
+            .finally(() => {
                 setLoading(false);
                 clearTimeout(failSafe);
             });
-        });
 
         // Listen for changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-            console.log('Auth state change:', _event);
+            console.log('Auth state change:', _event, session?.user?.id);
             setSession(session);
-            if (session) {
-                await fetchProfile(session);
-            } else {
-                setUser(null);
+            try {
+                if (session) {
+                    await fetchProfile(session);
+                } else {
+                    setUser(null);
+                }
+            } catch (err) {
+                console.error('Auth state change handler error:', err);
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         });
 
         return () => {
