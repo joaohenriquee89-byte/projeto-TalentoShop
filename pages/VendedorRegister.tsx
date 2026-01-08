@@ -241,7 +241,9 @@ const VendedorRegister: React.FC = () => {
     }
     setLoading(true);
     try {
-      // 1. Create auth user WITH metadata as backup
+      // 1. Create auth user WITH ALL metadata as backup
+      // The database trigger 'handle_new_user' will automatically create the profile 
+      // and subscription in the background.
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -271,47 +273,10 @@ const VendedorRegister: React.FC = () => {
         console.error('Auth error:', authError);
         throw authError;
       }
-      if (!authData.user) throw new Error("Erro ao criar usuário");
 
-      console.log('Step 2: Auth user created, ID:', authData.user.id);
+      console.log('Registration success. User created:', authData.user?.id);
 
-      // 2. Manually create profile (bypass broken trigger)
-      const profileData = {
-        id: authData.user.id,
-        email: formData.email,
-        full_name: `${formData.nome} ${formData.sobrenome}`,
-        user_type: 'vendedor',
-        cpf: formData.cpf.replace(/\D/g, ''),
-        rg: formData.rg.replace(/\D/g, ''),
-        birth_date: formData.nascimento,
-        bio: formData.bio || '',
-        phone: formData.celular.replace(/\D/g, ''),
-        escolaridade: formData.escolaridade || '',
-        disponibilidade: formData.disponibilidade || '',
-        address: { ...address, cep: address.cep.replace(/\D/g, '') },
-        company_name: '',
-        shopping_mall: '',
-        experiences: experiences.map(exp => ({
-          ...exp,
-          referenciaTel: exp.referenciaTel.replace(/\D/g, '')
-        })),
-        skills: formData.tags.split(',').map(s => s.trim()).filter(s => s !== '')
-      };
-
-      console.log('Step 3: Upserting profile...');
-
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert([profileData], { onConflict: 'id' });
-
-      if (profileError) {
-        // Silent error as trigger + auto-repair will fix it
-        console.warn('Silent Profile Error:', profileError.message);
-      }
-
-      console.log('Step 4: Profile created successfully!');
-
-      // Success
+      // 2. Success - Show modal immediately
       setModalConfig({
         isOpen: true,
         type: 'success',

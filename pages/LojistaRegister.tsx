@@ -254,7 +254,9 @@ const LojistaRegister: React.FC = () => {
     }
     setLoading(true);
     try {
-      // 1. Create auth user WITH metadata as backup
+      // 1. Create auth user WITH ALL metadata.
+      // The database trigger 'handle_new_user' will automatically create the profile 
+      // and subscription in the background.
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: responsibleData.email,
         password: responsibleData.password,
@@ -280,52 +282,10 @@ const LojistaRegister: React.FC = () => {
         console.error('Auth error:', authError);
         throw authError;
       }
-      if (!authData.user) throw new Error("Erro ao criar usuário");
 
-      console.log('Step 2: Auth user created, ID:', authData.user.id);
+      console.log('Registration success. User created:', authData.user?.id);
 
-      // 2. Manually create profile
-      const profileData = {
-        id: authData.user.id,
-        email: responsibleData.email,
-        full_name: responsibleData.nome,
-        user_type: 'lojista',
-        company_name: companyData.nomeEmpresa,
-        unit_type: companyData.tipoUnidade,
-        sector: isOtherSetor ? manualSetor : selectedSetor,
-        shopping_mall: selectedShopping,
-        address: { ...address, cep: cep.replace(/\D/g, '') },
-        cnpj: companyData.cnpj.replace(/\D/g, ''),
-        phone: responsibleData.celular.replace(/\D/g, ''),
-        rg: responsibleData.rg.replace(/\D/g, ''),
-        responsible_cpf: responsibleData.cpf.replace(/\D/g, ''),
-        responsible_phone: responsibleData.celular.replace(/\D/g, ''),
-        responsible_function: responsibleData.funcao,
-        responsible_contact: {
-          nome: responsibleData.nome,
-          cpf: responsibleData.cpf.replace(/\D/g, ''),
-          rg: responsibleData.rg.replace(/\D/g, ''),
-          funcao: responsibleData.funcao,
-          celular: responsibleData.celular.replace(/\D/g, ''),
-          email: responsibleData.email
-        }
-      };
-
-      console.log('Step 3: Upserting profile...');
-
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert([profileData], { onConflict: 'id' });
-
-      if (profileError) {
-        // We don't throw here because metadata trigger + auto-repair will eventually fix it.
-        // We only log the error.
-        console.warn('Silent Profile Error (will be fixed by trigger/auto-repair):', profileError.message);
-      }
-
-      console.log('Step 4: Profile created successfully!');
-
-      // Success
+      // 2. Success - Show modal immediately
       setModalConfig({
         isOpen: true,
         type: 'success',

@@ -25,136 +25,99 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             return;
         }
 
+        console.log('Fetching profile for:', currentSession.user.id);
+
         try {
-            let { data: profile, error } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', currentSession.user.id)
-                .single();
+            // 1. Concurrent Fetch: Get Profile and Subscription
+            const [profileRes, subRes] = await Promise.all([
+                supabase.from('profiles').select('*').eq('id', currentSession.user.id).single(),
+                supabase.from('subscriptions').select('plan_name, status, expires_at')
+                    .eq('profile_id', currentSession.user.id)
+                    .eq('status', 'active')
+                    .gt('expires_at', new Date().toISOString())
+                    .maybeSingle()
+            ]);
 
-            if (error) {
-                console.error('Error fetching profile:', error);
+            let profile = profileRes.data;
+            const profileError = profileRes.error;
+            const subscription = subRes.data;
 
-                // AUTO-REPAIR: If profile doesn't exist but we have a session, create it!
-                if (error.code === 'PGRST116' || !profile) {
-                    console.log('Profile missing. Attempting auto-repair from metadata...');
-                    const { data: newProfile, error: repairError } = await supabase
-                        .from('profiles')
-                        .upsert({
-                            id: currentSession.user.id,
-                            email: currentSession.user.email,
-                            full_name: currentSession.user.user_metadata?.full_name || 'Usuário',
-                            user_type: currentSession.user.user_metadata?.user_type || 'vendedor',
-                            phone: currentSession.user.user_metadata?.phone || ''
-                        })
-                        .select()
-                        .maybeSingle();
+            // 2. Resilience: If profile is missing, use metadata as source of truth
+            const meta = currentSession.user.user_metadata;
 
-                    if (repairError || !newProfile) {
-                        console.error('Auto-repair failed:', repairError);
-                        return;
-                    }
-                    profile = newProfile;
-                } else {
-                    return;
-                }
+            if (profileError || !profile) {
+                console.warn('Profile sync delay or missing. Using metadata for UI.');
             }
 
-            // Fetch Active Subscription
-            let planName = 'FREE';
-            const { data: subscription, error: subError } = await supabase
-                .from('subscriptions')
-                .select('plan_name, status, expires_at')
-                .eq('profile_id', currentSession.user.id)
-                .eq('status', 'active')
-                .gt('expires_at', new Date().toISOString())
-                .maybeSingle();
+            // 3. Subscription fallback
+            const planName = subscription?.plan_name || 'FREE';
 
-            if (subscription) {
-                planName = subscription.plan_name;
-            } else {
-                // AUTO-REPAIR: If no active subscription found, create a FREE one
-                console.log('Subscription missing. Attempting auto-repair...');
-                const { error: repairSubError } = await supabase
-                    .from('subscriptions')
-                    .insert({
-                        profile_id: currentSession.user.id,
-                        status: 'active',
-                        plan_name: 'FREE',
-                        started_at: new Date().toISOString(),
-                        expires_at: new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000).toISOString()
-                    });
+            // 4. Update state immediately with best available data
+            const appUser: User = {
+                id: currentSession.user.id,
+                name: profile?.full_name || meta?.full_name || currentSession.user.email || 'Usuário',
+                role: (profile?.user_type || meta?.user_type) === 'lojista' ? UserRole.LOJISTA : UserRole.VENDEDOR,
+                email: profile?.email || currentSession.user.email || '',
+                plan: planName,
+                avatar: profile?.avatar_url || meta?.avatar_url
+            };
 
-                if (repairSubError) {
-                    console.error('Subscription auto-repair failed:', repairSubError);
-                }
-            }
+            setUser(appUser);
+            console.log('App User state updated:', appUser.role, appUser.plan);
 
-            if (profile) {
-                const appUser: User = {
-                    id: currentSession.user.id,
-                    name: profile.full_name || currentSession.user.email || 'Usuário',
-                    role: profile.user_type === 'vendedor' ? UserRole.VENDEDOR : UserRole.LOJISTA,
-                    email: profile.email,
-                    plan: planName,
-                    avatar: profile.avatar_url || currentSession.user.user_metadata?.avatar_url
-                };
-                setUser(appUser);
-            }
         } catch (err) {
-            console.error('Unexpected error fetching profile/subscription:', err);
+            console.error('Critical failure in fetchProfile:', err);
         } finally {
-            console.log('fetchProfile finished. Current user state:', user?.id ? 'LOGGED_IN' : 'NOT_LOGGED_IN');
+            console.log('fetchProfile finished');
         }
     };
 
     useEffect(() => {
         console.log('AuthProvider mounted');
-        // Fail-safe: Ensure loading is never stuck
-        const failSafe = setTimeout(() => {
-            if (loading) {
-                console.warn('Auth timeout reached (5s). Forcing loading = false. This might happen due to slow Supabase response.');
+
+        let mounted = true;
+
+        // Fail-safe: Always hide loading after 6 seconds max
+        const timer = setTimeout(() => {
+            if (mounted && loading) {
+                console.warn('Auth loading fail-safe triggered');
                 setLoading(false);
             }
-        }, 5000);
+        }, 6000);
 
-        // Get initial session
-        supabase.auth.getSession()
-            .then(({ data: { session } }) => {
-                console.log('Initial session check:', session ? 'SESSION_FOUND' : 'NO_SESSION');
-                setSession(session);
-                return fetchProfile(session);
-            })
-            .catch(err => {
-                console.error('Session init error:', err);
-            })
-            .finally(() => {
-                console.log('Auth initialization complete');
-                setLoading(false);
-                clearTimeout(failSafe);
-            });
+        // Initial setup
+        const initAuth = async () => {
+            const { data: { session: initialSession } } = await supabase.auth.getSession();
+            if (!mounted) return;
+
+            setSession(initialSession);
+            if (initialSession) {
+                await fetchProfile(initialSession);
+            }
+            setLoading(false);
+            clearTimeout(timer);
+        };
+
+        initAuth();
 
         // Listen for changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-            console.log('Auth event transition:', _event, 'User ID:', session?.user?.id);
-            setSession(session);
-            try {
-                if (session) {
-                    await fetchProfile(session);
-                } else {
-                    setUser(null);
-                }
-            } catch (err) {
-                console.error('Auth state change handler error:', err);
-            } finally {
-                setLoading(false);
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
+            console.log('Auth transition:', _event);
+            if (!mounted) return;
+
+            setSession(newSession);
+            if (newSession) {
+                await fetchProfile(newSession);
+            } else {
+                setUser(null);
             }
+            setLoading(false);
         });
 
         return () => {
-            console.log('AuthProvider unmounting');
+            mounted = false;
             subscription.unsubscribe();
-            clearTimeout(failSafe);
+            clearTimeout(timer);
         };
     }, []);
 

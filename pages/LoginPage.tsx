@@ -48,17 +48,11 @@ const LoginPage: React.FC<LoginPageProps> = () => {
       if (authError) throw authError;
 
       if (data.user) {
-        // Auth was successful. AuthContext will detect the session change and 
-        // fetch/repair the profile automatically.
+        console.log('Login successful, waiting for redirect...');
+        // We set loading to false here to allow the UI to respond.
+        // The useEffect will handle the redirect once AuthContext updates.
+        setLoading(false);
       }
-
-      // If we got here, auth was successful. 
-      // The useEffect will handle the redirect once AuthContext updates.
-      // However, if AuthContext is slow, the user is stuck on "Entrando...".
-      // Let's add a timeout or check if we should stop loading.
-      setTimeout(() => {
-        if (!user) setLoading(false);
-      }, 5000);
 
     } catch (error: any) {
       console.error("Login error:", error);
