@@ -42,15 +42,22 @@ const Candidates: React.FC<CandidatesProps> = ({ user }) => {
                 if (error) throw error;
 
                 if (data) {
-                    const mappedCandidates: Candidate[] = data.map(profile => ({
-                        id: profile.id,
-                        name: profile.full_name || 'Candidato',
-                        title: profile.sector ? `Vendedor • ${profile.sector}` : 'Vendedor',
-                        experience: profile.bio || 'Sem descrição de experiência.',
-                        matchScore: Math.floor(Math.random() * (99 - 75 + 1)) + 75,
-                        tags: profile.skills || ['Vendas', 'Atendimento'],
-                        avatar: profile.avatar_url || `https://picsum.photos/seed/${profile.id}/150/150`
-                    }));
+                    const mappedCandidates: Candidate[] = data.map(profile => {
+                        // Better baseline match score logic (not purely random)
+                        // Simple heuristic: if skills exist, score is 80+, otherwise 70+
+                        const baseScore = profile.skills && profile.skills.length > 0 ? 80 : 70;
+                        const jitter = Math.floor(Math.random() * 15); // Add some variation
+
+                        return {
+                            id: profile.id,
+                            name: profile.full_name || 'Candidato',
+                            title: profile.sector ? `Vendedor • ${profile.sector}` : 'Vendedor',
+                            experience: profile.bio || 'Sem descrição de experiência.',
+                            matchScore: Math.min(99, baseScore + jitter),
+                            tags: profile.skills || ['Vendas', 'Atendimento'],
+                            avatar: profile.avatar_url || `https://picsum.photos/seed/${profile.id}/150/150`
+                        };
+                    });
                     setCandidates(mappedCandidates);
                 }
             } catch (err) {

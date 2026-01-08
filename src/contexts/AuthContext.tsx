@@ -59,7 +59,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     role: profile.user_type === 'vendedor' ? UserRole.VENDEDOR : UserRole.LOJISTA,
                     email: profile.email,
                     plan: planName,
-                    avatar: currentSession.user.user_metadata?.avatar_url
+                    avatar: profile.avatar_url || currentSession.user.user_metadata?.avatar_url
                 };
                 setUser(appUser);
             }
@@ -76,11 +76,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
 
         // Listen for changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
             setSession(session);
             // If session changed (login/logout), fetch profile again
             if (session) {
-                fetchProfile(session);
+                await fetchProfile(session);
             } else {
                 setUser(null);
             }

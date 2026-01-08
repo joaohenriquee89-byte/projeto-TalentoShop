@@ -106,53 +106,53 @@ const Settings: React.FC<SettingsProps> = ({ user, setUser }) => {
                 </div>
             </div>
 
-            {/* AI Diagnostics Section */}
-            <div className="mt-8 bg-surface-light dark:bg-surface-dark shadow rounded-xl p-8 border border-gray-100 dark:border-gray-700">
-                <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
-                    <span className="material-icons-round text-secondary">psychology</span>
-                    Diagnóstico de IA
-                </h2>
-                <div className="space-y-4">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Verifique a conectividade com o módulo de Inteligência Artificial para garantir que o ranqueamento de candidatos esteja funcionando.
-                    </p>
+            {/* AI Diagnostics Section (Dev Only) */}
+            {(process.env.NODE_ENV === 'development' || user.email === 'joaohenriquee89@gmail.com') && (
+                <div className="mt-8 bg-surface-light dark:bg-surface-dark shadow rounded-xl p-8 border border-gray-100 dark:border-gray-700">
+                    <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                        <span className="material-icons-round text-secondary">psychology</span>
+                        Diagnóstico de IA
+                    </h2>
+                    <div className="space-y-4">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                            Verifique a conectividade com o módulo de Inteligência Artificial para garantir que o ranqueamento de candidatos esteja funcionando.
+                        </p>
 
-                    <div className="flex gap-4 items-start">
-                        <button
-                            onClick={runAiTest}
-                            disabled={aiStatus === 'loading'}
-                            className="px-4 py-2 bg-secondary text-white rounded-lg font-bold hover:bg-opacity-90 transition-colors disabled:opacity-50 flex items-center gap-2"
-                        >
-                            {aiStatus === 'loading' ? (
-                                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                            ) : (
-                                <span className="material-icons-round text-sm">play_arrow</span>
-                            )}
-                            Executar Teste de IA
-                        </button>
+                        <div className="flex gap-4 items-start">
+                            <button
+                                onClick={runAiTest}
+                                disabled={aiStatus === 'loading'}
+                                className="px-4 py-2 bg-secondary text-white rounded-lg font-bold hover:bg-opacity-90 transition-colors disabled:opacity-50 flex items-center gap-2"
+                            >
+                                {aiStatus === 'loading' ? (
+                                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                                ) : (
+                                    <span className="material-icons-round text-sm">play_arrow</span>
+                                )}
+                                Executar Health Check
+                            </button>
 
-                        {aiResult && (
-                            <div className={`flex-1 p-4 rounded-lg border text-sm font-mono animate-fade-in ${aiResult.fallback ? 'bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-200' :
-                                aiResult.status === 'ok' ? 'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-200' :
-                                    'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-200'
-                                }`}>
-                                <div className="flex items-center gap-2 font-bold mb-1">
-                                    <span className="material-icons-round text-sm">
-                                        {aiResult.fallback ? 'warning' : aiResult.status === 'ok' ? 'check_circle' : 'error'}
-                                    </span>
-                                    <span>
-                                        {aiResult.fallback ? 'Modo de Fallback Ativo' : aiResult.status === 'ok' ? 'Sistema Operacional' : 'Erro no Sistema'}
-                                    </span>
+                            {aiResult && (
+                                <div className={`flex-1 p-4 rounded-lg border text-sm font-mono animate-fade-in ${aiResult.fallback ? 'bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-200' :
+                                    aiResult.status === 'ok' ? 'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-200' :
+                                        'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-200'
+                                    }`}>
+                                    <div className="flex items-center gap-2 font-bold mb-1">
+                                        <span>
+                                            {aiResult.status === 'ok' ? 'Sistema Operacional' : 'Erro no Sistema'}
+                                        </span>
+                                    </div>
+                                    <p className="mb-1"><strong>Status:</strong> {aiResult.status}</p>
+                                    <p className="mb-1"><strong>Edge:</strong> {aiResult.edge}</p>
+                                    <p className="mb-1"><strong>Provider:</strong> {aiResult.provider} ({aiResult.provider_config})</p>
+                                    {aiResult.latency && <p className="mb-1"><strong>Latência:</strong> {aiResult.latency}</p>}
+                                    {aiResult.details && <p className="mt-2 text-xs opacity-80 border-t border-black/10 pt-1">Debug: {aiResult.details}</p>}
                                 </div>
-                                <p className="mb-1"><strong>Status:</strong> {aiResult.message || aiResult.status}</p>
-                                {aiResult.modelo_usado && <p className="mb-1"><strong>Modelo:</strong> {aiResult.modelo_usado}</p>}
-                                {aiResult.tempo_de_resposta && <p className="mb-1"><strong>Latência:</strong> {aiResult.tempo_de_resposta}</p>}
-                                {aiResult.details && <p className="mt-2 text-xs opacity-80 border-t border-black/10 pt-1">Debug: {aiResult.details}</p>}
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 };
