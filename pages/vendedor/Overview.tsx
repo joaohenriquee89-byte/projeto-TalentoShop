@@ -185,8 +185,7 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
         experience_years: profileData.experience_years,
         skills: skillsArray,
         shopping_mall: profileData.shopping_mall,
-        bio: profileData.bio,
-        updated_at: new Date().toISOString(),
+        bio: profileData.bio
       };
 
       const { error } = await supabase
@@ -200,9 +199,10 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
       setShowSaveSuccess(true);
       setTimeout(() => setShowSaveSuccess(false), 4000);
 
-    } catch (err) {
+    } catch (err: any) {
       console.error("Erro ao salvar perfil:", err);
-      alert("Erro ao salvar alterações. Tente novamente.");
+      const errorMsg = err.message || (err.error_description) || "Erro desconhecido";
+      alert(`Erro ao salvar alterações: ${errorMsg}. Tente novamente.`);
     } finally {
       setIsSaving(false);
     }
