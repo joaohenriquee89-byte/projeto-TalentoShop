@@ -107,7 +107,7 @@ const Settings: React.FC<SettingsProps> = ({ user, setUser }) => {
             </div>
 
             {/* AI Diagnostics Section (Dev Only) */}
-            {(process.env.NODE_ENV === 'development' || user.email === 'joaohenriquee89@gmail.com') && (
+            {(process.env.NODE_ENV === 'development' || user.role === 'ADMIN' || user.email === 'joaohenriquee89@gmail.com') && (
                 <div className="mt-8 bg-surface-light dark:bg-surface-dark shadow rounded-xl p-8 border border-gray-100 dark:border-gray-700">
                     <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
                         <span className="material-icons-round text-secondary">psychology</span>
