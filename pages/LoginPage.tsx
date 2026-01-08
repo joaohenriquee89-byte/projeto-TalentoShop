@@ -48,21 +48,8 @@ const LoginPage: React.FC<LoginPageProps> = () => {
       if (authError) throw authError;
 
       if (data.user) {
-        // Verification fetch
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('id', data.user.id)
-          .single();
-
-        if (profileError) {
-          console.error("Profile not found or access denied:", profileError);
-          // We don't necessarily throw here because AuthContext might handle it, 
-          // but for the user it might be stuck.
-          if (profileError.code === 'PGRST116') {
-            throw new Error("Perfil não encontrado. Por favor, entre em contato com o suporte.");
-          }
-        }
+        // Auth was successful. AuthContext will detect the session change and 
+        // fetch/repair the profile automatically.
       }
 
       // If we got here, auth was successful. 

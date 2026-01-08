@@ -241,12 +241,17 @@ const VendedorRegister: React.FC = () => {
     }
     setLoading(true);
     try {
-      console.log('Step 1: Creating auth user WITHOUT metadata...');
-
-      // 1. Create auth user WITHOUT any metadata to avoid trigger issues
+      // 1. Create auth user WITH metadata as backup
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
-        password: formData.password
+        password: formData.password,
+        options: {
+          data: {
+            full_name: `${formData.nome} ${formData.sobrenome}`,
+            user_type: 'vendedor',
+            phone: formData.celular.replace(/\D/g, '')
+          }
+        }
       });
 
       if (authError) {
@@ -280,11 +285,11 @@ const VendedorRegister: React.FC = () => {
         skills: formData.tags.split(',').map(s => s.trim()).filter(s => s !== '')
       };
 
-      console.log('Step 3: Creating profile manually...');
+      console.log('Step 3: Upserting profile...');
 
       const { error: profileError } = await supabase
         .from('profiles')
-        .insert([profileData]);
+        .upsert([profileData], { onConflict: 'id' });
 
       if (profileError) {
         console.error('Profile error:', profileError);
@@ -320,7 +325,7 @@ const VendedorRegister: React.FC = () => {
 
       if (msg.includes("User already registered")) {
         title = "Conta já existe";
-        msg = "Este e-mail já está cadastrado. Por favor, faça login.";
+        msg = "Este e-mail já está em nosso sistema. Por favor, faça login para acessar seu perfil. Se houver dados pendentes, eles serão sincronizados automaticamente.";
         btnText = "Ir para Login";
         redirect = "/login";
       } else if (msg.includes("Database error")) {

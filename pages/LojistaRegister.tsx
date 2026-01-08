@@ -254,12 +254,17 @@ const LojistaRegister: React.FC = () => {
     }
     setLoading(true);
     try {
-      console.log('Step 1: Creating auth user WITHOUT metadata...');
-
-      // 1. Create auth user WITHOUT metadata to avoid trigger issues
+      // 1. Create auth user WITH metadata as backup
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: responsibleData.email,
-        password: responsibleData.password
+        password: responsibleData.password,
+        options: {
+          data: {
+            full_name: responsibleData.nome,
+            user_type: 'lojista',
+            phone: responsibleData.celular.replace(/\D/g, '')
+          }
+        }
       });
 
       if (authError) {
@@ -297,11 +302,11 @@ const LojistaRegister: React.FC = () => {
         }
       };
 
-      console.log('Step 3: Creating profile manually...');
+      console.log('Step 3: Upserting profile...');
 
       const { error: profileError } = await supabase
         .from('profiles')
-        .insert([profileData]);
+        .upsert([profileData], { onConflict: 'id' });
 
       if (profileError) {
         console.error('Profile error:', profileError);
@@ -329,7 +334,7 @@ const LojistaRegister: React.FC = () => {
 
       if (msg.includes("User already registered")) {
         title = "Conta já existe";
-        msg = "Este e-mail já está cadastrado. Por favor, faça login.";
+        msg = "Este e-mail já está em nosso sistema. Por favor, faça login para acessar seu painel. Se houver dados pendentes, eles serão sincronizados automaticamente.";
         btnText = "Ir para Login";
         redirect = "/login";
       }
