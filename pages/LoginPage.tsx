@@ -37,33 +37,41 @@ const LoginPage: React.FC<LoginPageProps> = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setErrorMsg(''); // Clear previous errors
+    setErrorMsg('');
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) throw error;
+      if (authError) throw authError;
 
-      // Check if user exists but has no profile (edge case from previous broken registrations)
       if (data.user) {
-        // Initial profile fetch to ensure it exists before redirecting
-        const { data: profile } = await supabase
+        // Verification fetch
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('id')
           .eq('id', data.user.id)
           .single();
 
-        if (!profile) {
-          console.warn("User logged in but has no profile. This shouldn't happen with new fixes.");
-          // Optional: Redirect to a "Complete Profile" page if we built one
+        if (profileError) {
+          console.error("Profile not found or access denied:", profileError);
+          // We don't necessarily throw here because AuthContext might handle it, 
+          // but for the user it might be stuck.
+          if (profileError.code === 'PGRST116') {
+            throw new Error("Perfil não encontrado. Por favor, entre em contato com o suporte.");
+          }
         }
       }
 
-      // No need to fetch profile or set user manually here.
-      // AuthContext detects onAuthStateChange -> fetches profile -> updates 'user' state -> useEffect above redirects.
+      // If we got here, auth was successful. 
+      // The useEffect will handle the redirect once AuthContext updates.
+      // However, if AuthContext is slow, the user is stuck on "Entrando...".
+      // Let's add a timeout or check if we should stop loading.
+      setTimeout(() => {
+        if (!user) setLoading(false);
+      }, 5000);
 
     } catch (error: any) {
       console.error("Login error:", error);
@@ -71,12 +79,12 @@ const LoginPage: React.FC<LoginPageProps> = () => {
       if (msg === "Invalid login credentials") {
         msg = "E-mail ou senha incorretos. Tente novamente.";
       } else if (msg === "Email not confirmed") {
-        msg = "E-mail não confirmado. Verifique sua caixa de entrada (incluindo SPAM) e clique no link de confirmação.";
+        msg = "E-mail não confirmado. Verifique seu e-mail.";
       } else {
-        msg = "Falha ao entrar: " + msg;
+        msg = "Erro ao entrar: " + msg;
       }
       setErrorMsg(msg);
-      setLoading(false); // Stop loading only on error. On success, we wait for redirect.
+      setLoading(false);
     }
   };
 

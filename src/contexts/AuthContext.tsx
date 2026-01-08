@@ -65,6 +65,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
         } catch (err) {
             console.error('Unexpected error fetching profile/subscription:', err);
+        } finally {
+            // Ensure any loading state dependent on this finishes
         }
     };
 
