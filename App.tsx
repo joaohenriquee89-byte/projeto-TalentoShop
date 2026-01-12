@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage';
 import VendedorRegister from './pages/VendedorRegister';
 import LojistaRegister from './pages/LojistaRegister';
 import RegisterSelection from './pages/RegisterSelection';
+import ResetPassword from './pages/ResetPassword';
 import VendedorOverview from './pages/vendedor/Overview';
 import VendedorJobs from './pages/vendedor/Jobs';
 import VendedorApplications from './pages/vendedor/Applications';
@@ -82,6 +83,7 @@ const MainRoutes: React.FC<{ theme: 'light' | 'dark', toggleTheme: () => void, s
             <Route path="/register/lojista" element={<LojistaRegister />} />
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/limit" element={<LimitPage />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
             {/* Dashboard Routes (Wrapped in Layout) */}
             <Route
@@ -161,7 +163,7 @@ const ConditionalNavbar: React.FC<{
 }> = ({ user, theme, toggleTheme, onLogout }) => {
   const location = useLocation();
   // Hide Navbar on Login/Register/Limit pages AND Dashboard pages (Layout handles Dashboard)
-  const hiddenOn = ['/login', '/register', '/register/vendedor', '/register/lojista', '/limit'];
+  const hiddenOn = ['/login', '/register', '/register/vendedor', '/register/lojista', '/limit', '/reset-password'];
   const isDashboard = location.pathname.includes('/dashboard');
 
   if (hiddenOn.includes(location.pathname) || isDashboard) return null;
@@ -172,7 +174,7 @@ const ConditionalNavbar: React.FC<{
 const ConditionalFooter: React.FC = () => {
   const location = useLocation();
   // Hide Footer on Auth pages and Dashboard pages
-  const hiddenOn = ['/login', '/register', '/register/vendedor', '/register/lojista', '/limit'];
+  const hiddenOn = ['/login', '/register', '/register/vendedor', '/register/lojista', '/limit', '/reset-password'];
   const isDashboard = location.pathname.includes('/dashboard');
 
   if (hiddenOn.includes(location.pathname) || isDashboard) return null;

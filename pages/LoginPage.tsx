@@ -17,11 +17,25 @@ const LoginPage: React.FC<LoginPageProps> = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotSuccess, setForgotSuccess] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const redirectPath = searchParams.get('redirect');
 
   const [errorMsg, setErrorMsg] = useState('');
+
+  // Load remembered email
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('remembered_email');
+    if (savedEmail) {
+      setEmail(savedEmail);
+      setRememberMe(true);
+    }
+  }, []);
 
   // Auto-redirect if already logged in
   useEffect(() => {
@@ -49,8 +63,14 @@ const LoginPage: React.FC<LoginPageProps> = () => {
 
       if (data.user) {
         console.log('Login successful, waiting for redirect...');
-        // We set loading to false here to allow the UI to respond.
-        // The useEffect will handle the redirect once AuthContext updates.
+
+        // Handle Remember Me
+        if (rememberMe) {
+          localStorage.setItem('remembered_email', email);
+        } else {
+          localStorage.removeItem('remembered_email');
+        }
+
         setLoading(false);
       }
 
@@ -87,6 +107,23 @@ const LoginPage: React.FC<LoginPageProps> = () => {
       console.error(`${provider} login error:`, error);
       setErrorMsg(`Erro ao entrar com ${provider === 'google' ? 'Google' : 'LinkedIn'}: ${error.message}`);
       setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      setForgotSuccess(true);
+    } catch (error: any) {
+      console.error("Reset password error:", error);
+      alert("Erro ao enviar e-mail de recuperação: " + error.message);
+    } finally {
+      setForgotLoading(false);
     }
   };
 
@@ -207,11 +244,27 @@ const LoginPage: React.FC<LoginPageProps> = () => {
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <input className="h-4 w-4 text-primary focus:ring-primary border-slate-300 rounded dark:bg-slate-700 dark:border-slate-600" id="remember-me" name="remember-me" type="checkbox" />
-                <label className="ml-2 block text-sm text-slate-600 dark:text-slate-400" htmlFor="remember-me">Lembrar de mim</label>
+                <input
+                  className="h-4 w-4 text-primary focus:ring-primary border-slate-300 rounded dark:bg-slate-700 dark:border-slate-600 cursor-pointer"
+                  id="remember-me"
+                  name="remember-me"
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                />
+                <label className="ml-2 block text-sm text-slate-600 dark:text-slate-400 cursor-pointer" htmlFor="remember-me">Lembrar de mim</label>
               </div>
               <div className="text-sm">
-                <a className="font-medium text-primary hover:text-petrol-700 dark:text-blue-400 dark:hover:text-blue-300" href="#">Esqueci minha senha</a>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setForgotEmail(email);
+                    setShowForgotModal(true);
+                  }}
+                  className="font-medium text-primary hover:text-petrol-700 dark:text-blue-400 dark:hover:text-blue-300"
+                >
+                  Esqueci minha senha
+                </button>
               </div>
             </div>
             <div>
@@ -294,6 +347,62 @@ const LoginPage: React.FC<LoginPageProps> = () => {
           </div>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      {showForgotModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-slate-800 w-full max-w-md rounded-2xl shadow-2xl p-8 border border-slate-200 dark:border-slate-700">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Recuperar Senha</h3>
+              <button onClick={() => { setShowForgotModal(false); setForgotSuccess(false); }} className="text-slate-400 hover:text-slate-600">
+                <span className="material-icons-round">close</span>
+              </button>
+            </div>
+
+            {!forgotSuccess ? (
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+                  Insira seu e-mail abaixo e enviaremos um link para você redefinir sua senha.
+                </p>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">E-mail</label>
+                  <input
+                    className="block w-full rounded-xl border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-primary focus:ring-primary sm:text-sm py-3 px-4 shadow-sm"
+                    placeholder="seu@email.com"
+                    type="email"
+                    required
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
+                  />
+                </div>
+                <button
+                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm font-bold text-white bg-primary hover:bg-petrol-700 focus:outline-none transition-all"
+                  type="submit"
+                  disabled={forgotLoading}
+                >
+                  {forgotLoading ? 'Enviando...' : 'Enviar Link de Recuperação'}
+                </button>
+              </form>
+            ) : (
+              <div className="text-center py-6">
+                <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="material-icons-round text-3xl">mark_email_read</span>
+                </div>
+                <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2">E-mail Enviado!</h4>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+                  Verifique sua caixa de entrada (e o spam) para seguir as instruções de redefinição.
+                </p>
+                <button
+                  onClick={() => { setShowForgotModal(false); setForgotSuccess(false); }}
+                  className="w-full py-3 px-4 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-600 transition-all"
+                >
+                  Fechar
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
