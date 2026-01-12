@@ -70,6 +70,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const subscription = subRes?.data;
             const meta = currentSession.user.user_metadata;
 
+            // HANDLE SOCIAL LOGIN ROLE SYNC: Check if there's a role in the URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlRole = urlParams.get('role');
+
+            if (urlRole && profile && !profile.user_type_set_manually) {
+                const normalizedRole = urlRole.toLowerCase() === 'lojista' ? 'lojista' : 'vendedor';
+                if (profile.user_type !== normalizedRole) {
+                    console.log('[AUTH_DEBUG] Updating profile role from URL:', normalizedRole);
+                    await supabase.from('profiles').update({ user_type: normalizedRole }).eq('id', uid);
+                    profile.user_type = normalizedRole; // Update local copy
+                }
+            }
+
             const planName = subscription?.plan_name || 'FREE';
 
             const appUser: User = {

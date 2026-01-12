@@ -69,6 +69,27 @@ const LoginPage: React.FC<LoginPageProps> = () => {
     }
   };
 
+  const handleSocialLogin = async (provider: 'google' | 'linkedin_oidc') => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}${window.location.pathname}?role=${role}${redirectPath ? `&redirect=${redirectPath}` : ''}`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+        }
+      });
+      if (error) throw error;
+    } catch (error: any) {
+      console.error(`${provider} login error:`, error);
+      setErrorMsg(`Erro ao entrar com ${provider === 'google' ? 'Google' : 'LinkedIn'}: ${error.message}`);
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 transition-colors duration-200 bg-background-light dark:bg-slate-900">
       <div className="w-full max-w-6xl h-auto md:h-[800px] flex flex-col md:flex-row bg-surface-light dark:bg-slate-800 rounded-2xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-700">
@@ -211,13 +232,19 @@ const LoginPage: React.FC<LoginPageProps> = () => {
             </div>
             <div className="mt-6 grid grid-cols-2 gap-3">
               <button
-                onClick={() => supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } })}
-                className="w-full inline-flex justify-center py-2.5 px-4 border border-slate-300 dark:border-slate-600 rounded-xl shadow-sm bg-white dark:bg-slate-800 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-                <img alt="Google" className="h-5 w-5 mr-2" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKsb6tOVQFw7LK0uFBc8s-WRlLnFXLHk3tsWde9QEFUSTFBaNYv3tGpOoXHvzrxKaPSW8mvoKpNc0GTmgdS6d5_PJjWwcpfAHVhTQRrxaJZ2_Hw68ylK6Tks0EMOt75-cJwbbDr7jIhDqdJuEcI-5uVxqm_HDrkT4nO4Qn0ysVz5DEItRwwIoCT00OnQ8t62HHrbJPaRXk3zYmwvxQ4BdB2wByRVMSxwQamYUdcP_WZg17v-OrtJJq06oeIWLa7UPKWCRHnQhziHQ" />
+                type="button"
+                onClick={() => handleSocialLogin('google')}
+                disabled={loading}
+                className="w-full inline-flex justify-center py-2.5 px-4 border border-slate-300 dark:border-slate-600 rounded-xl shadow-sm bg-white dark:bg-slate-800 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50">
+                <img alt="Google" className="h-5 w-5 mr-2" src="https://www.google.com/favicon.ico" />
                 Google
               </button>
-              <button className="w-full inline-flex justify-center py-2.5 px-4 border border-slate-300 dark:border-slate-600 rounded-xl shadow-sm bg-white dark:bg-slate-800 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-                <img alt="LinkedIn" className="h-5 w-5 mr-2" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDkRE4WlYKywSrWhvTEtWe9-TTwyn1_H9sw_PqC2KMiTFkL8DEwFNhLjK8LdqZriHQAEtPzzOCHbuN3BN0a_nMvOXFfAt4fkoE9vqAO194RGcF4l7Q0wXHNaZTri2n95ZYbuK-XkDHcGGOvSRwaJ2HhaWWKZKFAwMSXzPwnd39PwKdU7P73mEKU7YK6g1xXyX2ZSD92aHSIWfdUczUe9KLc-wDWEXepfoInmDHkEGAjAVXey05wn5GSqkpSLSv0Ltxgzlb0F0dLKG4" />
+              <button
+                type="button"
+                onClick={() => handleSocialLogin('linkedin_oidc')}
+                disabled={loading}
+                className="w-full inline-flex justify-center py-2.5 px-4 border border-slate-300 dark:border-slate-600 rounded-xl shadow-sm bg-white dark:bg-slate-800 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50">
+                <img alt="LinkedIn" className="h-5 w-5 mr-2" src="https://www.linkedin.com/favicon.ico" />
                 LinkedIn
               </button>
             </div>
