@@ -74,6 +74,9 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
             id: profile.id,
             companyName: profile.company_name,
             title: profile.sector || 'Varejo',
+            type: profile.sector || 'Varejo',
+            status: 'Ativa' as const,
+            user_id: profile.id,
             location: profile.shopping_mall || profile.address?.cidade || 'Localização não informada',
             compatibility: Math.floor(Math.random() * (99 - 70 + 1)) + 70,
             logoInitial: (profile.company_name || 'L').charAt(0).toUpperCase()

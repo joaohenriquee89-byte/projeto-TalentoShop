@@ -22,6 +22,10 @@ export interface Job {
   status: 'Ativa' | 'Fechada' | 'Rascunho';
   user_id: string;
   company_name?: string;
+  companyName?: string; // For display purposes
+  location?: string; // For display purposes
+  compatibility?: number; // Match score for vendedores
+  logoInitial?: string; // First letter of company name
   candidates?: number; // Logic field (count)
   created_at?: string;
 }
