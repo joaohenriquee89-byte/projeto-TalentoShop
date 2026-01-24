@@ -128,18 +128,18 @@ const LoginPage: React.FC<LoginPageProps> = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 transition-colors duration-200 bg-background-light dark:bg-slate-900">
-      <div className="w-full max-w-6xl h-auto md:h-[800px] flex flex-col md:flex-row bg-surface-light dark:bg-slate-800 rounded-2xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-700">
+    <div className="min-h-screen flex items-center justify-center p-4 transition-colors duration-500 bg-background dark:bg-[#07090D]">
+      <div className="w-full max-w-6xl h-auto md:h-[800px] flex flex-col md:flex-row bg-white dark:bg-slate-900/50 rounded-[2rem] shadow-2xl overflow-hidden border border-border/50 backdrop-blur-xl">
         {/* Left Side: Form */}
         <div className="w-full md:w-1/2 p-8 md:p-12 lg:p-16 flex flex-col justify-center relative">
           <Link to="/" className="flex items-center gap-2 mb-8 transform hover:scale-105 transition-transform origin-left">
             <div className="w-10 h-10 relative">
-              <div className="absolute inset-0 bg-primary rounded-xl opacity-90 rotate-3"></div>
-              <div className="absolute bottom-0 right-0 w-6 h-6 bg-secondary rounded-full border-2 border-white dark:border-surface-dark z-10 -mb-1 -mr-1"></div>
+              <div className="absolute inset-0 bg-primary rounded-xl opacity-90 rotate-3 shadow-lg shadow-primary/20"></div>
+              <div className="absolute bottom-0 right-0 w-6 h-6 bg-accent rounded-full border-2 border-white dark:border-[#07090D] z-10 -mb-1 -mr-1"></div>
               <span className="material-icons-round absolute inset-0 flex items-center justify-center text-white text-xl">shopping_bag</span>
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-primary dark:text-white">
-              Talento<span className="text-secondary">Shop</span>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+              Talento<span className="text-primary italic">Shop</span>
             </h1>
           </Link>
           <div className="mb-8">
@@ -147,16 +147,16 @@ const LoginPage: React.FC<LoginPageProps> = () => {
             <p className="text-slate-500 dark:text-slate-400">Acesse o hub de talentos e oportunidades.</p>
           </div>
 
-          <div className="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-xl flex mb-8">
+          <div className="bg-slate-100 dark:bg-slate-800/50 p-1.5 rounded-2xl flex mb-8">
             <button
-              className={`flex-1 flex items-center justify-center py-3 text-sm font-medium rounded-lg transition-all duration-300 ${role === UserRole.VENDEDOR ? 'bg-white dark:bg-slate-700 shadow-sm text-primary dark:text-white ring-1 ring-slate-200 dark:ring-slate-600' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+              className={`flex-1 flex items-center justify-center py-3 text-sm font-bold rounded-xl transition-all duration-300 ${role === UserRole.VENDEDOR ? 'bg-white dark:bg-primary shadow-lg text-primary dark:text-white ring-1 ring-border' : 'text-slate-500 dark:text-slate-400 hover:text-primary'}`}
               onClick={() => setRole(UserRole.VENDEDOR)}
             >
               <span className="material-icons-round text-lg mr-2">badge</span>
               Sou Vendedor
             </button>
             <button
-              className={`flex-1 flex items-center justify-center py-3 text-sm font-medium rounded-lg transition-all duration-300 ${role === UserRole.LOJISTA ? 'bg-white dark:bg-slate-700 shadow-sm text-primary dark:text-white ring-1 ring-slate-200 dark:ring-slate-600' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+              className={`flex-1 flex items-center justify-center py-3 text-sm font-bold rounded-xl transition-all duration-300 ${role === UserRole.LOJISTA ? 'bg-white dark:bg-primary shadow-lg text-primary dark:text-white ring-1 ring-border' : 'text-slate-500 dark:text-slate-400 hover:text-primary'}`}
               onClick={() => setRole(UserRole.LOJISTA)}
             >
               <span className="material-icons-round text-lg mr-2">storefront</span>
@@ -204,7 +204,7 @@ const LoginPage: React.FC<LoginPageProps> = () => {
                   <span className="material-icons-round text-xl">email</span>
                 </span>
                 <input
-                  className="pl-10 block w-full rounded-xl border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-primary focus:ring-primary sm:text-sm py-3 shadow-sm transition-all"
+                  className="pl-10 block w-full rounded-2xl border-border bg-white dark:bg-slate-800 text-foreground focus:border-primary focus:ring-primary sm:text-sm py-4 shadow-sm transition-all"
                   id="email"
                   name="email"
                   placeholder="seu@email.com"
@@ -222,7 +222,7 @@ const LoginPage: React.FC<LoginPageProps> = () => {
                   <span className="material-icons-round text-xl">lock</span>
                 </span>
                 <input
-                  className="pl-10 pr-10 block w-full rounded-xl border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-primary focus:ring-primary sm:text-sm py-3 shadow-sm transition-all"
+                  className="pl-10 pr-10 block w-full rounded-2xl border-border bg-white dark:bg-slate-800 text-foreground focus:border-primary focus:ring-primary sm:text-sm py-4 shadow-sm transition-all"
                   id="password"
                   name="password"
                   placeholder="••••••••"

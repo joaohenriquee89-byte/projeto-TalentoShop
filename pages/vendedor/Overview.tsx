@@ -380,25 +380,25 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Olá, {user.name.split(' ')[0]}! 👋</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Aqui está o resumo das suas conexões hoje.</p>
         </div>
-        <div className="flex items-center bg-blue-50 dark:bg-gray-800 px-4 py-2 rounded-lg border border-blue-100 dark:border-gray-700">
-          <span className="material-icons-round text-primary dark:text-secondary mr-2">verified</span>
-          <span className="text-sm font-medium text-primary dark:text-white mr-2">Plano Atual:</span>
-          <span className="text-sm font-bold text-gray-500 dark:text-gray-400">FREE</span>
-          <Link className="ml-4 text-sm font-semibold text-secondary hover:text-green-600 underline decoration-2 underline-offset-2" to="/dashboard/vendedor/plans">Fazer Upgrade</Link>
+        <div className="flex items-center bg-primary/5 dark:bg-primary/10 px-4 py-2 rounded-2xl border border-primary/20 backdrop-blur-sm">
+          <span className="material-icons-round text-primary mr-2">verified</span>
+          <span className="text-sm font-bold text-primary mr-2">Plano Atual:</span>
+          <span className="text-sm font-black text-foreground/60 uppercase tracking-tighter">{userPlan}</span>
+          <Link className="ml-4 text-sm font-bold text-primary hover:text-emerald-600 underline decoration-2 underline-offset-4" to="/dashboard/vendedor/plans">Fazer Upgrade</Link>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Profile Card */}
         <div className="lg:col-span-1 space-y-8">
-          <div className="bg-surface-light dark:bg-surface-dark shadow rounded-xl overflow-hidden border border-gray-100 dark:border-gray-700">
-            <div className="h-24 bg-gradient-to-r from-primary to-secondary"></div>
-            <div className="px-6 pb-6 relative">
+          <div className="bg-card shadow-2xl rounded-2xl overflow-hidden border border-border/50 backdrop-blur-md">
+            <div className="h-24 bg-gradient-to-r from-primary via-emerald-500 to-accent"></div>
+            <div className="px-6 pb-8 relative">
               <div className="-mt-12 mb-4">
-                <img alt="Profile" className="h-24 w-24 rounded-full border-4 border-white dark:border-gray-800 shadow-md object-cover" src={currentAvatar} />
+                <img alt="Profile" className="h-24 w-24 rounded-[1.25rem] border-4 border-white dark:border-slate-800 shadow-xl object-cover" src={currentAvatar} />
               </div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">{user.name}</h2>
-              <p className="text-primary dark:text-secondary font-medium text-sm mb-4">
+              <h2 className="text-xl font-black text-foreground">{user.name}</h2>
+              <p className="text-primary font-bold text-sm mb-6 tracking-tight">
                 {profileData.shopping_mall || 'Localização não definida'}
               </p>
               <div className="space-y-3">
@@ -429,20 +429,21 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Completude do Perfil</span>
                   <span className="text-sm font-bold text-primary dark:text-secondary">85%</span>
                 </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                  <div className="bg-primary h-2.5 rounded-full" style={{ width: '85%' }}></div>
+                <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5">
+                  <div className="bg-primary h-2.5 rounded-full shadow-lg shadow-primary/20" style={{ width: '85%' }}></div>
                 </div>
-                <button onClick={() => setIsEditing(true)} className="mt-4 w-full py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
-                  Editar Perfil
+                <button onClick={() => setIsEditing(true)} className="mt-6 w-full py-3 px-4 border border-border dark:bg-white/5 rounded-2xl shadow-sm text-sm font-bold text-foreground hover:bg-slate-50 dark:hover:bg-white/10 transition-all active:scale-95">
+                  Editar Perfil Profissional
                 </button>
               </div>
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-800 dark:to-gray-900 rounded-xl p-6 border border-blue-100 dark:border-gray-700 relative overflow-hidden">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="material-icons-round text-secondary">auto_awesome</span>
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">Dicas da IA</h3>
+          <div className="bg-card border border-primary/20 rounded-2xl p-8 relative overflow-hidden shadow-2xl backdrop-blur-xl group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors"></div>
+            <div className="flex items-center gap-3 mb-6">
+              <span className="material-icons-round text-primary animate-pulse">auto_awesome</span>
+              <h3 className="text-lg font-black text-foreground tracking-tight">Dicas da IA de Elite</h3>
             </div>
             <ul className="space-y-3 mb-4">
               <li className="flex items-start text-sm text-gray-600 dark:text-gray-400">
@@ -459,42 +460,44 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
 
         {/* Job Listings Area */}
         <div className="lg:col-span-2 space-y-8">
-          <div className="bg-primary rounded-xl shadow-lg p-6 text-white relative overflow-hidden group">
+          <div className="bg-primary rounded-2xl shadow-xl p-8 text-white relative overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary to-emerald-600 opacity-90"></div>
+            <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-accent/20 rounded-full blur-[80px] group-hover:bg-accent/30 transition-colors"></div>
             <div className="relative z-10 sm:flex justify-between items-center">
               <div className="mb-4 sm:mb-0">
-                <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
-                  <span className="material-icons-round">rocket_launch</span>
+                <h3 className="text-2xl font-black mb-2 flex items-center gap-3">
+                  <span className="material-icons-round text-accent">rocket_launch</span>
                   Acelere sua contratação
                 </h3>
-                <p className="text-blue-100 text-sm">
-                  Usuários Premium aparecem no topo das buscas e têm acesso ilimitado.
+                <p className="text-white/80 font-medium max-w-md">
+                  Vendedores de Elite aparecem no topo das buscas e têm acesso ilimitado às melhores marcas.
                 </p>
               </div>
-              <Link to="/dashboard/vendedor/plans" className="bg-secondary hover:bg-green-500 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 transform hover:scale-105 inline-block text-center">
-                Quero ser Premium
+              <Link to="/dashboard/vendedor/plans" className="bg-white text-primary font-black py-4 px-8 rounded-2xl transition-all hover:scale-105 hover:bg-emerald-50 shadow-2xl active:scale-95 inline-block text-center whitespace-nowrap">
+                Ser Premium agora
               </Link>
             </div>
           </div>
 
-          <div className="bg-[#1e2533] dark:bg-surface-dark shadow-xl rounded-xl border border-slate-700 p-6">
-            <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <span className="material-icons-round text-secondary">storefront</span>
-                Buscar Lojas Contratando
+          <div className="bg-card dark:bg-[#07090D] shadow-2xl rounded-2xl border border-border/50 p-8">
+            <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
+              <h3 className="text-xl font-black text-foreground flex items-center gap-3">
+                <span className="material-icons-round text-primary">storefront</span>
+                Marcas em Destaque
               </h3>
             </div>
-            <form onSubmit={handleSearch} className="flex gap-2 mb-6">
+            <form onSubmit={handleSearch} className="flex gap-4 mb-8">
               <div className="relative flex-grow">
-                <span className="material-icons-round absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">search</span>
+                <span className="material-icons-round absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400 group-focus-within:text-primary transition-colors">search</span>
                 <input
-                  className="block w-full pl-10 pr-3 py-3 border border-slate-600 rounded-md bg-[#161b26] dark:bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-secondary sm:text-sm"
+                  className="block w-full pl-12 pr-4 py-4 border border-border rounded-2xl bg-slate-50 dark:bg-slate-800/50 text-foreground placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/20 sm:text-sm transition-all"
                   placeholder="Ex: Zara, Shopping Iguatemi..."
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <button type="submit" className="bg-primary hover:bg-opacity-90 text-white px-6 py-2 rounded-md font-bold text-sm transition-all active:scale-95">Buscar</button>
+              <button type="submit" className="bg-primary hover:bg-emerald-600 text-white px-8 py-4 rounded-2xl font-black text-sm transition-all active:scale-95 shadow-lg shadow-primary/20">BUSCAR</button>
             </form>
 
             <div className="space-y-4">
@@ -505,14 +508,14 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
                 </div>
               ) : filteredJobs.length > 0 ? (
                 filteredJobs.map(job => (
-                  <div key={job.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-[#161b26] dark:bg-gray-800 border border-slate-700 rounded-lg hover:border-secondary transition-all cursor-pointer group">
+                  <div key={job.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 bg-white dark:bg-white/5 border border-border/50 rounded-2xl hover:border-primary/50 transition-all cursor-pointer group hover:shadow-xl hover:-translate-y-1">
                     <div className="flex items-center gap-4 mb-3 sm:mb-0">
-                      <div className={`h-12 w-12 rounded-lg flex items-center justify-center text-xl font-bold transition-transform group-hover:scale-110 ${job.logoInitial === 'Z' ? 'bg-black text-white' : 'bg-slate-700 text-white'}`}>
+                      <div className={`h-14 w-14 rounded-xl flex items-center justify-center text-xl font-black transition-transform group-hover:rotate-6 ${job.logoInitial === 'Z' ? 'bg-black text-white' : 'bg-primary/10 text-primary'}`}>
                         {job.logoInitial}
                       </div>
                       <div>
-                        <h4 className="text-base font-semibold text-white">{job.companyName}</h4>
-                        <p className="text-sm text-slate-400">{job.title} • {job.location}</p>
+                        <h4 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">{job.companyName}</h4>
+                        <p className="text-sm text-foreground/50 font-medium">{job.title} • {job.location}</p>
                         {job.compatibility && (
                           <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-green-900/40 text-green-400 border border-green-800/50 mt-1">
                             {job.compatibility}% Match
