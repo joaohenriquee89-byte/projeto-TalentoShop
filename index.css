@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,63 +6,62 @@
 
 @layer base {
   :root {
-    /* RADICAL PALETTE: Signal Orange + Electric Gold */
-    --primary: 16 100% 50%;
-    /* #FF4500 - Signal Orange */
+    /* MODERN LUXURY PALETTE: Emerald + Slate + Gold */
+    --primary: 160 84% 39%;
+    /* #10B981 - Emerald Green */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 160 84% 39%;
-    /* #05C46B - Keep Green */
-    --secondary-foreground: 0 0% 0%;
+    --secondary: 215 25% 27%;
+    /* Sophisticated Slate */
+    --secondary-foreground: 210 40% 98%;
 
-    --accent: 51 100% 50%;
-    /* #FFD700 - Electric Gold */
+    --accent: 38 92% 50%;
+    /* #F59E0B - Soft Gold */
     --accent-foreground: 0 0% 0%;
 
-    --background: 0 0% 100%;
-    --foreground: 0 0% 4%;
-    /* #0A0A0A - True Black */
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 4%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 4%;
+    --popover-foreground: 222 47% 11%;
 
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 16 100% 50%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 160 84% 39%;
 
-    --radius: 0rem;
-    /* SHARP EDGES - No rounding */
+    --radius: 1rem;
+    /* PREMIUM ROUNDING - 16px */
   }
 
   .dark {
-    --background: 0 0% 4%;
-    /* #0A0A0A - True Black */
-    --foreground: 0 0% 98%;
+    --background: 222 47% 6%;
+    /* Deep Slate Black */
+    --foreground: 210 40% 98%;
 
-    --card: 0 0% 8%;
-    --card-foreground: 0 0% 98%;
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 0 0% 8%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 16 100% 50%;
-    /* #FF4500 - Signal Orange */
+    --primary: 160 84% 45%;
+    /* Lighter Emerald for Dark Mode */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 160 84% 39%;
-    /* #05C46B - Green */
-    --secondary-foreground: 0 0% 0%;
+    --secondary: 215 25% 20%;
+    /* Darker Slate */
+    --secondary-foreground: 210 40% 98%;
 
-    --accent: 51 100% 50%;
-    /* #FFD700 - Electric Gold */
+    --accent: 38 92% 50%;
+    /* Soft Gold */
     --accent-foreground: 0 0% 0%;
 
-    --border: 0 0% 15%;
-    --input: 0 0% 15%;
-    --ring: 16 100% 50%;
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 160 84% 39%;
   }
 }
 
@@ -73,10 +72,10 @@
 
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary;
-    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
 
-  /* Grain Texture Overlay */
+  /* Refined Soft Grain Texture Overlay */
   body::before {
     content: '';
     position: fixed;
@@ -84,10 +83,10 @@
     left: 0;
     width: 100%;
     height: 100%;
-    opacity: 0.03;
+    opacity: 0.02;
     z-index: -1;
     pointer-events: none;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
   }
 
   h1,
@@ -97,7 +96,7 @@
   h5,
   h6 {
     @apply font-bold tracking-tight;
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
   }
 }
 
