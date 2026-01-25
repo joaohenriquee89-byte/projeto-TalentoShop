@@ -113,6 +113,7 @@ const Overview: React.FC<OverviewProps> = ({ user }) => {
 
         setIsSaving(true);
         try {
+            console.log('[PROFILE_UPDATE] Attempting update for:', user.id);
             const { error } = await supabase
                 .from('profiles')
                 .update({
@@ -127,116 +128,170 @@ const Overview: React.FC<OverviewProps> = ({ user }) => {
 
             if (error) throw error;
 
+            console.log('[PROFILE_UPDATE] Database success, refreshing profile state...');
             await refreshProfile();
+
             setIsEditing(false);
-            alert("Perfil atualizado com sucesso!");
+            setShowSuccessToast(true);
+            setTimeout(() => setShowSuccessToast(false), 4000);
         } catch (err: any) {
-            console.error(err);
-            alert("Erro ao salvar perfil: " + err.message);
+            console.error('[PROFILE_UPDATE] CRITICAL ERROR:', err);
+            alert("Erro ao salvar perfil: " + (err.message || "Entre em contato com o suporte."));
         } finally {
             setIsSaving(false);
         }
     };
 
+    const [showSuccessToast, setShowSuccessToast] = useState(false);
+
     if (isEditing) {
         return (
-            <div className="max-w-2xl mx-auto bg-white dark:bg-slate-900 p-10 rounded-[2.5rem] shadow-2xl border border-border/50 animate-fade-in backdrop-blur-xl">
-                <div className="flex justify-between items-center mb-8">
-                    <div>
-                        <h2 className="text-3xl font-black text-foreground tracking-tight flex items-center gap-3">
-                            <div className="w-12 h-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center">
-                                <span className="material-icons-round text-2xl">settings_suggest</span>
-                            </div>
-                            Editar Perfil
-                        </h2>
-                        <p className="text-foreground/50 text-sm mt-1 ml-1">Mantenha os dados da sua loja atualizados.</p>
-                    </div>
-                    <button onClick={() => setIsEditing(false)} className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
-                        <span className="material-icons-round text-foreground/40">close</span>
-                    </button>
-                </div>
-
-                <div className="mb-10 flex flex-col items-center">
-                    <div className="relative group">
-                        <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl group-hover:blur-2xl transition-all opacity-0 group-hover:opacity-100"></div>
-                        <img
-                            src={profileData.avatar_url || user?.avatar || `https://picsum.photos/seed/${user?.id}/200/200`}
-                            alt="Preview"
-                            className="w-32 h-32 rounded-full object-cover border-4 border-white dark:border-slate-800 shadow-xl relative z-10"
-                        />
-                        <label className="absolute inset-0 z-20 flex items-center justify-center bg-black/40 text-white rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-all">
-                            <span className="material-icons-round text-3xl">add_a_photo</span>
-                            <input type="file" className="hidden" accept="image/*" onChange={handleFileUpload} disabled={uploading} />
-                        </label>
-                        {uploading && (
-                            <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/60 rounded-full">
-                                <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
-                            </div>
-                        )}
-                    </div>
-                    <p className="mt-4 text-xs font-black text-foreground/40 uppercase tracking-widest">Toque para alterar imagem</p>
-                </div>
-
-                <form onSubmit={handleSave} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="col-span-1 md:col-span-2">
-                            <label className="block text-[10px] font-black text-foreground/40 uppercase tracking-wider mb-2 ml-1">Responsável pela Unidade</label>
-                            <input
-                                type="text"
-                                className="w-full p-4 rounded-2xl border dark:bg-black/20 dark:border-white/10 dark:text-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
-                                value={profileData.full_name}
-                                onChange={(e) => setProfileData({ ...profileData, full_name: e.target.value })}
-                                placeholder="Seu nome"
-                            />
-                        </div>
-
+            <div className="max-w-2xl mx-auto animate-fade-in py-10">
+                <div className="bg-white dark:bg-slate-900 rounded-[3rem] shadow-2xl border border-slate-100 dark:border-white/5 overflow-hidden">
+                    {/* Header glass effect */}
+                    <div className="bg-slate-50/50 dark:bg-white/5 backdrop-blur-md p-10 border-b border-slate-100 dark:border-white/5 flex justify-between items-center">
                         <div>
-                            <label className="block text-[10px] font-black text-foreground/40 uppercase tracking-wider mb-2 ml-1">Nome Fantasia da Loja</label>
-                            <input
-                                type="text"
-                                className="w-full p-4 rounded-2xl border dark:bg-black/20 dark:border-white/10 dark:text-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
-                                value={profileData.company_name}
-                                onChange={(e) => setProfileData({ ...profileData, company_name: e.target.value })}
-                                placeholder="Nome da loja"
-                            />
+                            <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter flex items-center gap-3">
+                                <div className="w-12 h-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center">
+                                    <span className="material-icons-round text-2xl">person_search</span>
+                                </div>
+                                Editar Perfil
+                            </h2>
+                            <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1">Refine a identidade da sua loja na plataforma.</p>
                         </div>
-
-                        <div>
-                            <label className="block text-[10px] font-black text-foreground/40 uppercase tracking-wider mb-2 ml-1">Contato WhatsApp</label>
-                            <input
-                                type="text"
-                                className="w-full p-4 rounded-2xl border dark:bg-black/20 dark:border-white/10 dark:text-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
-                                value={profileData.phone}
-                                onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
-                                placeholder="(00) 00000-0000"
-                            />
-                        </div>
-
-                        <div className="col-span-1 md:col-span-2">
-                            <label className="block text-[10px] font-black text-foreground/40 uppercase tracking-wider mb-2 ml-1">Bio / Descrição da Loja</label>
-                            <textarea
-                                className="w-full p-4 rounded-2xl border dark:bg-black/20 dark:border-white/10 dark:text-white focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none resize-none"
-                                value={profileData.bio}
-                                onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
-                                placeholder="Fale um pouco sobre a cultura da sua loja e o que busca nos candidatos..."
-                                rows={4}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="flex gap-4 pt-6">
-                        <button type="button" onClick={() => setIsEditing(false)} className="flex-1 py-4 px-6 border border-border dark:border-white/10 rounded-2xl dark:text-white font-bold hover:bg-slate-50 dark:hover:bg-white/5 transition-all">Descartar</button>
-                        <button type="submit" disabled={isSaving || uploading} className="flex-1 py-4 px-6 bg-primary text-white rounded-2xl font-black shadow-xl shadow-primary/20 hover:bg-emerald-600 hover:-translate-y-1 transition-all disabled:opacity-50 active:scale-95">
-                            {isSaving ? 'Gravando...' : 'ATUALIZAR PERFIL'}
+                        <button
+                            onClick={() => setIsEditing(false)}
+                            className="w-12 h-12 flex items-center justify-center rounded-2xl hover:bg-slate-200 dark:hover:bg-white/10 text-slate-400 transition-all active:scale-95"
+                        >
+                            <span className="material-icons-round">close</span>
                         </button>
                     </div>
-                </form>
+
+                    <div className="p-10 space-y-12">
+                        {/* Avatar Section */}
+                        <div className="flex flex-col items-center">
+                            <div className="relative group">
+                                <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
+                                <div className="relative w-40 h-40 rounded-full border-[6px] border-white dark:border-slate-800 shadow-2xl overflow-hidden z-10">
+                                    <img
+                                        src={profileData.avatar_url || user?.avatar || `https://picsum.photos/seed/${user?.id}/200/200`}
+                                        alt="Preview"
+                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                    />
+                                    <label className="absolute inset-0 bg-slate-900/60 flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 cursor-pointer transition-all duration-300">
+                                        <span className="material-icons-round text-3xl mb-1">photo_camera</span>
+                                        <span className="text-[10px] font-black uppercase tracking-widest">Alterar</span>
+                                        <input type="file" className="hidden" accept="image/*" onChange={handleFileUpload} disabled={uploading} />
+                                    </label>
+                                </div>
+                                {uploading && (
+                                    <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm rounded-full">
+                                        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                    </div>
+                                )}
+                            </div>
+                            <p className="mt-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Imagem de Perfil / Logo</p>
+                        </div>
+
+                        <form onSubmit={handleSave} className="space-y-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="col-span-1 md:col-span-2 space-y-2">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Responsável pela Unidade</label>
+                                    <div className="relative">
+                                        <span className="material-icons-round absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg">badge</span>
+                                        <input
+                                            type="text"
+                                            required
+                                            className="w-full pl-12 pr-6 py-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 text-slate-900 dark:text-white font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all"
+                                            value={profileData.full_name}
+                                            onChange={(e) => setProfileData({ ...profileData, full_name: e.target.value })}
+                                            placeholder="Ex: João Henrique"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nome Fantasia</label>
+                                    <div className="relative">
+                                        <span className="material-icons-round absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg">storefront</span>
+                                        <input
+                                            type="text"
+                                            required
+                                            className="w-full pl-12 pr-6 py-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 text-slate-900 dark:text-white font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all"
+                                            value={profileData.company_name}
+                                            onChange={(e) => setProfileData({ ...profileData, company_name: e.target.value })}
+                                            placeholder="Ex: Talentoshop Store"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">WhatsApp de Contato</label>
+                                    <div className="relative">
+                                        <span className="material-icons-round absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg">phone</span>
+                                        <input
+                                            type="text"
+                                            className="w-full pl-12 pr-6 py-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 text-slate-900 dark:text-white font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all"
+                                            value={profileData.phone}
+                                            onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                                            placeholder="(00) 00000-0000"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="col-span-1 md:col-span-2 space-y-2">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Biografia / Sobre a Loja</label>
+                                    <textarea
+                                        className="w-full p-6 rounded-[2rem] bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 text-slate-900 dark:text-white font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all resize-none"
+                                        value={profileData.bio}
+                                        onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
+                                        placeholder="Conte um pouco sobre a cultura da sua loja e o que busca nos candidatos..."
+                                        rows={4}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col sm:flex-row gap-4 pt-6">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsEditing(false)}
+                                    className="flex-1 py-5 px-6 border border-slate-200 dark:border-white/10 rounded-2xl text-slate-500 dark:text-slate-400 font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-all active:scale-95"
+                                >
+                                    Descartar
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isSaving || uploading}
+                                    className="flex-[2] py-5 px-8 bg-slate-900 dark:bg-white dark:text-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl hover:bg-slate-800 transition-all disabled:opacity-50 active:scale-95 flex items-center justify-center gap-3"
+                                >
+                                    {isSaving ? (
+                                        <>
+                                            <span className="w-4 h-4 border-2 border-white dark:border-slate-900 border-t-transparent rounded-full animate-spin"></span>
+                                            GRAVANDO...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span className="material-icons-round text-sm">cloud_upload</span>
+                                            ATUALIZAR PERFIL
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="space-y-10 animate-fade-in max-w-7xl mx-auto">
+        <div className="space-y-10 animate-fade-in max-w-7xl mx-auto relative">
+            {showSuccessToast && (
+                <div className="fixed top-24 right-8 bg-emerald-500 text-white px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-spring-in z-[100] font-black border border-white/20">
+                    <span className="material-icons-round">check_circle</span>
+                    Perfil atualizado com sucesso!
+                </div>
+            )}
             {/* Header / Welcome Section */}
             <div className="relative overflow-hidden rounded-[2.5rem] bg-slate-900 text-white p-8 md:p-12 shadow-2xl">
                 <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary/20 to-transparent"></div>
