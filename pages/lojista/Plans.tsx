@@ -32,181 +32,233 @@ const Plans: React.FC = () => {
 
         try {
             const data = await createCheckout(planCode, price, `Assinatura ${selectedPlan} `);
-            console.log("Dados recebidos da função (Plans):", data);
             if (data && data.url) {
                 window.location.href = data.url;
-            } else {
-                console.warn("URL não recebida no Plans:", data);
             }
         } catch (error: any) {
-            console.error(error);
-            // MODIFICAÇÃO DE DEBUG: Mostrar erro real na tela
-            console.error("Erro detalhado:", error);
-            alert(`Erro no pagamento: ${JSON.stringify(error)}`);
+            console.error("Erro no pagamento:", error);
+            alert(`Erro no pagamento: Ocorreu um problema ao iniciar o checkout.`);
         } finally {
             setIsLoading(false);
             setShowUpgradeModal(false);
         }
     };
 
-
     const plans = [
         {
+            id: 'free',
             name: 'Básico (Grátis)',
-            price: 'R$ 0',
+            price: '0',
             period: '/mês',
             features: [
-                '1 Vaga ativa',
-                'Banco de talentos básico',
-                'Sem IA'
+                { text: '1 Vaga ativa simultânea', icon: 'campaign' },
+                { text: 'Banco de talentos básico', icon: 'database' },
+                { text: 'Sem IA (Busca manual)', icon: 'block' }
             ],
-            active: true,
-            button: 'Plano Atual',
-            recommended: false,
-            action: () => { }
+            status: 'Plano Atual',
+            isCurrent: true,
+            buttonClass: 'bg-slate-100 dark:bg-white/5 text-slate-400 dark:text-slate-500 cursor-default'
         },
         {
+            id: 'standard',
             name: 'Plano ESSENCIAL',
-            description: 'Contrate melhor',
-            price: 'R$ 49,90',
+            tagline: 'O salto de qualidade',
+            price: '49,90',
             period: '/mês',
-            subText: 'Encontre vendedores com mais rapidez e menos erro.',
-            featuresHeader: 'Tudo do FREE +',
+            highlight: 'TUDO DO FREE +',
             features: [
-                'Busca com ajuda da IA (padrão)',
-                'Filtros por experiência, shopping, setor e habilidades',
-                'Acesso completo aos perfis',
-                'Mais precisão na escolha do candidato'
+                { text: 'IA Padrão (Filtros Básicos)', icon: 'psychology' },
+                { text: 'Acesso completo aos perfis', icon: 'visibility' },
+                { text: 'Filtros Pro (Setor/Habilidades)', icon: 'tune' },
+                { text: 'Mais precisão na escolha', icon: 'verified' }
             ],
-            footerText: '🎯 Perfeito para quem quer acertar mais na contratação.',
-            active: false,
-            button: 'Contratar Equipe',
+            status: 'CONTRATAR AGORA',
+            isCurrent: false,
             recommended: false,
-            action: () => {
-                setSelectedPlan('Plano ESSENCIAL');
-                setShowUpgradeModal(true);
-            }
+            buttonClass: 'bg-slate-900 dark:bg-white dark:text-slate-900 text-white hover:shadow-xl hover:-translate-y-1'
         },
         {
+            id: 'pro',
             name: 'Lojista Premium',
-            price: 'R$ 99,90',
+            tagline: 'Experiência ilimitada',
+            price: '99,90',
             period: '/mês',
+            highlight: 'ELITE SELECTION',
             features: [
-                'Vagas ilimitadas',
-                'Match IA completo'
+                { text: 'Vagas ilimitadas', icon: 'all_inclusive' },
+                { text: 'Match IA Completo (99% دقت)', icon: 'auto_awesome' },
+                { text: 'Destaque nas buscas de talentos', icon: 'star' },
+                { text: 'Suporte VIP dedicado', icon: 'support_agent' }
             ],
-            active: false,
-            button: 'Acesso Total + IA',
+            status: 'ACESSO TOTAL + IA',
+            isCurrent: false,
             recommended: true,
-            action: () => {
-                setSelectedPlan('Lojista Premium');
-                setShowUpgradeModal(true);
-            }
+            buttonClass: 'bg-primary text-white hover:bg-emerald-400 shadow-xl shadow-primary/20 hover:-translate-y-1'
         }
     ];
 
     return (
-        <div className="space-y-8 animate-fade-in relative max-w-6xl mx-auto">
+        <div className="space-y-16 animate-fade-in max-w-7xl mx-auto py-10 px-4">
             {/* Upgrade Modal */}
             {showUpgradeModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-                    <div className="bg-white dark:bg-surface-dark rounded-2xl shadow-2xl max-w-md w-full p-8 border border-gray-100 dark:border-gray-700 relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary to-secondary"></div>
-                        <button
-                            onClick={() => setShowUpgradeModal(false)}
-                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-                        >
-                            <span className="material-icons-round">close</span>
-                        </button>
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md animate-fade-in" onClick={() => !isLoading && setShowUpgradeModal(false)}></div>
+                    <div className="bg-white dark:bg-slate-900 rounded-[3rem] shadow-2xl max-w-lg w-full p-10 border border-white/10 relative overflow-hidden animate-scale-in z-10">
+                        <div className="absolute top-0 right-0 p-8 opacity-5">
+                            <span className="material-icons-round text-9xl">rocket_launch</span>
+                        </div>
 
-                        <div className="text-center mb-8">
-                            <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <span className="material-icons-round text-3xl text-primary">rocket_launch</span>
+                        <div className="relative z-10 text-center space-y-6">
+                            <div className="w-20 h-20 bg-primary/10 text-primary rounded-[2rem] flex items-center justify-center mx-auto shadow-inner">
+                                <span className="material-icons-round text-4xl">upgrade</span>
                             </div>
-                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Upgrade para {selectedPlan}</h3>
-                            <p className="text-gray-500 dark:text-gray-400">
-                                Você está a um passo de transformar suas contratações com o plano <span className="font-bold text-primary">{selectedPlan}</span>.
-                            </p>
-                        </div>
 
-                        <div className="space-y-3">
-                            <button
-                                onClick={handleUpgrade}
-                                disabled={isLoading}
-                                className="w-full bg-primary hover:bg-petrol-700 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {isLoading ? 'Processando...' : 'Confirmar Upgrade'}
-                            </button>
-                            <button
-                                onClick={() => setShowUpgradeModal(false)}
-                                disabled={isLoading}
-                                className="w-full bg-transparent hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 font-semibold py-3 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                Talvez depois
-                            </button>
-                        </div>
+                            <div>
+                                <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter mb-2">Upgrade de Elite</h3>
+                                <p className="text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+                                    Você está prestes a desbloquear o plano <span className="text-primary font-black uppercase tracking-widest text-sm">{selectedPlan}</span>.
+                                    Prepare-se para uma nova era de contratações.
+                                </p>
+                            </div>
 
-                        <div className="mt-6 flex items-center justify-center gap-2 text-xs text-gray-400">
-                            <span className="material-icons-round text-sm">lock</span>
-                            Pagamento processado com segurança via Mercado Pago
+                            <div className="pt-4 space-y-3">
+                                <button
+                                    onClick={handleUpgrade}
+                                    disabled={isLoading}
+                                    className="w-full bg-slate-900 dark:bg-white dark:text-slate-900 text-white font-black py-5 rounded-2xl shadow-xl hover:shadow-primary/20 transition-all active:scale-95 disabled:opacity-50 text-xs uppercase tracking-[0.2em]"
+                                >
+                                    {isLoading ? 'INICIANDO CHECKOUT...' : 'CONFIRMAR E PAGAR'}
+                                </button>
+                                <button
+                                    onClick={() => setShowUpgradeModal(false)}
+                                    disabled={isLoading}
+                                    className="w-full bg-transparent text-slate-400 hover:text-slate-600 dark:hover:text-white font-black py-3 text-[10px] uppercase tracking-widest transition-colors"
+                                >
+                                    TALVEZ MAIS TARDE
+                                </button>
+                            </div>
+
+                            <div className="flex items-center justify-center gap-2 mt-4">
+                                <span className="material-icons-round text-emerald-500 text-sm">enhanced_encryption</span>
+                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Conexão Segura Mercado Pago</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             )}
 
-            <div className="text-center max-w-2xl mx-auto mb-12">
-                <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-4">Escolha o plano ideal</h1>
-                <p className="text-gray-500 dark:text-gray-400 text-lg">
-                    Desbloqueie todo o potencial da nossa IA para encontrar os melhores vendedores.
+            {/* Header Section */}
+            <div className="text-center space-y-6 max-w-3xl mx-auto">
+                <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.3em] animate-fade-in">
+                    Assinaturas & Escala
+                </div>
+                <h1 className="text-5xl md:text-7xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">
+                    O Plano <span className="text-primary italic">Ideal</span> para o seu Negócio.
+                </h1>
+                <p className="text-slate-500 dark:text-slate-400 text-lg font-medium leading-relaxed">
+                    Desbloqueie o poder da nossa IA Preditiva e encontre os talentos que sua marca merece.
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-                {plans.map((plan, idx) => (
-                    <div key={idx} className={`relative bg-white dark:bg-slate-900 rounded-3xl p-8 border transition-all duration-300 hover:shadow-soft ${plan.recommended ? 'border-primary shadow-soft ring-1 ring-primary/20 scale-105 z-10' : 'border-slate-200 dark:border-slate-800 shadow-premium'} flex flex-col`}>
+            {/* Pricing Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch pt-8">
+                {plans.map((plan) => (
+                    <div
+                        key={plan.id}
+                        className={`group relative bg-white dark:bg-slate-900 rounded-[3rem] p-10 border transition-all duration-500 flex flex-col ${plan.recommended
+                                ? 'border-primary ring-[6px] ring-primary/5 shadow-2xl scale-[1.02] z-10'
+                                : 'border-slate-100 dark:border-white/5 shadow-sm hover:shadow-2xl hover:-translate-y-2'
+                            }`}
+                    >
                         {plan.recommended && (
-                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white px-6 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg flex items-center gap-2">
-                                <span className="material-icons-round text-base">star</span>
-                                Recomendado
+                            <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-primary text-white px-8 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-xl flex items-center gap-2 z-20">
+                                <span className="material-icons-round text-base">auto_awesome</span>
+                                Mais Popular
                             </div>
                         )}
 
-                        <div className="mb-6">
-                            <h3 className={`text-2xl font-bold mb-1 ${plan.recommended ? 'text-primary' : 'text-gray-800 dark:text-white'}`}>{plan.name}</h3>
-                            {plan.description && <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{plan.description}</p>}
+                        <div className="space-y-2 mb-10">
+                            <h3 className={`text-sm font-black uppercase tracking-[0.2em] ${plan.recommended ? 'text-primary' : 'text-slate-400'}`}>
+                                {plan.name}
+                            </h3>
+                            {plan.tagline && (
+                                <p className="text-slate-500 dark:text-slate-400 text-xs font-bold">{plan.tagline}</p>
+                            )}
                         </div>
 
-                        <div className="flex flex-col mb-8">
-                            <div className="flex items-baseline">
-                                <span className="text-5xl font-extrabold text-gray-900 dark:text-white">{plan.price}</span>
-                                <span className="text-gray-500 dark:text-gray-400 ml-2 text-lg">{plan.period}</span>
+                        <div className="flex flex-col mb-12">
+                            <div className="flex items-baseline gap-1">
+                                <span className="text-sm font-black text-slate-400 dark:text-slate-500 self-start mt-2">R$</span>
+                                <span className="text-6xl font-black text-slate-900 dark:text-white tracking-tighter">
+                                    {plan.price}
+                                </span>
+                                <span className="text-slate-400 font-bold ml-1 text-xs">{plan.period}</span>
                             </div>
-                            {plan.subText && <p className="text-sm text-primary font-medium mt-2 leading-snug">{plan.subText}</p>}
+                            {plan.highlight && (
+                                <div className="mt-4 px-3 py-1 bg-slate-100 dark:bg-white/5 rounded-lg w-fit text-[9px] font-black text-slate-500 uppercase tracking-widest italic">
+                                    {plan.highlight}
+                                </div>
+                            )}
                         </div>
 
-                        <div className="flex-1">
-                            {plan.featuresHeader && <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">{plan.featuresHeader}</p>}
-                            <ul className="space-y-4 mb-8">
+                        <div className="flex-1 space-y-6 mb-12">
+                            <div className="w-full h-px bg-slate-100 dark:bg-white/5"></div>
+                            <ul className="space-y-5">
                                 {plan.features.map((feat, i) => (
-                                    <li key={i} className="flex items-start gap-3 text-base text-gray-600 dark:text-gray-300">
-                                        <div className={`mt-0.5 rounded-full p-0.5 ${plan.recommended ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-400 dark:bg-gray-800'}`}>
-                                            <span className="material-icons-round text-base">check</span>
+                                    <li key={i} className="flex items-start gap-4 text-sm text-slate-600 dark:text-slate-300 font-medium">
+                                        <div className={`mt-0.5 w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${plan.recommended ? 'bg-primary/10 text-primary' : 'bg-slate-50 dark:bg-white/5 text-slate-400'
+                                            }`}>
+                                            <span className="material-icons-round text-base">{(feat as any).icon || 'check'}</span>
                                         </div>
-                                        <span className="leading-tight">{feat}</span>
+                                        <span className="leading-tight pt-0.5">{feat.text}</span>
                                     </li>
                                 ))}
                             </ul>
-                            {plan.footerText && <p className="text-sm font-medium text-gray-500 dark:text-gray-400 italic mb-6 border-t border-dashed border-gray-200 dark:border-gray-700 pt-4">{plan.footerText}</p>}
                         </div>
 
                         <button
-                            onClick={plan.action}
-                            className={`w-full py-4 rounded-xl font-bold text-lg transition-all transform active:scale-95 ${plan.recommended ? 'bg-primary text-white hover:bg-petrol-700 shadow-xl shadow-primary/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
+                            disabled={plan.isCurrent || isLoading}
+                            onClick={() => {
+                                if (plan.isCurrent) return;
+                                setSelectedPlan(plan.name);
+                                setShowUpgradeModal(true);
+                            }}
+                            className={`w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all transform active:scale-95 shadow-lg ${plan.buttonClass}`}
                         >
-                            {plan.button}
+                            {plan.status}
                         </button>
+
+                        {plan.recommended && (
+                            <p className="mt-4 text-center text-[9px] font-black text-slate-400 uppercase tracking-[0.1em]">
+                                Acesso imediato após confirmação
+                            </p>
+                        )}
                     </div>
                 ))}
+            </div>
+
+            {/* Bottom Proof Section */}
+            <div className="pt-20 border-t border-slate-100 dark:border-white/5 flex flex-col md:flex-row items-center justify-between gap-10 opacity-60 grayscale hover:grayscale-0 transition-all duration-700">
+                <div className="text-center md:text-left">
+                    <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Segurança Garantida</h4>
+                    <div className="flex items-center gap-6">
+                        <img src="https://logodownload.org/wp-content/uploads/2019/06/mercado-pago-logo.png" className="h-4 object-contain" alt="Mercado Pago" />
+                        <div className="w-px h-6 bg-slate-200 dark:bg-white/10"></div>
+                        <span className="text-[10px] font-bold text-slate-500">Criptografia SSL de 256 bits</span>
+                    </div>
+                </div>
+
+                <div className="flex flex-wrap justify-center gap-8">
+                    {/* Placeholder for real partner logos/trust badges */}
+                    <div className="flex items-center gap-2">
+                        <span className="material-icons-round text-primary text-xl">verified</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Verificado</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className="material-icons-round text-primary text-xl">speed</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Ativação Instantânea</span>
+                    </div>
+                </div>
             </div>
         </div>
     );
