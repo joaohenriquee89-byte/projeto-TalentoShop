@@ -1,8 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const VendedorJobs: React.FC = () => {
-    const savedJobs: any[] = [];
+    const [activeFilter, setActiveFilter] = useState<'all' | 'open'>('all');
+
+    // Placeholder for saved jobs. In a real scenario, this would be fetched from Supabase.
+    const allSavedJobs = [
+        /* 
+        { 
+            id: '1', 
+            initial: 'Z', 
+            title: 'Consultor de Vendas', 
+            company: 'Zara', 
+            location: 'Shopping Iguatemi', 
+            status: 'Aberto', 
+            date: '2 dias' 
+        }
+        */
+    ];
+
+    const filteredJobs = activeFilter === 'all'
+        ? allSavedJobs
+        : allSavedJobs.filter(job => job.status === 'Aberto');
 
     return (
         <div className="animate-fade-in max-w-5xl mx-auto py-10 px-4">
@@ -14,14 +33,30 @@ const VendedorJobs: React.FC = () => {
                     <p className="text-slate-500 dark:text-slate-400 text-lg font-medium">As melhores oportunidades que você selecionou.</p>
                 </div>
                 <div className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded-2xl p-1.5 flex shadow-inner">
-                    <button className="px-6 py-2.5 bg-white dark:bg-primary text-primary dark:text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg">Todas</button>
-                    <button className="px-6 py-2.5 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors text-xs font-black uppercase tracking-widest">Abertas</button>
+                    <button
+                        onClick={() => setActiveFilter('all')}
+                        className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 ${activeFilter === 'all'
+                                ? 'bg-white dark:bg-primary text-primary dark:text-white shadow-lg'
+                                : 'text-slate-500 dark:text-slate-400 hover:text-primary'
+                            }`}
+                    >
+                        Todas
+                    </button>
+                    <button
+                        onClick={() => setActiveFilter('open')}
+                        className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 ${activeFilter === 'open'
+                                ? 'bg-white dark:bg-primary text-primary dark:text-white shadow-lg'
+                                : 'text-slate-500 dark:text-slate-400 hover:text-primary'
+                            }`}
+                    >
+                        Abertas
+                    </button>
                 </div>
             </div>
 
             <div className="grid gap-6">
-                {savedJobs.length > 0 ? (
-                    savedJobs.map(job => (
+                {filteredJobs.length > 0 ? (
+                    filteredJobs.map(job => (
                         <div key={job.id} className="group bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-white/5 hover:border-primary/40 transition-all duration-500 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 hover:shadow-2xl hover:-translate-y-1">
                             <div className="flex items-center gap-6">
                                 <div className="w-16 h-16 rounded-2xl bg-slate-50 dark:bg-white/5 flex items-center justify-center font-black text-2xl text-slate-600 dark:text-slate-300 group-hover:bg-primary group-hover:text-white transition-all shadow-md group-hover:rotate-6">
@@ -54,8 +89,14 @@ const VendedorJobs: React.FC = () => {
                         <div className="w-24 h-24 bg-slate-50 dark:bg-white/5 rounded-[2.2rem] flex items-center justify-center mx-auto mb-8 rotate-12">
                             <span className="material-icons-round text-5xl text-slate-300">bookmarks</span>
                         </div>
-                        <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-3 tracking-tighter">Sua vitrine de desejos</h3>
-                        <p className="text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-10 font-medium leading-relaxed">Salve as vagas que mais combinam com você para analisar com calma e se candidatar depois.</p>
+                        <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-3 tracking-tighter">
+                            {activeFilter === 'all' ? 'Sua vitrine de desejos' : 'Nenhuma vaga aberta salva'}
+                        </h3>
+                        <p className="text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-10 font-medium leading-relaxed">
+                            {activeFilter === 'all'
+                                ? 'Salve as vagas que mais combinam com você para analisar com calma e se candidatar depois.'
+                                : 'As vagas que você salvou no momento estão com o processo encerrado ou em análise.'}
+                        </p>
                         <Link to="/dashboard/vendedor" className="px-10 py-5 bg-primary text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-primary/20 hover:bg-emerald-400 transition-all active:scale-95 inline-flex items-center gap-3">
                             <span className="material-icons-round">category</span>
                             EXPLORAR OPORTUNIDADES
