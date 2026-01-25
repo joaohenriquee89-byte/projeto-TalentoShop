@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { User } from '../../types';
 import { supabase } from '../../src/lib/supabase';
+import ChangePasswordModal from '../../components/ChangePasswordModal';
 
 interface SettingsProps {
     user: User;
@@ -9,6 +10,7 @@ interface SettingsProps {
 
 const Settings: React.FC<SettingsProps> = ({ user, setUser }) => {
     const [showSuccess, setShowSuccess] = useState(false);
+    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
     // @ts-ignore
     const url = typeof supabase !== 'undefined' ? supabase.supabaseUrl : "unknown";
@@ -78,10 +80,18 @@ const Settings: React.FC<SettingsProps> = ({ user, setUser }) => {
                             <h3 className="font-semibold text-gray-800 dark:text-white">Senha do Sistema</h3>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Alterar sua senha de acesso</p>
                         </div>
-                        <button className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                        <button
+                            onClick={() => setIsPasswordModalOpen(true)}
+                            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        >
                             Alterar Senha
                         </button>
                     </div>
+
+                    <ChangePasswordModal
+                        isOpen={isPasswordModalOpen}
+                        onClose={() => setIsPasswordModalOpen(false)}
+                    />
 
                     <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-gray-700">
                         <div>
