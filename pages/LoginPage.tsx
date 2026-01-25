@@ -28,12 +28,19 @@ const LoginPage: React.FC<LoginPageProps> = () => {
 
   const [errorMsg, setErrorMsg] = useState('');
 
-  // Load remembered email
+  // Load remembered credentials and preferences
   useEffect(() => {
     const savedEmail = localStorage.getItem('remembered_email');
+    const savedRole = localStorage.getItem('remembered_role');
+    const savedState = localStorage.getItem('remember_me_state');
+
     if (savedEmail) {
       setEmail(savedEmail);
-      setRememberMe(true);
+      setRememberMe(savedState === 'true');
+    }
+
+    if (savedRole) {
+      setRole(savedRole as UserRole);
     }
   }, []);
 
@@ -64,11 +71,17 @@ const LoginPage: React.FC<LoginPageProps> = () => {
       if (data.user) {
         console.log('Login successful, waiting for redirect...');
 
-        // Handle Remember Me
+        // Handle Remember Me Persistence
         if (rememberMe) {
+          console.log('[LOGIN] Persistence enabled: saving email and role');
           localStorage.setItem('remembered_email', email);
+          localStorage.setItem('remembered_role', role);
+          localStorage.setItem('remember_me_state', 'true');
         } else {
+          console.log('[LOGIN] Persistence disabled: clearing saved data');
           localStorage.removeItem('remembered_email');
+          localStorage.removeItem('remembered_role');
+          localStorage.removeItem('remember_me_state');
         }
 
         setLoading(false);
@@ -243,21 +256,21 @@ const LoginPage: React.FC<LoginPageProps> = () => {
               </div>
             </div>
             <div className="flex items-center justify-between px-1">
-              <div className="flex items-center group cursor-pointer">
+              <div className="flex items-center group">
                 <div className="relative flex items-center">
                   <input
-                    className="peer h-4 w-4 opacity-0 absolute cursor-pointer z-10"
+                    className="peer h-5 w-5 opacity-0 absolute cursor-pointer z-10"
                     id="remember-me"
                     name="remember-me"
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
                   />
-                  <div className="h-4 w-4 border-2 border-slate-300 dark:border-slate-600 rounded peer-checked:bg-primary peer-checked:border-primary transition-all duration-300 flex items-center justify-center">
-                    <span className="material-icons-round text-[10px] text-white opacity-0 peer-checked:opacity-100 transition-opacity">check</span>
+                  <div className={`h-5 w-5 border-2 rounded-full transition-all duration-300 flex items-center justify-center ${rememberMe ? 'bg-primary border-primary shadow-lg shadow-primary/20' : 'border-slate-300 dark:border-slate-600'} peer-focus:ring-2 peer-focus:ring-primary/20`}>
+                    <span className={`material-icons-round text-[12px] text-white transition-opacity ${rememberMe ? 'opacity-100' : 'opacity-0'}`}>check</span>
                   </div>
                 </div>
-                <label className="ml-2 block text-sm text-slate-600 dark:text-slate-400 cursor-pointer group-hover:text-foreground transition-colors" htmlFor="remember-me">Lembrar de mim</label>
+                <label className="ml-3 block text-sm font-bold text-slate-600 dark:text-slate-400 cursor-pointer group-hover:text-foreground transition-colors" htmlFor="remember-me">Lembrar de mim</label>
               </div>
               <div className="text-sm">
                 <button
