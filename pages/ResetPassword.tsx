@@ -7,6 +7,7 @@ const ResetPassword = () => {
     const { session, loading: authLoading } = useAuth();
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
@@ -95,26 +96,48 @@ const ResetPassword = () => {
 
                         <div className="space-y-2">
                             <label className="block text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] ml-2">Nova Senha</label>
-                            <input
-                                type="password"
-                                required
-                                placeholder="••••••••"
-                                className="w-full py-4 px-6 rounded-2xl border-border bg-slate-50 dark:bg-white/5 text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                            />
+                            <div className="relative group">
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    required
+                                    placeholder="••••••••"
+                                    className="w-full py-4 px-6 pr-12 rounded-2xl border-border bg-slate-50 dark:bg-white/5 text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-all active:scale-95"
+                                >
+                                    <span className="material-icons-round text-xl">
+                                        {showPassword ? 'visibility_off' : 'visibility'}
+                                    </span>
+                                </button>
+                            </div>
                         </div>
 
                         <div className="space-y-2">
                             <label className="block text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] ml-2">Confirmar Novo Acesso</label>
-                            <input
-                                type="password"
-                                required
-                                placeholder="••••••••"
-                                className="w-full py-4 px-6 rounded-2xl border-border bg-slate-50 dark:bg-white/5 text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                            />
+                            <div className="relative group">
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    required
+                                    placeholder="••••••••"
+                                    className="w-full py-4 px-6 pr-12 rounded-2xl border-border bg-slate-50 dark:bg-white/5 text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-all active:scale-95"
+                                >
+                                    <span className="material-icons-round text-xl">
+                                        {showPassword ? 'visibility_off' : 'visibility'}
+                                    </span>
+                                </button>
+                            </div>
                         </div>
 
                         <button
