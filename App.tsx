@@ -38,15 +38,6 @@ const MainRoutes: React.FC<{ theme: 'light' | 'dark', toggleTheme: () => void, s
     setLocalUser(user);
   }, [user]);
 
-  // Redirect old hash-based URLs to new path-based URLs
-  useEffect(() => {
-    if (window.location.hash) {
-      const hashPath = window.location.hash.replace('#', '');
-      if (hashPath) {
-        window.location.replace(hashPath);
-      }
-    }
-  }, []);
 
   // Handle loading state
   if (loading) {
