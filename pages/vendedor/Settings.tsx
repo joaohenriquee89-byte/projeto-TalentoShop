@@ -8,8 +8,7 @@ interface VendedorSettingsProps {
     setUser: (user: User) => void;
 }
 
-const VendedorSettings: React.FC<VendedorSettingsProps> = ({ user, setUser }) => {
-    const [showSuccess] = useState(false);
+const VendedorSettings: React.FC<VendedorSettingsProps> = ({ user }) => {
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('security');
 
@@ -24,32 +23,25 @@ const VendedorSettings: React.FC<VendedorSettingsProps> = ({ user, setUser }) =>
     ];
 
     return (
-        <div className="animate-fade-in max-w-5xl mx-auto space-y-10">
+        <div className="animate-fade-in max-w-5xl mx-auto space-y-10 py-6 px-4">
             {/* Header */}
-            <div>
-                <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">Configurações</h1>
-                <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">Gerencie sua segurança e preferências.</p>
+            <div className="space-y-4">
+                <h1 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">Configurações</h1>
+                <p className="text-slate-500 dark:text-slate-400 text-lg font-medium">Gerencie sua segurança e preferências da conta.</p>
             </div>
-
-            {showSuccess && (
-                <div className="fixed top-24 right-8 bg-primary text-white px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-spring-in z-50 font-bold border border-white/20">
-                    <span className="material-icons-round">check_circle</span>
-                    Alterações salvas com sucesso!
-                </div>
-            )}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
                 {/* Navigation Sidebar */}
-                <div className="md:col-span-1 space-y-2">
+                <div className="md:col-span-1 space-y-3">
                     {tabs.filter(t => !t.hidden).map((item) => (
                         <button
                             key={item.id}
                             type="button"
                             onClick={() => setActiveTab(item.id)}
-                            className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl transition-all cursor-pointer ${activeTab === item.id ? 'bg-primary text-white shadow-lg shadow-primary/20 font-black' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5 font-bold'}`}
+                            className={`w-full flex items-center gap-4 px-6 py-5 rounded-2xl transition-all cursor-pointer group ${activeTab === item.id ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-xl shadow-slate-900/10 dark:shadow-white/5 font-black' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5 font-bold hover:translate-x-1'}`}
                         >
-                            <span className={`material-icons-round ${item.color || ''}`}>{item.icon}</span>
-                            <span className="text-sm uppercase tracking-widest">{item.label}</span>
+                            <span className={`material-icons-round ${item.id === activeTab ? '' : item.color || ''}`}>{item.icon}</span>
+                            <span className="text-[10px] uppercase tracking-[0.2em]">{item.label}</span>
                         </button>
                     ))}
                 </div>
@@ -57,25 +49,30 @@ const VendedorSettings: React.FC<VendedorSettingsProps> = ({ user, setUser }) =>
                 <div className="md:col-span-2 space-y-8 min-h-[400px]">
                     {/* Security Section */}
                     {activeTab === 'security' && (
-                        <section className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-border/50 p-10 shadow-sm space-y-8 animate-fade-in">
-                            <div className="flex items-center gap-3 mb-2">
-                                <div className="w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
-                                    <span className="material-icons-round">shield</span>
+                        <section className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-white/5 p-10 shadow-sm space-y-10 animate-fade-in relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 dark:bg-white/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
+
+                            <div className="flex items-center gap-4 relative z-10">
+                                <div className="w-12 h-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center shadow-inner">
+                                    <span className="material-icons-round text-2xl">shield_person</span>
                                 </div>
-                                <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-wider">Segurança e Acesso</h2>
+                                <div>
+                                    <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-wider">Segurança Profissional</h2>
+                                    <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Acesso e Credenciais</p>
+                                </div>
                             </div>
 
-                            <div className="space-y-6">
-                                <div className="flex items-center justify-between p-6 bg-slate-50 dark:bg-black/20 rounded-3xl border border-slate-100 dark:border-white/5 group">
-                                    <div>
-                                        <h3 className="font-bold text-slate-800 dark:text-white group-hover:text-primary transition-colors">Senha da Conta</h3>
-                                        <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Troque sua senha periodicamente.</p>
+                            <div className="space-y-6 relative z-10">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-8 bg-slate-50 dark:bg-black/20 rounded-[2rem] border border-slate-100 dark:border-white/5 group gap-6">
+                                    <div className="flex-1">
+                                        <h3 className="font-black text-slate-800 dark:text-white group-hover:text-primary transition-colors mb-1">Senha da Conta</h3>
+                                        <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Recomendamos a troca a cada 90 dias para sua máxima proteção.</p>
                                     </div>
                                     <button
                                         onClick={() => setIsPasswordModalOpen(true)}
-                                        className="px-6 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl text-xs font-black uppercase tracking-widest hover:border-primary/40 hover:text-primary transition-all active:scale-95"
+                                        className="w-full sm:w-auto px-8 py-4 bg-slate-900 dark:bg-white dark:text-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all active:scale-95 shadow-lg"
                                     >
-                                        Alterar
+                                        ALTERAR AGORA
                                     </button>
                                 </div>
                             </div>
@@ -84,27 +81,35 @@ const VendedorSettings: React.FC<VendedorSettingsProps> = ({ user, setUser }) =>
 
                     {/* Notifications Section */}
                     {activeTab === 'notifications' && (
-                        <section className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-border/50 p-10 shadow-sm space-y-8 animate-fade-in">
-                            <div className="flex items-center gap-3 mb-2">
-                                <div className="w-10 h-10 bg-blue-500/10 text-blue-500 rounded-xl flex items-center justify-center">
-                                    <span className="material-icons-round">notifications</span>
+                        <section className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-white/5 p-10 shadow-sm space-y-10 animate-fade-in">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-blue-500/10 text-blue-500 rounded-2xl flex items-center justify-center shadow-inner">
+                                    <span className="material-icons-round text-2xl">notifications_active</span>
                                 </div>
-                                <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-wider">Notificações</h2>
+                                <div>
+                                    <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-wider">Alertas de Vagas</h2>
+                                    <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Preferências de Contato</p>
+                                </div>
                             </div>
 
                             <div className="space-y-4">
                                 {[
-                                    { title: 'Novos Trabalhos', desc: 'Alertas de vagas que dão match com seu perfil.' },
-                                    { title: 'Mensagens de Lojas', desc: 'Notificar quando receber contatos de recrutadores.' },
+                                    { title: 'Radar de Vagas', desc: 'Alertas em tempo real para vagas com match acima de 80%.', icon: 'radar' },
+                                    { title: 'Direct das Marcas', desc: 'Notificar via e-mail quando um lojista visualizar seu perfil.', icon: 'forward_to_inbox' },
                                 ].map((notif, idx) => (
-                                    <div key={idx} className="flex items-center justify-between p-6 bg-slate-50 dark:bg-black/20 rounded-3xl border border-slate-100 dark:border-white/5 group">
-                                        <div>
-                                            <h3 className="font-bold text-slate-800 dark:text-white group-hover:text-primary transition-colors">{notif.title}</h3>
-                                            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">{notif.desc}</p>
+                                    <div key={idx} className="flex items-center justify-between p-8 bg-slate-50 dark:bg-black/20 rounded-[2rem] border border-slate-100 dark:border-white/5 group">
+                                        <div className="flex gap-4 items-center">
+                                            <div className="hidden sm:flex w-10 h-10 rounded-xl bg-white dark:bg-slate-800 items-center justify-center text-slate-400 group-hover:text-primary transition-colors">
+                                                <span className="material-icons-round text-xl">{notif.icon}</span>
+                                            </div>
+                                            <div>
+                                                <h3 className="font-black text-slate-800 dark:text-white group-hover:text-primary transition-colors">{notif.title}</h3>
+                                                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{notif.desc}</p>
+                                            </div>
                                         </div>
-                                        <label className="relative inline-flex items-center cursor-pointer">
+                                        <label className="relative inline-flex items-center cursor-pointer ml-4">
                                             <input type="checkbox" defaultChecked className="sr-only peer" />
-                                            <div className="w-14 h-7 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                            <div className="w-16 h-8 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[6px] after:left-[6px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary shadow-inner"></div>
                                         </label>
                                     </div>
                                 ))}
@@ -114,21 +119,30 @@ const VendedorSettings: React.FC<VendedorSettingsProps> = ({ user, setUser }) =>
 
                     {/* AI Tester Section */}
                     {activeTab === 'ai' && (
-                        <section className="bg-slate-900 rounded-[2.5rem] p-10 shadow-2xl space-y-8 animate-fade-in">
-                            <h2 className="text-xl font-black text-white uppercase tracking-wider">Diagnóstico de IA</h2>
+                        <section className="bg-slate-900 rounded-[2.5rem] p-10 shadow-2xl space-y-10 animate-fade-in border border-white/5 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
+                            <div>
+                                <h2 className="text-xl font-black text-white uppercase tracking-wider mb-2">Engenharia de Match IA</h2>
+                                <p className="text-white/40 text-xs font-bold uppercase tracking-widest">Diagnóstico Técnico do Sistema</p>
+                            </div>
                             <AITester />
                         </section>
                     )}
 
                     {/* Excision Section */}
                     {activeTab === 'excision' && (
-                        <section className="bg-red-50/50 dark:bg-red-900/10 rounded-[2.5rem] border border-red-100 dark:border-red-900/30 p-10 shadow-sm space-y-8 animate-fade-in">
-                            <h2 className="text-xl font-black text-red-700 dark:text-red-400 uppercase tracking-wider">Zona de Perigo</h2>
-                            <p className="text-sm text-red-600 dark:text-red-400 font-medium leading-relaxed">
-                                Esta ação é irreversível e excluirá todo seu histórico de aplicações e currículo.
+                        <section className="bg-rose-50/50 dark:bg-rose-950/10 rounded-[2.5rem] border border-rose-100 dark:border-rose-900/30 p-10 shadow-sm space-y-10 animate-fade-in">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-rose-500/10 text-rose-500 rounded-2xl flex items-center justify-center">
+                                    <span className="material-icons-round text-2xl">dangerous</span>
+                                </div>
+                                <h2 className="text-xl font-black text-rose-700 dark:text-rose-400 uppercase tracking-wider">Zona de Decisão Final</h2>
+                            </div>
+                            <p className="text-sm text-slate-500 dark:text-rose-400/60 font-medium leading-relaxed max-w-lg">
+                                Ao excluir sua conta, todos os seus dados de currículo, histórico de candidaturas e matches de IA serão apagados permanentemente dos nossos servidores.
                             </p>
-                            <button className="px-10 py-5 bg-red-600 text-white rounded-[1.5rem] font-black text-xs uppercase tracking-widest shadow-xl shadow-red-500/20 hover:bg-red-700 transition-all active:scale-95">
-                                EXCLUIR MINHA CONTA
+                            <button className="px-10 py-5 bg-rose-600 text-white rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl shadow-rose-500/20 hover:bg-rose-700 transition-all active:scale-95">
+                                EXCLUIR MINHA CONTA AGORA
                             </button>
                         </section>
                     )}
@@ -171,18 +185,18 @@ const AITester: React.FC = () => {
     };
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-6 relative z-10">
             <button
                 onClick={runTest}
                 disabled={loading}
-                className="px-8 py-4 bg-white text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-100 transition-all disabled:opacity-50 flex items-center gap-3 shadow-xl"
+                className="px-8 py-5 bg-white text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-100 transition-all disabled:opacity-50 flex items-center gap-4 shadow-2xl"
             >
-                {loading ? <span className="w-4 h-4 border-2 border-slate-900 border-t-transparent rounded-full animate-spin"></span> : <span className="material-icons-round">play_arrow</span>}
-                Executar Teste
+                {loading ? <span className="w-5 h-5 border-3 border-slate-900 border-t-transparent rounded-full animate-spin"></span> : <span className="material-icons-round text-lg">bolt</span>}
+                INICIAR DIAGNÓSTICO
             </button>
 
             {result && (
-                <div className="bg-slate-800 rounded-2xl p-6 overflow-x-auto border border-white/5">
+                <div className="bg-slate-800/80 backdrop-blur-md rounded-3xl p-8 overflow-x-auto border border-white/10 shadow-inner">
                     <pre className="text-emerald-400 font-mono text-xs leading-relaxed">
                         {JSON.stringify(result, null, 2)}
                     </pre>

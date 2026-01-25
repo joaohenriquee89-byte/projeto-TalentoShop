@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { User, Job } from '../../types';
+import { Link } from 'react-router-dom';
+import { User, Job, UserRole } from '../../types';
 import UpgradeModal from '../../components/UpgradeModal';
 import { supabase } from '../../src/lib/supabase';
 
@@ -18,12 +18,13 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
   const [isSaving, setIsSaving] = useState(false);
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const [upgradeConfig, setUpgradeConfig] = useState({ title: '', feature: '' });
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
 
   // Full Profile State
   const [profileData, setProfileData] = useState({
     phone: '',
     experience_years: '',
-    specialty: '', // Will use first item of skills array or 'Vendas'
+    specialty: '',
     shopping_mall: '',
     bio: '',
     resume_url: ''
@@ -36,9 +37,7 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
     const fetchDashboardData = async () => {
       try {
         setIsLoading(true);
-
-        // 1. Fetch User's Full Profile
-        const { data: userProfile, error: profileError } = await supabase
+        const { data: userProfile } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', user.id)
@@ -54,14 +53,12 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
             resume_url: userProfile.resume_url || ''
           });
 
-          // Update prop user avatar if changed remotely
           if (userProfile.avatar_url && userProfile.avatar_url !== user.avatar) {
             setUser({ ...user, avatar: userProfile.avatar_url });
           }
         }
 
-        // 2. Fetch Stores (Jobs)
-        const { data: storesData, error: storesError } = await supabase
+        const { data: storesData } = await supabase
           .from('profiles')
           .select('*')
           .eq('user_type', 'lojista')
@@ -69,7 +66,6 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
 
         if (storesData) {
           const validProfiles = storesData.filter(profile => profile.company_name && profile.company_name.trim() !== '');
-
           const mappedJobs: Job[] = validProfiles.map(profile => ({
             id: profile.id,
             companyName: profile.company_name,
@@ -89,7 +85,6 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
         setIsLoading(false);
       }
     };
-
     fetchDashboardData();
   }, [user.id]);
 
@@ -105,8 +100,6 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
     job.location.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
-
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -114,22 +107,11 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
         const fileExt = file.name.split('.').pop();
         const fileName = `${user.id}-${Math.random()}.${fileExt}`;
         const filePath = `${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('avatars')
-          .upload(filePath, file);
-
+        const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file);
         if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('avatars')
-          .getPublicUrl(filePath);
-
+        const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
         setUser({ ...user, avatar: publicUrl });
-
-        // Update profile in DB immediately
         await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', user.id);
-
       } catch (error: any) {
         alert('Erro ao carregar imagem: ' + error.message);
       }
@@ -138,36 +120,17 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
 
   const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (file.type !== 'application/pdf') {
-        alert('Por favor, selecione um arquivo PDF.');
-        return;
-      }
-
+    if (file && file.type === 'application/pdf') {
       setIsSaving(true);
       try {
         const fileName = `${user.id}/resume.pdf`;
-        const { error: uploadError } = await supabase.storage
-          .from('resumes')
-          .upload(fileName, file, {
-            upsert: true,
-            contentType: 'application/pdf'
-          });
-
+        const { error: uploadError } = await supabase.storage.from('resumes').upload(fileName, file, { upsert: true, contentType: 'application/pdf' });
         if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('resumes')
-          .getPublicUrl(fileName);
-
+        const { data: { publicUrl } } = supabase.storage.from('resumes').getPublicUrl(fileName);
         setProfileData(prev => ({ ...prev, resume_url: publicUrl }));
-
-        // Update profile in DB
         await supabase.from('profiles').update({ resume_url: publicUrl }).eq('id', user.id);
-
         setShowSaveSuccess(true);
         setTimeout(() => setShowSaveSuccess(false), 3000);
-
       } catch (error: any) {
         alert('Erro ao carregar currículo: ' + error.message);
       } finally {
@@ -179,33 +142,21 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
   const handleSaveProfile = async () => {
     setIsSaving(true);
     try {
-      // Prepare skills array
       const skillsArray = profileData.specialty.split(',').map(s => s.trim()).filter(s => s !== '');
-
-      const updates = {
+      const { error } = await supabase.from('profiles').update({
         full_name: user.name,
         phone: profileData.phone,
         experience_years: profileData.experience_years,
         skills: skillsArray,
         shopping_mall: profileData.shopping_mall,
         bio: profileData.bio
-      };
-
-      const { error } = await supabase
-        .from('profiles')
-        .update(updates)
-        .eq('id', user.id);
-
+      }).eq('id', user.id);
       if (error) throw error;
-
       setIsEditing(false);
       setShowSaveSuccess(true);
       setTimeout(() => setShowSaveSuccess(false), 4000);
-
     } catch (err: any) {
-      console.error("Erro ao salvar perfil:", err);
-      const errorMsg = err.message || (err.error_description) || "Erro desconhecido";
-      alert(`Erro ao salvar alterações: ${errorMsg}. Tente novamente.`);
+      alert(`Erro ao salvar alterações: ${err.message}`);
     } finally {
       setIsSaving(false);
     }
@@ -215,145 +166,156 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
 
   if (isEditing) {
     return (
-      <div className="max-w-3xl mx-auto animate-fade-in pb-10">
-        <button onClick={() => setIsEditing(false)} className="mb-6 flex items-center gap-2 text-primary font-medium hover:underline">
-          <span className="material-icons-round">arrow_back</span> Voltar ao Dashboard
-        </button>
-        <div className="bg-surface-light dark:bg-surface-dark shadow-2xl rounded-2xl p-8 border border-gray-100 dark:border-gray-700">
-          <h2 className="text-2xl font-bold mb-8 dark:text-white flex items-center gap-2">
-            <span className="material-icons-round text-primary">edit_note</span>
-            Editar Perfil Profissional
-          </h2>
-
-          <div className="flex flex-col items-center mb-8">
-            <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-              <img alt="Profile" className="h-32 w-32 rounded-full border-4 border-primary shadow-lg object-cover transition-transform group-hover:scale-105" src={currentAvatar} />
-              <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">
-                <span className="material-icons-round text-white text-3xl">photo_camera</span>
-              </div>
+      <div className="max-w-2xl mx-auto animate-fade-in py-10">
+        <div className="bg-white dark:bg-slate-900 rounded-[3rem] shadow-2xl border border-slate-100 dark:border-white/5 overflow-hidden">
+          <div className="bg-slate-50/50 dark:bg-white/5 backdrop-blur-md p-10 border-b border-slate-100 dark:border-white/5 flex justify-between items-center">
+            <div>
+              <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter flex items-center gap-3">
+                <div className="w-12 h-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center">
+                  <span className="material-icons-round text-2xl">person_pin</span>
+                </div>
+                Editar Perfil Profissional
+              </h2>
+              <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1">Refine como as melhores marcas veem você.</p>
             </div>
-            <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
-            <p className="mt-3 text-sm font-medium text-primary cursor-pointer hover:underline" onClick={() => fileInputRef.current?.click()}>Alterar foto de perfil</p>
+            <button
+              onClick={() => setIsEditing(false)}
+              className="w-12 h-12 flex items-center justify-center rounded-2xl hover:bg-slate-200 dark:hover:bg-white/10 text-slate-400 transition-all active:scale-95"
+            >
+              <span className="material-icons-round">close</span>
+            </button>
           </div>
 
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-2">Informações Pessoais</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nome Completo</label>
-                <input
-                  className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                  value={user.name}
-                  onChange={(e) => setUser({ ...user, name: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">E-mail (apenas leitura)</label>
-                <input
-                  className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-900 text-gray-500 dark:text-gray-400 p-2.5 cursor-not-allowed"
-                  value={user.email}
-                  disabled
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Telefone / WhatsApp</label>
-                <input
-                  className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                  placeholder="(11) 99999-9999"
-                  value={profileData.phone}
-                  onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Localização / Shopping</label>
-                <input
-                  className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                  placeholder="Ex: Shopping Morumbi, SP"
-                  value={profileData.shopping_mall}
-                  onChange={(e) => setProfileData({ ...profileData, shopping_mall: e.target.value })}
-                />
-              </div>
-            </div>
-
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-2 pt-4">Carreira & Experiência</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Anos de Experiência</label>
-                <select
-                  className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                  value={profileData.experience_years}
-                  onChange={(e) => setProfileData({ ...profileData, experience_years: e.target.value })}
-                >
-                  <option value="">Selecione...</option>
-                  <option value="Sem experiência">Sem experiência</option>
-                  <option value="Menos de 1 ano">Menos de 1 ano</option>
-                  <option value="1 a 3 anos">1 a 3 anos</option>
-                  <option value="3 a 5 anos">3 a 5 anos</option>
-                  <option value="Mais de 5 anos">Mais de 5 anos</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Especialidade Principal</label>
-                <input
-                  className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                  placeholder="Ex: Vendas, Gerência, Moda..."
-                  value={profileData.specialty}
-                  onChange={(e) => setProfileData({ ...profileData, specialty: e.target.value })}
-                />
-              </div>
-              <div className="col-span-1 md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Bio Profissional / Sobre Mim</label>
-                <textarea
-                  className="w-full rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 dark:text-white p-2.5 focus:ring-2 focus:ring-primary focus:border-transparent transition-all min-h-[120px]"
-                  placeholder="Conte um pouco sobre sua trajetória profissional..."
-                  value={profileData.bio}
-                  onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
-                />
-                <p className="text-xs text-gray-500 mt-1">Dica: Descreva suas principais conquistas e o que você busca na próxima oportunidade.</p>
-              </div>
-              <div className="col-span-1 md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Currículo (PDF)</label>
-                <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                  <span className="material-icons-round text-3xl text-gray-400">picture_as_pdf</span>
-                  <div className="flex-1">
-                    {profileData.resume_url ? (
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600 dark:text-gray-300 font-medium">Currículo atual carregado</span>
-                        <a href={profileData.resume_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline font-bold">Ver PDF</a>
-                      </div>
-                    ) : (
-                      <span className="text-sm text-gray-500 italic">Nenhum currículo carregado</span>
-                    )}
-                  </div>
-                  <input type="file" id="resume-upload" className="hidden" accept=".pdf" onChange={handleResumeUpload} />
-                  <label htmlFor="resume-upload" className="px-4 py-2 bg-white dark:bg-slate-900 border border-gray-300 dark:border-gray-600 rounded-lg text-xs font-bold text-gray-700 dark:text-gray-200 cursor-pointer hover:bg-gray-50 transition-colors">
-                    {profileData.resume_url ? 'Alterar PDF' : 'Enviar PDF'}
+          <div className="p-10 space-y-12">
+            <div className="flex flex-col items-center">
+              <div className="relative group">
+                <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
+                <div className="relative w-40 h-40 rounded-full border-[6px] border-white dark:border-slate-800 shadow-2xl overflow-hidden z-10 text-center">
+                  <img
+                    src={currentAvatar}
+                    alt="Preview"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                  <label className="absolute inset-0 bg-slate-900/60 flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 cursor-pointer transition-all duration-300">
+                    <span className="material-icons-round text-3xl mb-1">photo_camera</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest">Alterar Foto</span>
+                    <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
                   </label>
                 </div>
               </div>
+              <p className="mt-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Sua Foto Profissional</p>
             </div>
 
-            <div className="pt-6 flex gap-3">
-              <button onClick={() => setIsEditing(false)} className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors">
-                Cancelar
-              </button>
-              <button
-                onClick={handleSaveProfile}
-                disabled={isSaving}
-                className="flex-1 bg-primary text-white font-bold py-3 rounded-lg shadow-lg hover:bg-petrol-700 transition-all flex justify-center items-center gap-2"
-              >
-                {isSaving ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Salvando...
-                  </>
-                ) : (
-                  <>
-                    <span className="material-icons-round">save</span>
-                    Salvar Alterações
-                  </>
-                )}
-              </button>
+            <div className="space-y-8 text-center sm:text-left">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nome Completo</label>
+                  <input
+                    type="text"
+                    required
+                    className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 text-slate-900 dark:text-white font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all"
+                    value={user.name}
+                    onChange={(e) => setUser({ ...user, name: e.target.value })}
+                    placeholder="Seu Nome completo"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">WhatsApp de Contato</label>
+                  <input
+                    type="text"
+                    className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 text-slate-900 dark:text-white font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all"
+                    value={profileData.phone}
+                    onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                    placeholder="(00) 00000-0000"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Anos de Experiência</label>
+                  <select
+                    className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 text-slate-900 dark:text-white font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all appearance-none"
+                    value={profileData.experience_years}
+                    onChange={(e) => setProfileData({ ...profileData, experience_years: e.target.value })}
+                  >
+                    <option value="">Selecione...</option>
+                    <option value="Sem experiência">Sem experiência</option>
+                    <option value="Menos de 1 ano">Menos de 1 ano</option>
+                    <option value="1 a 3 anos">1 a 3 anos</option>
+                    <option value="3 a 5 anos">3 a 5 anos</option>
+                    <option value="Mais de 5 anos">Mais de 5 anos</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Especialidade Principal</label>
+                  <input
+                    type="text"
+                    className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 text-slate-900 dark:text-white font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all"
+                    value={profileData.specialty}
+                    onChange={(e) => setProfileData({ ...profileData, specialty: e.target.value })}
+                    placeholder="Ex: Vendas, Moda, Gerência"
+                  />
+                </div>
+
+                <div className="col-span-1 md:col-span-2 space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Currículo (PDF)</label>
+                  <div className="flex items-center gap-4 p-6 bg-slate-50 dark:bg-white/5 rounded-3xl border border-slate-100 dark:border-white/5">
+                    <div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-2xl shadow-sm flex items-center justify-center text-primary">
+                      <span className="material-icons-round text-2xl">description</span>
+                    </div>
+                    <div className="flex-1">
+                      {profileData.resume_url ? (
+                        <p className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest text-[10px]">Documento Verificado ✓</p>
+                      ) : (
+                        <p className="text-sm text-slate-500 italic">Nenhum currículo em PDF carregado</p>
+                      )}
+                    </div>
+                    <input type="file" id="resume-upload" className="hidden" accept=".pdf" onChange={handleResumeUpload} />
+                    <label htmlFor="resume-upload" className="px-6 py-3 bg-slate-900 dark:bg-white dark:text-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest cursor-pointer hover:scale-105 transition-all active:scale-95 shadow-lg">
+                      {profileData.resume_url ? 'ALTERAR PDF' : 'SUBIR CURRÍCULO'}
+                    </label>
+                  </div>
+                </div>
+
+                <div className="col-span-1 md:col-span-2 space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Resumo Profissional / Bio</label>
+                  <textarea
+                    className="w-full p-6 rounded-[2rem] bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 text-slate-900 dark:text-white font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all resize-none"
+                    value={profileData.bio}
+                    onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
+                    placeholder="Fale sobre seus principais diferenciais em vendas..."
+                    rows={4}
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4 pt-6">
+                <button
+                  type="button"
+                  onClick={() => setIsEditing(false)}
+                  className="flex-1 py-5 px-6 border border-slate-200 dark:border-white/10 rounded-2xl text-slate-500 dark:text-slate-400 font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 transition-all active:scale-95"
+                >
+                  Descartar
+                </button>
+                <button
+                  onClick={handleSaveProfile}
+                  disabled={isSaving}
+                  className="flex-[2] py-5 px-8 bg-slate-900 dark:bg-white dark:text-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl hover:bg-slate-800 transition-all disabled:opacity-50 active:scale-95 flex items-center justify-center gap-3"
+                >
+                  {isSaving ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-white dark:border-slate-900 border-t-transparent rounded-full animate-spin"></span>
+                      GRAVANDO...
+                    </>
+                  ) : (
+                    <>
+                      <span className="material-icons-round text-sm">save</span>
+                      SALVAR ALTERAÇÕES
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -362,197 +324,235 @@ const VendedorDashboard: React.FC<VendedorDashboardProps> = ({ user, setUser }) 
   }
 
   return (
-    <div className="space-y-6 relative">
+    <div className="space-y-10 animate-fade-in max-w-7xl mx-auto py-4">
       {showSaveSuccess && (
-        <div className="fixed top-24 right-8 bg-green-500 text-white px-6 py-3 rounded-lg shadow-2xl flex items-center gap-2 animate-bounce-in z-[100] border-2 border-white/20 backdrop-blur-sm">
+        <div className="fixed top-24 right-8 bg-emerald-500 text-white px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-spring-in z-[100] font-black border border-white/20">
           <span className="material-icons-round">check_circle</span>
-          <span className="font-bold">Salvo com sucesso!</span>
+          Perfil atualizado com sucesso!
         </div>
       )}
+
       <UpgradeModal
         isOpen={upgradeModalOpen}
         onClose={() => setUpgradeModalOpen(false)}
         title={upgradeConfig.title}
         featureName={upgradeConfig.feature}
       />
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Olá, {user.name.split(' ')[0]}! 👋</h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Aqui está o resumo das suas conexões hoje.</p>
-        </div>
-        <div className="flex items-center bg-primary/5 dark:bg-primary/10 px-4 py-2 rounded-2xl border border-primary/20 backdrop-blur-sm">
-          <span className="material-icons-round text-primary mr-2">verified</span>
-          <span className="text-sm font-bold text-primary mr-2">Plano Atual:</span>
-          <span className="text-sm font-black text-foreground/60 uppercase tracking-tighter">{userPlan}</span>
-          <Link className="ml-4 text-sm font-bold text-primary hover:text-emerald-600 underline decoration-2 underline-offset-4" to="/dashboard/vendedor/plans">Fazer Upgrade</Link>
+
+      {/* Hero Welcome Section */}
+      <div className="relative overflow-hidden rounded-[3rem] bg-slate-900 text-white p-10 md:p-14 shadow-2xl">
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-primary/30 to-transparent"></div>
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/10 rounded-full blur-[100px] animate-pulse"></div>
+
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-10">
+          <div className="space-y-6">
+            <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/10 text-primary text-[10px] font-black uppercase tracking-[0.3em]">
+              <span className="w-2 h-2 rounded-full bg-primary animate-ping"></span>
+              Pilar Vendedor • Hub de Elite
+            </div>
+            <h1 className="text-5xl md:text-6xl font-black tracking-tighter leading-none">
+              Olá, <span className="text-primary italic">{user.name.split(' ')[0]}!</span> 👋
+            </h1>
+            <p className="text-white/60 text-lg max-w-xl font-medium leading-relaxed">
+              Sua jornada de vendas ganha novos capítulos hoje. Explore as melhores marcas de shoppings e feche seu próximo grande contrato.
+            </p>
+          </div>
+
+          <div className="flex flex-col items-end gap-3">
+            <div className="flex items-center gap-4 bg-white/5 backdrop-blur-md px-6 py-4 rounded-[1.5rem] border border-white/10 group hover:border-primary/50 transition-all">
+              <div className="w-12 h-12 bg-primary/20 rounded-2xl flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                <span className="material-icons-round text-2xl">stars</span>
+              </div>
+              <div>
+                <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">Status da Conta</p>
+                <p className="text-xl font-black tracking-tight">{userPlan}</p>
+              </div>
+              {userPlan === 'FREE' && (
+                <Link to="/dashboard/vendedor/plans" className="ml-4 p-3 bg-primary text-white rounded-xl hover:bg-emerald-400 transition-all">
+                  <span className="material-icons-round text-lg">upgrade</span>
+                </Link>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Profile Card */}
-        <div className="lg:col-span-1 space-y-8">
-          <div className="bg-card shadow-2xl rounded-2xl overflow-hidden border border-border/50 backdrop-blur-md">
-            <div className="h-24 bg-gradient-to-r from-primary via-emerald-500 to-accent"></div>
-            <div className="px-6 pb-8 relative">
-              <div className="-mt-12 mb-4">
-                <img alt="Profile" className="h-24 w-24 rounded-[1.25rem] border-4 border-white dark:border-slate-800 shadow-xl object-cover" src={currentAvatar} />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        {/* Profile Stats Sidebar */}
+        <div className="lg:col-span-1 space-y-10">
+          <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-10 shadow-sm border border-border/50 relative overflow-hidden group">
+            <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-slate-50 dark:from-white/5 to-transparent"></div>
+
+            <div className="relative flex flex-col items-center">
+              <div className="relative mb-6">
+                <div className="absolute -inset-2 bg-gradient-to-tr from-primary to-accent rounded-[2rem] blur opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                <img alt="Profile" className="relative h-32 w-32 rounded-[2rem] border-4 border-white dark:border-slate-800 shadow-2xl object-cover z-10" src={currentAvatar} />
               </div>
-              <h2 className="text-xl font-black text-foreground">{user.name}</h2>
-              <p className="text-primary font-bold text-sm mb-6 tracking-tight">
-                {profileData.shopping_mall || 'Localização não definida'}
-              </p>
-              <div className="space-y-3">
-                <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                  <span className="material-icons-round mr-2 text-gray-400">work_outline</span>
-                  <span>Experiência: {profileData.experience_years || '--'}</span>
-                </div>
-                <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                  <span className="material-icons-round mr-2 text-gray-400">grade</span>
-                  <span>Especialidade: {profileData.specialty || '--'}</span>
-                </div>
-                {profileData.resume_url && (
-                  <div className="pt-2">
-                    <a
-                      href={profileData.resume_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center text-sm text-primary dark:text-secondary font-bold hover:underline"
-                    >
-                      <span className="material-icons-round mr-2">description</span>
-                      Ver Meu Currículo PDF
-                    </a>
+
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight text-center">{user.name}</h2>
+              <p className="text-primary font-bold text-sm uppercase tracking-widest mt-1 mb-8">{profileData.specialty}</p>
+
+              <div className="w-full space-y-4">
+                <div className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-black/20 rounded-2xl border border-slate-100 dark:border-white/5">
+                  <span className="material-icons-round text-slate-400">shopping_bag</span>
+                  <div className="flex-1">
+                    <p className="text-[9px] font-black text-slate-400 uppercase">Localização</p>
+                    <p className="text-sm font-bold truncate">{profileData.shopping_mall || 'Não informada'}</p>
                   </div>
-                )}
+                </div>
+                <div className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-black/20 rounded-2xl border border-slate-100 dark:border-white/5">
+                  <span className="material-icons-round text-slate-400">history</span>
+                  <div className="flex-1">
+                    <p className="text-[9px] font-black text-slate-400 uppercase">Experiência</p>
+                    <p className="text-sm font-bold">{profileData.experience_years || '--'}</p>
+                  </div>
+                </div>
               </div>
-              <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Completude do Perfil</span>
-                  <span className="text-sm font-bold text-primary dark:text-secondary">85%</span>
+
+              <div className="w-full mt-10 pt-10 border-t border-slate-100 dark:border-white/5">
+                <div className="flex justify-between items-center mb-4">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Score do Perfil</span>
+                  <span className="text-sm font-black text-primary">85%</span>
                 </div>
-                <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5">
-                  <div className="bg-primary h-2.5 rounded-full shadow-lg shadow-primary/20" style={{ width: '85%' }}></div>
+                <div className="w-full bg-slate-100 dark:bg-white/5 rounded-full h-2 shadow-inner">
+                  <div className="bg-primary h-2 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all duration-1000" style={{ width: '85%' }}></div>
                 </div>
-                <button onClick={() => setIsEditing(true)} className="mt-6 w-full py-3 px-4 border border-border dark:bg-white/5 rounded-2xl shadow-sm text-sm font-bold text-foreground hover:bg-slate-50 dark:hover:bg-white/10 transition-all active:scale-95">
-                  Editar Perfil Profissional
+
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="mt-8 w-full py-5 bg-slate-900 dark:bg-white dark:text-slate-900 text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl hover:bg-slate-800 transition-all active:scale-95 shadow-xl"
+                >
+                  EDITAR MEU PERFIL
                 </button>
               </div>
             </div>
           </div>
 
-          <div className="bg-card border border-primary/20 rounded-2xl p-8 relative overflow-hidden shadow-2xl backdrop-blur-xl group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors"></div>
-            <div className="flex items-center gap-3 mb-6">
-              <span className="material-icons-round text-primary animate-pulse">auto_awesome</span>
-              <h3 className="text-lg font-black text-foreground tracking-tight">Dicas da IA de Elite</h3>
+          <div className="bg-slate-900 rounded-[2rem] p-8 text-white relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 blur-3xl rounded-full"></div>
+            <div className="flex items-center gap-3 mb-6 relative z-10">
+              <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-primary">
+                <span className="material-icons-round text-2xl">auto_awesome</span>
+              </div>
+              <h3 className="text-lg font-bold tracking-tight">Vantagens PRO</h3>
             </div>
-            <ul className="space-y-3 mb-4">
-              <li className="flex items-start text-sm text-gray-600 dark:text-gray-400">
-                <span className="material-icons-round text-yellow-500 text-base mr-2 mt-0.5">lightbulb</span>
-                Adicione um vídeo de apresentação curto.
-              </li>
-              <li className="flex items-start text-sm text-gray-600 dark:text-gray-400">
-                <span className="material-icons-round text-yellow-500 text-base mr-2 mt-0.5">lightbulb</span>
-                Liste suas últimas 2 conquistas de vendas.
+            <ul className="space-y-4 relative z-10">
+              <li className="flex items-start gap-3">
+                <span className="material-icons-round text-primary text-sm mt-0.5">verified_user</span>
+                <p className="text-xs text-white/70 leading-relaxed"><span className="text-white font-bold">Destaque Total:</span> Apareça nas primeiras páginas para as marcas de luxo.</p>
               </li>
             </ul>
+            <Link to="/dashboard/vendedor/plans" className="mt-8 block text-center py-4 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
+              CONHECER PLANOS
+            </Link>
           </div>
         </div>
 
-        {/* Job Listings Area */}
-        <div className="lg:col-span-2 space-y-8">
-          <div className="bg-primary rounded-2xl shadow-xl p-8 text-white relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary to-emerald-600 opacity-90"></div>
-            <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-accent/20 rounded-full blur-[80px] group-hover:bg-accent/30 transition-colors"></div>
-            <div className="relative z-10 sm:flex justify-between items-center">
-              <div className="mb-4 sm:mb-0">
-                <h3 className="text-2xl font-black mb-2 flex items-center gap-3">
-                  <span className="material-icons-round text-accent">rocket_launch</span>
-                  Acelere sua contratação
-                </h3>
-                <p className="text-white/80 font-medium max-w-md">
-                  Vendedores de Elite aparecem no topo das buscas e têm acesso ilimitado às melhores marcas.
-                </p>
-              </div>
-              <Link to="/dashboard/vendedor/plans" className="bg-white text-primary font-black py-4 px-8 rounded-2xl transition-all hover:scale-105 hover:bg-emerald-50 shadow-2xl active:scale-95 inline-block text-center whitespace-nowrap">
-                Ser Premium agora
-              </Link>
-            </div>
-          </div>
+        {/* Content Area: Store Search / Feed */}
+        <div className="lg:col-span-2 space-y-10">
+          <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-border/50 p-10 shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 dark:bg-white/5 rounded-full blur-3xl -mr-32 -mt-32"></div>
 
-          <div className="bg-card dark:bg-[#07090D] shadow-2xl rounded-2xl border border-border/50 p-8">
-            <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
-              <h3 className="text-xl font-black text-foreground flex items-center gap-3">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 relative z-10">
+              <h3 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-3">
                 <span className="material-icons-round text-primary">storefront</span>
-                Marcas em Destaque
+                Oportunidades Recomendadas
               </h3>
+              <div className="flex gap-2">
+                <div className="px-4 py-2 bg-slate-100 dark:bg-white/5 rounded-full text-[10px] font-black text-slate-500 uppercase tracking-widest border border-slate-200 dark:border-white/5">
+                  Moda & Acessórios
+                </div>
+              </div>
             </div>
-            <form onSubmit={handleSearch} className="flex gap-4 mb-8">
+
+            <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-4 mb-10 relative z-10">
               <div className="relative flex-grow">
-                <span className="material-icons-round absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400 group-focus-within:text-primary transition-colors">search</span>
+                <span className="material-icons-round absolute inset-y-0 left-5 flex items-center text-slate-400">search</span>
                 <input
-                  className="block w-full pl-12 pr-4 py-4 border border-border rounded-2xl bg-slate-50 dark:bg-slate-800/50 text-foreground placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/20 sm:text-sm transition-all"
-                  placeholder="Ex: Zara, Shopping Iguatemi..."
+                  className="w-full pl-14 pr-6 py-5 rounded-[1.5rem] bg-slate-50 dark:bg-black/20 border border-slate-100 dark:border-white/5 text-slate-900 dark:text-white font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
+                  placeholder="Ex: Shopping Recife, Moda, Vendas..."
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <button type="submit" className="bg-primary hover:bg-emerald-600 text-white px-8 py-4 rounded-2xl font-black text-sm transition-all active:scale-95 shadow-lg shadow-primary/20">BUSCAR</button>
+              <button type="submit" className="bg-primary hover:bg-emerald-600 text-white px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-primary/20 transition-all active:scale-95">BUSCAR</button>
             </form>
 
-            <div className="space-y-4">
+            <div className="space-y-4 relative z-10">
               {isLoading ? (
-                <div className="flex flex-col items-center justify-center py-12">
-                  <div className="w-10 h-10 border-4 border-secondary border-t-transparent rounded-full animate-spin mb-4"></div>
-                  <p className="text-slate-400 text-sm animate-pulse">Buscando lojas compatíveis...</p>
+                <div className="flex flex-col items-center justify-center py-20">
+                  <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                  <p className="mt-4 text-slate-400 font-bold tracking-widest text-[10px] uppercase animate-pulse">Analizando seu perfil para o match ideal...</p>
                 </div>
               ) : filteredJobs.length > 0 ? (
                 filteredJobs.map(job => (
-                  <div key={job.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 bg-white dark:bg-white/5 border border-border/50 rounded-2xl hover:border-primary/50 transition-all cursor-pointer group hover:shadow-xl hover:-translate-y-1">
-                    <div className="flex items-center gap-4 mb-3 sm:mb-0">
-                      <div className={`h-14 w-14 rounded-xl flex items-center justify-center text-xl font-black transition-transform group-hover:rotate-6 ${job.logoInitial === 'Z' ? 'bg-black text-white' : 'bg-primary/10 text-primary'}`}>
-                        {job.logoInitial}
+                  <div key={job.id} className="group p-6 bg-slate-50 dark:bg-black/20 border border-slate-100 dark:border-white/5 rounded-3xl hover:border-primary/40 hover:bg-white dark:hover:bg-white/5 transition-all duration-300">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                      <div className="flex items-center gap-5">
+                        <div className={`h-16 w-16 rounded-2xl flex items-center justify-center text-2xl font-black shadow-lg transition-transform group-hover:rotate-6 ${job.logoInitial === 'Z' ? 'bg-black text-white' : 'bg-primary text-white'}`}>
+                          {job.logoInitial}
+                        </div>
+                        <div>
+                          <h4 className="text-xl font-black text-slate-900 dark:text-white mb-1">{job.companyName}</h4>
+                          <p className="text-sm font-bold text-slate-500 flex items-center gap-2">
+                            <span className="material-icons-round text-base">location_on</span>
+                            {job.location}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">{job.companyName}</h4>
-                        <p className="text-sm text-foreground/50 font-medium">{job.title} • {job.location}</p>
-                        {job.compatibility && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-green-900/40 text-green-400 border border-green-800/50 mt-1">
-                            {job.compatibility}% Match
-                          </span>
-                        )}
+
+                      <div className="flex items-center gap-6 w-full sm:w-auto border-t sm:border-t-0 border-slate-100 dark:border-white/5 pt-4 sm:pt-0">
+                        <div className="text-right flex-1 sm:flex-none">
+                          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Compatibilidade</p>
+                          <p className="text-xl font-black text-emerald-500 leading-none">{job.compatibility}%</p>
+                        </div>
+                        <button
+                          onClick={() => {
+                            if (!isPremium) {
+                              setUpgradeConfig({
+                                title: "Candidatura Elite",
+                                feature: "entrar em contato direto com as lojas e ver detalhes da vaga"
+                              });
+                              setUpgradeModalOpen(true);
+                            }
+                          }}
+                          className={`px-8 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 ${isPremium
+                              ? 'bg-slate-900 dark:bg-white dark:text-slate-900 text-white'
+                              : 'bg-white dark:bg-white/10 text-slate-900 dark:text-white border border-slate-200 dark:border-white/10'
+                            }`}
+                        >
+                          {isPremium ? 'VER DETALHES' : 'DESBLOQUEAR'}
+                        </button>
                       </div>
                     </div>
-                    <button
-                      onClick={() => {
-                        if (!isPremium) {
-                          setUpgradeConfig({
-                            title: "Candidatura Bloqueada",
-                            feature: "candidatar-se a vagas e ver detalhes exclusivos"
-                          });
-                          setUpgradeModalOpen(true);
-                          return;
-                        }
-                      }}
-                      className="text-secondary font-bold text-sm hover:text-green-400 transition-colors"
-                    >
-                      {isPremium ? 'Ver Detalhes' : 'Desbloquear Vaga'}
-                    </button>
                   </div>
                 ))
               ) : (
-                <div className="text-center py-12">
-                  <span className="material-icons-round text-slate-600 text-4xl mb-2">search_off</span>
-                  <p className="text-slate-500">Nenhuma loja encontrada para "{searchTerm}"</p>
+                <div className="text-center py-20 opacity-40">
+                  <span className="material-icons-round text-6xl mb-4">search_off</span>
+                  <p className="font-bold tracking-widest text-xs uppercase">Nenhuma loja encontrada na sua região</p>
                 </div>
               )}
+            </div>
+          </div>
 
-              <div className="relative group p-4 border border-dashed border-slate-600 rounded-lg flex items-center justify-center bg-black/20">
-                <div className="text-center">
-                  <span className="material-icons-round text-secondary text-2xl mb-1">lock</span>
-                  <p className="text-xs text-slate-400 font-medium">Upgrade para ver mais 15 vagas compatíveis</p>
-                </div>
+          {/* AI Banner */}
+          <div className="bg-gradient-to-r from-slate-900 to-primary p-1 rounded-[2.5rem] shadow-2xl">
+            <div className="bg-slate-900 rounded-[2.3rem] p-10 flex flex-col md:flex-row items-center justify-between gap-8">
+              <div className="flex-1">
+                <h4 className="text-2xl font-black text-white tracking-tight mb-4 flex items-center gap-3">
+                  <span className="material-icons-round text-primary">auto_awesome</span>
+                  Radar de Vagas de Elite
+                </h4>
+                <p className="text-white/50 text-base font-medium leading-relaxed">
+                  Assine o plano Pro para ser notificado instantaneamente quando marcas do seu interesse abrirem novas vagas nos seus shoppings favoritos.
+                </p>
               </div>
+              <Link to="/dashboard/vendedor/plans" className="px-10 py-5 bg-primary text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:bg-emerald-400 transition-all flex items-center gap-3">
+                SER PRO POR R$ 9,90
+                <span className="material-icons-round text-sm">arrow_forward</span>
+              </Link>
             </div>
           </div>
         </div>

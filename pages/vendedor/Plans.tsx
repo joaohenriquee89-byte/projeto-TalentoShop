@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { createCheckout } from '../../src/lib/api';
-// import { supabase } from '../../src/lib/supabase'; // Não usado diretamente mais aqui
 
 const VendedorPlans: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
@@ -8,82 +7,138 @@ const VendedorPlans: React.FC = () => {
     const handleUpgrade = async () => {
         setIsLoading(true);
         try {
-            // Usando a mesma função padronizada do Lojista
             const data = await createCheckout('PRO_VENDEDOR', 9.90, 'Assinatura PRO Vendedor');
-
-            console.log("Dados recebidos da função (Vendedor):", data);
-
             if (data && data.url) {
                 window.location.href = data.url;
-            } else {
-                console.warn("URL não recebida:", data);
-                alert('Erro: O link de pagamento não foi gerado. Tente novamente.');
             }
         } catch (error: any) {
-            console.error("Erro detalhado:", error);
-            // Mostrar erro detalhado na tela para facilitar debug
-            alert(`Erro no pagamento: ${JSON.stringify(error) || error.message}`);
+            console.error("Erro no pagamento:", error);
+            alert(`Erro no pagamento: Ocorreu um problema ao iniciar o checkout.`);
         } finally {
             setIsLoading(false);
         }
     };
 
+    const plans = [
+        {
+            id: 'basic',
+            name: 'Basic',
+            tagline: 'O essencial para começar',
+            price: 'Grátis',
+            period: '',
+            features: [
+                'Perfil profissional básico',
+                'Visualização padrão de vagas',
+                'Candidaturas manuais'
+            ],
+            status: 'Plano Atual',
+            isCurrent: true,
+            buttonClass: 'bg-slate-100 dark:bg-white/5 text-slate-400 dark:text-slate-500 cursor-default'
+        },
+        {
+            id: 'pro',
+            name: 'Plano PRO',
+            tagline: 'Visibilidade máxima de elite',
+            price: '9,90',
+            period: '/mês',
+            highlight: 'RECOMENDADO',
+            features: [
+                'Busca inteligente com IA',
+                'Prioridade absoluta nas buscas',
+                'Perfil com selo de verificado',
+                'Candidaturas ilimitadas',
+                'Acesso a salários e benefícios'
+            ],
+            status: 'CONTRATAR AGORA',
+            isCurrent: false,
+            recommended: true,
+            buttonClass: 'bg-primary text-white hover:bg-emerald-400 shadow-xl shadow-primary/20 hover:-translate-y-1'
+        }
+    ];
+
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4">
-            {/* Cabeçalho - Controla a largura máxima */}
-            <div className="max-w-4xl mx-auto text-center mb-12">
-                <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white mb-4">
-                    Escolha o plano ideal
+        <div className="space-y-16 animate-fade-in max-w-5xl mx-auto py-12 px-4">
+            {/* Header Section */}
+            <div className="text-center space-y-6 max-w-2xl mx-auto">
+                <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.3em]">
+                    Sua Carreira • Seu Futuro
+                </div>
+                <h1 className="text-5xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">
+                    Destaque-se na <span className="text-secondary italic">Vitrine</span>.
                 </h1>
-                <p className="text-slate-500 dark:text-slate-400 text-lg">
-                    Invista na sua carreira e tenha acesso a recursos exclusivos.
+                <p className="text-slate-500 dark:text-slate-400 text-lg font-medium leading-relaxed">
+                    Vendedores Pro são contratados até 4x mais rápido pelas grandes marcas de shoppings.
                 </p>
             </div>
 
-            {/* Grid de Cards - Centralizado e com tamanho controlado */}
-            <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
-
-                {/* Plano Grátis */}
-                <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col">
-                    <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Basic (Free)</h2>
-                    <div className="mb-6">
-                        <span className="text-4xl font-bold dark:text-white">Grátis</span>
-                    </div>
-                    <ul className="text-slate-600 dark:text-slate-400 space-y-3 mb-8 flex-1">
-                        <li>✓ Perfil básico</li>
-                        <li>✓ Visualização limitada</li>
-                        <li>✓ Candidaturas básicas</li>
-                    </ul>
-                    <button disabled className="w-full py-3 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 rounded-xl font-semibold cursor-not-allowed">
-                        Plano Atual
-                    </button>
-                </div>
-
-                {/* Plano PRO - Destaque */}
-                <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 border-2 border-blue-500 shadow-xl flex flex-col relative transform hover:scale-[1.02] transition-transform">
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
-                        Recomendado
-                    </div>
-                    <h2 className="text-xl font-bold text-blue-600 mb-2">Plano PRO</h2>
-                    <div className="mb-6">
-                        <span className="text-4xl font-bold dark:text-white">R$ 9,90</span>
-                        <span className="text-slate-500 text-sm">/mês</span>
-                    </div>
-                    <ul className="text-slate-600 dark:text-slate-400 space-y-3 mb-8 flex-1">
-                        <li>✓ Busca inteligente com IA</li>
-                        <li>✓ Prioridade nas buscas</li>
-                        <li>✓ Perfil em destaque</li>
-                        <li>✓ Acesso ilimitado</li>
-                    </ul>
-                    <button
-                        onClick={handleUpgrade}
-                        disabled={isLoading}
-                        className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 transition-all active:scale-95"
+            {/* Pricing Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-stretch pt-8 max-w-4xl mx-auto">
+                {plans.map((plan) => (
+                    <div
+                        key={plan.id}
+                        className={`group relative bg-white dark:bg-slate-900 rounded-[3rem] p-10 border transition-all duration-500 flex flex-col ${plan.recommended
+                                ? 'border-primary ring-[8px] ring-primary/5 shadow-2xl scale-[1.05] z-10'
+                                : 'border-slate-100 dark:border-white/5 shadow-sm hover:shadow-2xl hover:-translate-y-2'
+                            }`}
                     >
-                        {isLoading ? 'Processando...' : 'Fazer Upgrade Agora'}
-                    </button>
-                </div>
+                        {plan.recommended && (
+                            <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-primary text-white px-8 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-xl flex items-center gap-2 z-20">
+                                <span className="material-icons-round text-base">verified</span>
+                                MAIS POPULAR
+                            </div>
+                        )}
 
+                        <div className="space-y-2 mb-10">
+                            <h3 className={`text-sm font-black uppercase tracking-[0.2em] ${plan.recommended ? 'text-primary' : 'text-slate-400'}`}>
+                                {plan.name}
+                            </h3>
+                            <p className="text-slate-500 dark:text-slate-400 text-xs font-bold leading-relaxed">{plan.tagline}</p>
+                        </div>
+
+                        <div className="flex flex-col mb-12">
+                            <div className="flex items-baseline gap-1">
+                                {plan.price !== 'Grátis' && <span className="text-sm font-black text-slate-400 dark:text-slate-500 self-start mt-2">R$</span>}
+                                <span className="text-6xl font-black text-slate-900 dark:text-white tracking-tighter">
+                                    {plan.price}
+                                </span>
+                                <span className="text-slate-400 font-bold ml-1 text-xs">{plan.period}</span>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 space-y-6 mb-12 text-center sm:text-left">
+                            <div className="w-full h-px bg-slate-100 dark:bg-white/5"></div>
+                            <ul className="space-y-5">
+                                {plan.features.map((feat, i) => (
+                                    <li key={i} className="flex items-start gap-4 text-sm text-slate-600 dark:text-slate-300 font-medium">
+                                        <div className={`mt-0.5 w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${plan.recommended ? 'bg-primary/10 text-primary' : 'bg-slate-50 dark:bg-white/5 text-slate-400'
+                                            }`}>
+                                            <span className="material-symbols-rounded text-base font-black">check</span>
+                                        </div>
+                                        <span className="leading-tight pt-0.5">{feat}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        <button
+                            disabled={plan.isCurrent || isLoading}
+                            onClick={handleUpgrade}
+                            className={`w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all transform active:scale-95 shadow-lg ${plan.buttonClass}`}
+                        >
+                            {plan.status}
+                        </button>
+                    </div>
+                ))}
+            </div>
+
+            {/* Bottom Proof Section */}
+            <div className="pt-20 border-t border-slate-100 dark:border-white/5 text-center">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-8">PAGUE COM SEGURANÇA VIA MERCADO PAGO</p>
+                <div className="flex justify-center items-center gap-10 opacity-40 grayscale">
+                    <img src="https://logodownload.org/wp-content/uploads/2019/06/mercado-pago-logo.png" className="h-4 object-contain" alt="Mercado Pago" />
+                    <div className="w-px h-6 bg-slate-200 dark:bg-white/10"></div>
+                    <span className="material-icons-round text-3xl">shield</span>
+                </div>
             </div>
         </div>
     );
