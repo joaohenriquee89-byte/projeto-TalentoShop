@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { User } from '../../types';
 import { supabase } from '../../src/lib/supabase';
 import { useAuth } from '../../src/contexts/AuthContext';
+import SupportModal from '../../components/SupportModal';
 
 interface OverviewProps {
     user: User;
@@ -16,6 +17,7 @@ const Overview: React.FC<OverviewProps> = ({ user }) => {
     const [uploading, setUploading] = useState(false);
     const [stats, setStats] = useState({ jobs: 0, candidates: 0, messages: 0 });
     const [loadingStats, setLoadingStats] = useState(true);
+    const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
 
     const [profileData, setProfileData] = useState({
         company_name: '',
@@ -332,11 +334,19 @@ const Overview: React.FC<OverviewProps> = ({ user }) => {
                     <div className="bg-slate-900 rounded-[2rem] p-8 text-white">
                         <h4 className="font-bold mb-4">Suporte ao Lojista</h4>
                         <p className="text-white/40 text-sm mb-6">Precisa de ajuda com suas vagas ou ranqueamento?</p>
-                        <a href="mailto:suporte@talentoshop.com.br" className="flex items-center justify-center gap-2 w-full py-4 bg-white text-black font-black rounded-2xl hover:bg-slate-100 transition-all text-xs uppercase tracking-widest">
-                            <span className="material-icons-round text-sm">mail</span>
+                        <button
+                            onClick={() => setIsSupportModalOpen(true)}
+                            className="flex items-center justify-center gap-2 w-full py-4 bg-white text-black font-black rounded-2xl hover:bg-slate-100 transition-all text-xs uppercase tracking-widest"
+                        >
+                            <span className="material-icons-round text-sm">contact_support</span>
                             Falar com Suporte
-                        </a>
+                        </button>
                     </div>
+
+                    <SupportModal
+                        isOpen={isSupportModalOpen}
+                        onClose={() => setIsSupportModalOpen(false)}
+                    />
                 </div>
             </div>
         </div>

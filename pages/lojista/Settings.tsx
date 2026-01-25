@@ -39,130 +39,146 @@ const Settings: React.FC<SettingsProps> = ({ user, setUser }) => {
                 status: 'error',
                 message: 'Erro de conexão local',
                 details: error.message,
-                fallback: true // Client side fallback perception
+                fallback: true
             });
         } finally {
             setAiStatus('done');
         }
     };
 
-    const handleSave = () => {
-        setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 3000);
-    };
-
-    // Avatar editing removed from Settings (moved to Profile)
-
-
-    const currentAvatar = user.avatar || `https://picsum.photos/seed/${user.id}/200/200`;
-
     return (
-        <div className="animate-fade-in max-w-4xl mx-auto">
-            <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">Configurações da Conta</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">Gerencie acesso, segurança e preferências do sistema</p>
+        <div className="animate-fade-in max-w-5xl mx-auto space-y-10">
+            {/* Header */}
+            <div>
+                <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">Configurações</h1>
+                <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">Gerencie sua segurança, preferências e diagnósticos de IA.</p>
+            </div>
 
             {showSuccess && (
-                <div className="fixed top-24 right-8 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-bounce-in z-50">
+                <div className="fixed top-24 right-8 bg-primary text-white px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-spring-in z-50 font-bold border border-white/20">
                     <span className="material-icons-round">check_circle</span>
                     Alterações salvas com sucesso!
                 </div>
             )}
 
-            <div className="bg-surface-light dark:bg-surface-dark shadow rounded-xl p-8 border border-gray-100 dark:border-gray-700">
-                <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-6 flex items-center gap-2">
-                    <span className="material-icons-round text-primary">manage_accounts</span>
-                    Segurança e Acesso
-                </h2>
-
-                <div className="space-y-6">
-                    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                        <div>
-                            <h3 className="font-semibold text-gray-800 dark:text-white">Senha do Sistema</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Alterar sua senha de acesso</p>
-                        </div>
-                        <button
-                            onClick={() => setIsPasswordModalOpen(true)}
-                            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                        >
-                            Alterar Senha
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                {/* Navigation Sidebar (Visual only) */}
+                <div className="md:col-span-1 space-y-2">
+                    {[
+                        { icon: 'security', label: 'Segurança', active: true },
+                        { icon: 'notifications', label: 'Notificações' },
+                        { icon: 'psychology', label: 'Diagnóstico IA' },
+                        { icon: 'delete_forever', label: 'Exclusão', color: 'text-red-500' },
+                    ].map((item, idx) => (
+                        <button key={idx} className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl transition-all ${item.active ? 'bg-primary text-white shadow-lg shadow-primary/20 font-black' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5 font-bold'}`}>
+                            <span className={`material-icons-round ${item.color || ''}`}>{item.icon}</span>
+                            <span className="text-sm uppercase tracking-widest">{item.label}</span>
                         </button>
-                    </div>
+                    ))}
+                </div>
 
-                    <ChangePasswordModal
-                        isOpen={isPasswordModalOpen}
-                        onClose={() => setIsPasswordModalOpen(false)}
-                    />
-
-                    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                        <div>
-                            <h3 className="font-semibold text-gray-800 dark:text-white">Notificações</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Gerenciar alertas de novos candidatos</p>
+                <div className="md:col-span-2 space-y-8">
+                    {/* Security Section */}
+                    <section className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-border/50 p-10 shadow-sm space-y-8">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
+                                <span className="material-icons-round">shield</span>
+                            </div>
+                            <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-wider">Segurança e Acesso</h2>
                         </div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" checked readOnly className="sr-only peer" />
-                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
-                        </label>
-                    </div>
 
-                    <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/10 rounded-lg border border-red-100 dark:border-red-900/30">
-                        <div>
-                            <h3 className="font-semibold text-red-700 dark:text-red-400">Zona de Perigo</h3>
-                            <p className="text-sm text-red-500 dark:text-red-500/80">Excluir conta permanentemente</p>
+                        <div className="space-y-6">
+                            <div className="flex items-center justify-between p-6 bg-slate-50 dark:bg-black/20 rounded-3xl border border-slate-100 dark:border-white/5 transition-all hover:shadow-md group">
+                                <div>
+                                    <h3 className="font-bold text-slate-800 dark:text-white group-hover:text-primary transition-colors">Senha da Conta</h3>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mt-0.5">Mantenha suas credenciais protegidas.</p>
+                                </div>
+                                <button
+                                    onClick={() => setIsPasswordModalOpen(true)}
+                                    className="px-6 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl text-xs font-black uppercase tracking-widest hover:border-primary/40 hover:text-primary transition-all active:scale-95"
+                                >
+                                    Alterar
+                                </button>
+                            </div>
+
+                            <div className="flex items-center justify-between p-6 bg-slate-50 dark:bg-black/20 rounded-3xl border border-slate-100 dark:border-white/5 group">
+                                <div>
+                                    <h3 className="font-bold text-slate-800 dark:text-white group-hover:text-primary transition-colors">Alertas de Candidatos</h3>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mt-0.5">Notificar quando novos perfis derem match.</p>
+                                </div>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" checked readOnly className="sr-only peer" />
+                                    <div className="w-14 h-7 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                </label>
+                            </div>
                         </div>
-                        <button className="px-4 py-2 text-red-600 border border-red-200 dark:border-red-800 rounded-lg text-sm font-medium hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors">
-                            Excluir Conta
-                        </button>
-                    </div>
+
+                        <div className="pt-4">
+                            <button className="w-full p-6 bg-red-50 dark:bg-red-900/10 rounded-3xl border border-red-100 dark:border-red-900/30 flex items-center justify-between group hover:bg-red-100 dark:hover:bg-red-900/20 transition-all">
+                                <div className="text-left">
+                                    <h3 className="font-bold text-red-600 dark:text-red-400">Excluir Minha Conta</h3>
+                                    <p className="text-xs text-red-500/70 dark:text-red-400/60 font-medium">Esta ação é irreversível e apagará todos os seus dados.</p>
+                                </div>
+                                <span className="material-icons-round text-red-400 group-hover:translate-x-1 transition-transform">chevron_right</span>
+                            </button>
+                        </div>
+                    </section>
+
+                    {/* AI Diagnostics Section */}
+                    {(process.env.NODE_ENV === 'development' || user.role === 'ADMIN' || user.email === 'joaohenriquee89@gmail.com') && (
+                        <section className="bg-slate-900 rounded-[2.5rem] p-10 shadow-2xl space-y-8 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 blur-3xl rounded-full translate-x-16 -translate-y-16"></div>
+
+                            <div className="flex items-center gap-3 relative z-10">
+                                <div className="w-10 h-10 bg-white/10 text-white rounded-xl flex items-center justify-center">
+                                    <span className="material-icons-round">psychology</span>
+                                </div>
+                                <h2 className="text-xl font-black text-white uppercase tracking-wider">Laboratório de IA</h2>
+                            </div>
+
+                            <div className="space-y-6 relative z-10">
+                                <p className="text-sm text-slate-400 font-medium leading-relaxed">
+                                    Verifique a integridade operacional do motor de inteligência artificial e conectividade com a rede neural da Talentoshop.
+                                </p>
+
+                                <div className="flex flex-col gap-6">
+                                    <button
+                                        onClick={runAiTest}
+                                        disabled={aiStatus === 'loading'}
+                                        className="w-fit px-8 py-4 bg-white text-slate-900 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-slate-100 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-3 shadow-xl"
+                                    >
+                                        {aiStatus === 'loading' && <span className="w-4 h-4 border-2 border-slate-900 border-t-transparent rounded-full animate-spin"></span>}
+                                        TESTAR CONEXÃO
+                                    </button>
+
+                                    {aiResult && (
+                                        <div className={`p-6 rounded-3xl border text-xs font-mono animate-fade-in ${aiResult.fallback ? 'bg-amber-500/10 border-amber-500/20 text-amber-200' :
+                                            aiResult.status === 'ok' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-200' :
+                                                'bg-red-500/10 border-red-500/20 text-red-200'
+                                            }`}>
+                                            <div className="flex items-center gap-2 font-black mb-4 uppercase tracking-widest text-[10px]">
+                                                <span className={`w-2 h-2 rounded-full ${aiResult.status === 'ok' ? 'bg-emerald-500' : 'bg-red-500'} animate-pulse`}></span>
+                                                {aiResult.status === 'ok' ? 'Sistema Online' : 'Falla de Resposta'}
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-y-2 gap-x-4">
+                                                <p><span className="opacity-50">Status:</span> {aiResult.status}</p>
+                                                <p><span className="opacity-50">Latência:</span> {aiResult.latency || 'N/A'}</p>
+                                                <p className="col-span-2"><span className="opacity-50">Endpoint:</span> {aiResult.edge || 'TalentoShop Network'}</p>
+                                            </div>
+                                            {aiResult.details && <div className="mt-4 pt-4 border-t border-white/5 opacity-60 overflow-hidden line-clamp-1">{aiResult.details}</div>}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </section>
+                    )}
                 </div>
             </div>
 
-            {/* AI Diagnostics Section (Dev Only) */}
-            {(process.env.NODE_ENV === 'development' || user.role === 'ADMIN' || user.email === 'joaohenriquee89@gmail.com') && (
-                <div className="mt-8 bg-surface-light dark:bg-surface-dark shadow rounded-xl p-8 border border-gray-100 dark:border-gray-700">
-                    <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
-                        <span className="material-icons-round text-secondary">psychology</span>
-                        Diagnóstico de IA
-                    </h2>
-                    <div className="space-y-4">
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Verifique a conectividade com o módulo de Inteligência Artificial para garantir que o ranqueamento de candidatos esteja funcionando.
-                        </p>
-
-                        <div className="flex gap-4 items-start">
-                            <button
-                                onClick={runAiTest}
-                                disabled={aiStatus === 'loading'}
-                                className="px-4 py-2 bg-secondary text-white rounded-lg font-bold hover:bg-opacity-90 transition-colors disabled:opacity-50 flex items-center gap-2"
-                            >
-                                {aiStatus === 'loading' ? (
-                                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                                ) : (
-                                    <span className="material-icons-round text-sm">play_arrow</span>
-                                )}
-                                Executar Health Check
-                            </button>
-
-                            {aiResult && (
-                                <div className={`flex-1 p-4 rounded-lg border text-sm font-mono animate-fade-in ${aiResult.fallback ? 'bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-200' :
-                                    aiResult.status === 'ok' ? 'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-200' :
-                                        'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-200'
-                                    }`}>
-                                    <div className="flex items-center gap-2 font-bold mb-1">
-                                        <span>
-                                            {aiResult.status === 'ok' ? 'Sistema Operacional' : 'Erro no Sistema'}
-                                        </span>
-                                    </div>
-                                    <p className="mb-1"><strong>Status:</strong> {aiResult.status}</p>
-                                    <p className="mb-1"><strong>Edge:</strong> {aiResult.edge}</p>
-                                    <p className="mb-1"><strong>Provider:</strong> {aiResult.provider} ({aiResult.provider_config})</p>
-                                    {aiResult.latency && <p className="mb-1"><strong>Latência:</strong> {aiResult.latency}</p>}
-                                    {aiResult.details && <p className="mt-2 text-xs opacity-80 border-t border-black/10 pt-1">Debug: {aiResult.details}</p>}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
+            <ChangePasswordModal
+                isOpen={isPasswordModalOpen}
+                onClose={() => setIsPasswordModalOpen(false)}
+            />
         </div>
     );
 };
