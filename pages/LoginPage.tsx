@@ -95,7 +95,7 @@ const LoginPage: React.FC<LoginPageProps> = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}${window.location.pathname}?role=${role}${redirectPath ? `&redirect=${redirectPath}` : ''}`,
+          redirectTo: `https://talentoshop.vercel.app/login?role=${role}${redirectPath ? `&redirect=${redirectPath}` : ''}`,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
@@ -115,7 +115,7 @@ const LoginPage: React.FC<LoginPageProps> = () => {
     setForgotLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `https://talentoshop.vercel.app/reset-password`,
       });
       if (error) throw error;
       setForgotSuccess(true);
@@ -178,7 +178,7 @@ const LoginPage: React.FC<LoginPageProps> = () => {
                         type: 'signup',
                         email: email,
                         options: {
-                          emailRedirectTo: window.location.origin
+                          emailRedirectTo: 'https://talentoshop.vercel.app'
                         }
                       });
                       if (error) throw error;
@@ -234,7 +234,7 @@ const LoginPage: React.FC<LoginPageProps> = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-primary transition-colors focus:outline-none"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-primary transition-all active:scale-95 focus:outline-none group-hover:text-primary"
                 >
                   <span className="material-icons-round text-xl">
                     {showPassword ? 'visibility_off' : 'visibility'}
@@ -242,17 +242,22 @@ const LoginPage: React.FC<LoginPageProps> = () => {
                 </button>
               </div>
             </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  className="h-4 w-4 text-primary focus:ring-primary border-slate-300 rounded dark:bg-slate-700 dark:border-slate-600 cursor-pointer"
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                />
-                <label className="ml-2 block text-sm text-slate-600 dark:text-slate-400 cursor-pointer" htmlFor="remember-me">Lembrar de mim</label>
+            <div className="flex items-center justify-between px-1">
+              <div className="flex items-center group cursor-pointer">
+                <div className="relative flex items-center">
+                  <input
+                    className="peer h-4 w-4 opacity-0 absolute cursor-pointer z-10"
+                    id="remember-me"
+                    name="remember-me"
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                  />
+                  <div className="h-4 w-4 border-2 border-slate-300 dark:border-slate-600 rounded peer-checked:bg-primary peer-checked:border-primary transition-all duration-300 flex items-center justify-center">
+                    <span className="material-icons-round text-[10px] text-white opacity-0 peer-checked:opacity-100 transition-opacity">check</span>
+                  </div>
+                </div>
+                <label className="ml-2 block text-sm text-slate-600 dark:text-slate-400 cursor-pointer group-hover:text-foreground transition-colors" htmlFor="remember-me">Lembrar de mim</label>
               </div>
               <div className="text-sm">
                 <button
@@ -261,15 +266,16 @@ const LoginPage: React.FC<LoginPageProps> = () => {
                     setForgotEmail(email);
                     setShowForgotModal(true);
                   }}
-                  className="font-medium text-primary hover:text-petrol-700 dark:text-blue-400 dark:hover:text-blue-300"
+                  className="font-bold text-primary hover:text-primary/80 transition-all hover:underline underline-offset-4 decoration-primary/30"
                 >
                   Esqueci minha senha
                 </button>
               </div>
             </div>
-            <div>
-              <button className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg text-sm font-bold text-white bg-primary hover:bg-petrol-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all transform hover:scale-[1.02] hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed" type="submit" disabled={loading}>
-                {loading ? 'Entrando...' : 'Entrar na Plataforma'}
+            <div className="pt-2">
+              <button className="w-full flex justify-center py-4 px-4 border border-transparent rounded-2xl shadow-xl text-sm font-black text-white bg-primary hover:bg-emerald-600 focus:outline-none focus:ring-4 focus:ring-primary/20 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed group relative overflow-hidden" type="submit" disabled={loading}>
+                <span className="relative z-10">{loading ? 'Entrando...' : 'ENTRAR NA PLATAFORMA'}</span>
+                <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
               </button>
             </div>
           </form>
@@ -350,24 +356,27 @@ const LoginPage: React.FC<LoginPageProps> = () => {
 
       {/* Forgot Password Modal */}
       {showForgotModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white dark:bg-slate-800 w-full max-w-md rounded-2xl shadow-2xl p-8 border border-slate-200 dark:border-slate-700">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Recuperar Senha</h3>
-              <button onClick={() => { setShowForgotModal(false); setForgotSuccess(false); }} className="text-slate-400 hover:text-slate-600">
-                <span className="material-icons-round">close</span>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xl animate-fade-in">
+          <div className="bg-white dark:bg-[#0A0A0A]/90 w-full max-w-md rounded-[2rem] shadow-2xl p-10 border border-white/20 relative overflow-hidden backdrop-blur-2xl">
+            {/* Visual Accent */}
+            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary to-emerald-400"></div>
+
+            <div className="flex justify-between items-center mb-8">
+              <h3 className="text-2xl font-black text-foreground tracking-tight">Recuperar Acesso</h3>
+              <button onClick={() => { setShowForgotModal(false); setForgotSuccess(false); }} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
+                <span className="material-icons-round text-foreground/50">close</span>
               </button>
             </div>
 
             {!forgotSuccess ? (
-              <form onSubmit={handleForgotPassword} className="space-y-4">
-                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-                  Insira seu e-mail abaixo e enviaremos um link para você redefinir sua senha.
+              <form onSubmit={handleForgotPassword} className="space-y-6">
+                <p className="text-foreground/60 leading-relaxed font-medium">
+                  Insira seu e-mail corporativo e enviaremos um link seguro para redefinição.
                 </p>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">E-mail</label>
+                  <label className="block text-xs font-black text-foreground/40 uppercase tracking-widest mb-2 ml-1">E-mail</label>
                   <input
-                    className="block w-full rounded-xl border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-primary focus:ring-primary sm:text-sm py-3 px-4 shadow-sm"
+                    className="block w-full rounded-2xl border-border bg-slate-50 dark:bg-white/5 text-foreground focus:border-primary focus:ring-primary sm:text-sm py-4 px-5 shadow-sm transition-all"
                     placeholder="seu@email.com"
                     type="email"
                     required
@@ -376,27 +385,29 @@ const LoginPage: React.FC<LoginPageProps> = () => {
                   />
                 </div>
                 <button
-                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm font-bold text-white bg-primary hover:bg-petrol-700 focus:outline-none transition-all"
+                  className="w-full flex justify-center py-5 px-4 border border-transparent rounded-2xl shadow-xl shadow-primary/20 text-sm font-black text-white bg-primary hover:bg-emerald-600 transition-all active:scale-95"
                   type="submit"
                   disabled={forgotLoading}
                 >
-                  {forgotLoading ? 'Enviando...' : 'Enviar Link de Recuperação'}
+                  {forgotLoading ? (
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  ) : 'ENVIAR LINK DE SEGURANÇA'}
                 </button>
               </form>
             ) : (
               <div className="text-center py-6">
-                <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="material-icons-round text-3xl">mark_email_read</span>
+                <div className="w-20 h-20 bg-primary/10 text-primary rounded-3xl flex items-center justify-center mx-auto mb-6 animate-spring-in">
+                  <span className="material-icons-round text-4xl">mark_email_read</span>
                 </div>
-                <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2">E-mail Enviado!</h4>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-                  Verifique sua caixa de entrada (e o spam) para seguir as instruções de redefinição.
+                <h4 className="text-2xl font-black text-foreground mb-3">E-mail Enviado!</h4>
+                <p className="text-foreground/60 leading-relaxed font-medium mb-8">
+                  As instruções de redefinição foram enviadas com sucesso para sua caixa de entrada.
                 </p>
                 <button
                   onClick={() => { setShowForgotModal(false); setForgotSuccess(false); }}
-                  className="w-full py-3 px-4 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-600 transition-all"
+                  className="w-full py-5 px-4 bg-slate-100 dark:bg-white/5 text-foreground rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-white/10 transition-all"
                 >
-                  Fechar
+                  CONCLUÍDO
                 </button>
               </div>
             )}
